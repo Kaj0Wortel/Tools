@@ -1,0 +1,181 @@
+
+package tools.dataStructures.node;
+
+// Own packages
+import tools.dataStructures.Node;
+
+// Java packages
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+
+public class TreeNode<E> extends Node<E> implements Cloneable {
+    protected Number key;
+    protected Node parent;
+    protected ArrayList<Node> children;
+    
+    public TreeNode(E entry) {
+        super(entry);
+        key = null;
+        parent = null;
+        children = new ArrayList<Node>();
+    }
+    
+    public TreeNode(Number key) {
+        this.key = key;
+        entry = null;
+        parent = null;
+        children = new ArrayList<Node>();
+    }
+    
+    public TreeNode(Number key, E entry) {
+        super(entry);
+        this.key = key;
+        parent = null;
+        children = new ArrayList<Node>();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public TreeNode(Number key, E entry, Node parent, ArrayList<Node> children) {
+        super(entry);
+        this.key = key;
+        this.parent = parent;
+        this.children = (ArrayList<Node>) children.clone();
+    }
+    
+    /* ----------------------------------------------------------------------------------------------------------------
+     * Methods for Cloneable
+     * ----------------------------------------------------------------------------------------------------------------
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Object clone() {
+        ListIterator<Node> childIter = children.listIterator();
+        ArrayList<Node> childClone = new ArrayList<Node>();
+        
+        while (childIter.hasNext()) {
+            childClone.add((Node) childIter.next());
+        }
+        
+        return new TreeNode(key, entry, parent, childClone);
+    }
+    
+    /* ----------------------------------------------------------------------------------------------------------------
+     * Set/add/remove methods
+     * ----------------------------------------------------------------------------------------------------------------
+     */
+    /* 
+     * Sets the key.
+     */
+    public Number setKey(Number key) {
+        return this.key = key;
+    }
+    
+    /* 
+     * Overwrites all current children by the new ones in the given list.
+     */
+    public void setChildren(ArrayList<Node> newChildren) {
+        if (newChildren == null) {
+            children.clear();
+            
+        } else {
+            children = new ArrayList<Node>(newChildren.size());
+            children.addAll(newChildren);
+        }
+    }
+    
+    /* 
+     * Adds a single child.
+     * Returns true iff the child was added.
+     * Returns false iff the child was not added due to
+     * the fact that it already occured.
+     */
+    public boolean addChild(Node newChild) {
+        if (!children.contains(newChild)) {
+            children.add(newChild);
+            return true;
+            
+        } else {
+            return false;
+        }
+    }
+    
+    /* 
+     * Adds all children in the given list.
+     * See "boolean addChild(Node)" for more info
+     */
+    public boolean[] addChildren(ArrayList<Node> newChildren) {
+        boolean[] added = new boolean[newChildren.size()];
+        int numAdded = 0;
+        
+        for (int i = 0; i < children.size() - numAdded; i++) {
+            if (this.addChild(newChildren.get(i))) {
+                added[i] = true;
+                numAdded++;
+                
+            } else {
+                added[i] = false;
+            }
+        }
+        
+        return added;
+    }
+    
+    /* 
+     * Removes all edges to the children.
+     * Returns the number of children removed
+     */
+    public int removeAllChildren() {
+        int size = children.size();
+        children.clear();
+        return  size;
+    }
+    
+    /* 
+     * Removes and returns the current parent of the node.
+     */
+    public Node removeParent() {
+        Node oldParent = parent;
+        parent = null;
+        return oldParent;
+    }
+    
+    /* ----------------------------------------------------------------------------------------------------------------
+     * Get methods
+     * ----------------------------------------------------------------------------------------------------------------
+     */
+    /* 
+     * Returns all children of this node.
+     */
+    public ArrayList<Node> getChildren() {
+        return children;
+    }
+    
+    /* 
+     * Returns the childIterator of this list.
+     */
+    public ListIterator<Node> childIterator() {
+        return children.listIterator();
+    }
+    
+    /* 
+     * Returns the parent of this Node
+     */
+    public Node getParent() {
+        return parent;
+    }
+    
+    /* 
+     * Returns its current key.
+     */
+    public Number getKey() {
+        return key;
+    }
+    
+    
+    // tmp
+    public static void main(String[] args) {
+        //TreeNode<Integer,String> a = new Node<Integer,String>(10,"a",);
+    }
+}
