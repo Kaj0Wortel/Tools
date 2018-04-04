@@ -46,7 +46,7 @@ public class Button2
     extends AbstractButton {
     // The default image location.
     final protected static String IMG_LOC
-        = System.getProperty("user.dir") + "\\tools\\img\\";
+        = System.getProperty("user.dir") + "\\tools\\";
     
     // The conditions of the button.
     final public static int NORMAL = 0;
