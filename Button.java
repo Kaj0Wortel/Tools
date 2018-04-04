@@ -40,9 +40,10 @@ import javax.swing.SwingUtilities;
  * Old artefact.
  * Use with care!
  */
-public class Button extends AbstractButton {
-    final private Button thisButton = this;
-    final protected static String imgLoc = System.getProperty("user.dir") + "\\tools\\";
+public class Button
+    extends AbstractButton {
+    final protected static String imgLoc = System.getProperty("user.dir")
+        + "\\tools\\";
     
     // Borders
     final private Image upperBorder;
@@ -78,11 +79,12 @@ public class Button extends AbstractButton {
     private boolean mouseIsOverButton = false;
     private boolean mouseIsPressed = false;
     
-    /* ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Constructors
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
-    public Button(int sizeX, int sizeY, int barSize, Image image) throws IOException {
+    public Button(int sizeX, int sizeY, int barSize, Image image)
+        throws IOException {
         this(sizeX, sizeY, barSize);
         this.image = image;
     }
@@ -192,9 +194,9 @@ public class Button extends AbstractButton {
         paintBackgroundImage = backgroundNoAction;
     }
     
-    /* ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Mouse listeners
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     MouseAdapter listener = new MouseAdapter() {
         @Override
@@ -203,7 +205,7 @@ public class Button extends AbstractButton {
                 mouseIsPressed = false;
                 mouseIsOverButton = true;
                 paintBackgroundImage = backgroundHover;
-                thisButton.repaint();
+                repaint();
             }
         }
         
@@ -213,7 +215,7 @@ public class Button extends AbstractButton {
                 mouseIsPressed = false;
                 mouseIsOverButton = false;
                 paintBackgroundImage = backgroundNoAction;
-                thisButton.repaint();
+                repaint();
             }
         }
         
@@ -226,7 +228,7 @@ public class Button extends AbstractButton {
                 fireActionEvents(Integer.toString(e.getButton()),
                                  e.getWhen(),
                                  e.getModifiers());
-                thisButton.repaint();
+                repaint();
             }
         }
         
@@ -235,14 +237,14 @@ public class Button extends AbstractButton {
             if (enabled) {
                 mouseIsPressed = false;
                 paintBackgroundImage = backgroundHover;
-                thisButton.repaint();
+                repaint();
             }
         }
     };
     
-    /* ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Private functions
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Fires an ActionEvent for all ActionListeners currently listening.
@@ -262,8 +264,8 @@ public class Button extends AbstractButton {
         SwingUtilities.invokeLater
             (new Runnable() {
             public void run() {
-                ActionListener[] als = thisButton.getListeners(ActionListener.class);
-                ActionEvent e = new ActionEvent(thisButton,
+                ActionListener[] als = getListeners(ActionListener.class);
+                ActionEvent e = new ActionEvent(Button.this,
                                                 ActionEvent.ACTION_PERFORMED,
                                                 command, when, modifiers);
                 
@@ -274,9 +276,9 @@ public class Button extends AbstractButton {
         });
     }
     
-    /* ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Public functions
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * If there was no label set, create a new label with the text and
@@ -292,10 +294,7 @@ public class Button extends AbstractButton {
             
             if ((int) (sizeX - barSize * 2) > 0 && (int) (sizeY - barSize * 2) > 0) {
                 label.setSize((int) (sizeX - barSize * 2), (int) (sizeY - barSize * 2));
-                //label.setSize(sizeX, sizeY);
-                //label.setLocation(0, 0);
                 label.setLocation((int) (barSize * 1), (int) (barSize * 1));
-                //System.out.println((int) (sizeX - barSize * 2) + ", " + (int) (sizeY - barSize * 2));
                 
             } else {
                 label.setSize(sizeX, sizeY);
@@ -318,7 +317,8 @@ public class Button extends AbstractButton {
     /* 
      * en-/disables button.
      * When enabled:
-     * A press of the mouse button when the mouse is over the button notifies all ActionListeners.
+     * A press of the mouse button when the mouse is over the button notifies
+     *     all ActionListeners.
      * Also the background is changed accordingly.
      * 
      * When disabled:
@@ -506,7 +506,10 @@ public class Button extends AbstractButton {
         
         // contents
         if (image != null) {
-            g.drawImage(image, (sizeX - image.getWidth(null)) / 2, (sizeY - image.getHeight(null)) / 2, null);
+            g.drawImage(image,
+                        (sizeX - image.getWidth(null)) / 2,
+                        (sizeY - image.getHeight(null)) / 2,
+                        null);
         }
     }
 }
