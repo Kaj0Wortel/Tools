@@ -25,11 +25,18 @@ import java.io.Reader;
 
 import java.util.ArrayList;
 
+
 /* 
  * Provides an easy way of processing a data file.
- * Supports the following functionality:
+ * Has the following functionality:
  *  - Keeps track of a line counter.
- *  - Supports 
+ *  - Supports custom comment (single line and multiple line).
+ *  - Supports easy csv file handeling:
+ *    - Read single cell.
+ *    - Read line of cells.
+ *  - Supports stream marking.
+ *  - Supports easy pre and post line processing when extneded
+ *  - Can be used as a wrapper.
  */
 public class BufferedReaderPlus
     extends BufferedReader
@@ -66,9 +73,9 @@ public class BufferedReaderPlus
     private boolean isCsv = false;
     
     
-    /* ------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Constructor
-     * ------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Constructors with String to file location.
@@ -236,9 +243,9 @@ public class BufferedReaderPlus
         multipleCommentEndString = multipleCommentEnd;
     }
     
-    /* ------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Fuctions
-     * ------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Reads a line.
@@ -436,14 +443,19 @@ public class BufferedReaderPlus
      * @throws IllegalArgumentException iff if the file was not set as
      *     a csv file.
      * 
-     * If no line was buffered, pick the next one iff lineBlock == false. Otherwise return null.
+     * If no line was buffered, pick the next one iff lineBlock == false.
+     *     Otherwise return null.
      */
-    public String readCSVCell(boolean processed) throws IOException, IllegalArgumentException {
+    public String readCSVCell(boolean processed)
+        throws IOException, IllegalArgumentException {
         return readCSVCell(processed, false);
     }
     
-    public String readCSVCell(boolean processed, boolean lineBlock) throws IOException, IllegalArgumentException {
-        if (!isCsv) throw new IllegalArgumentException("File type is not declared as \".csv\"");
+    public String readCSVCell(boolean processed, boolean lineBlock)
+        throws IOException, IllegalArgumentException {
+        if (!isCsv)
+            throw new IllegalArgumentException
+            ("File type is not declared as \".csv\"");
         
         // Update the buffer if nessecary
         if (bufferedLine == null || bufferedLine.length() == 0) {
@@ -503,7 +515,8 @@ public class BufferedReaderPlus
         throws IOException, IllegalArgumentException {
         
         if (!isCsv)
-            throw new IllegalArgumentException("File type is not declared as \".csv\"");
+            throw new IllegalArgumentException
+            ("File type is not declared as \".csv\"");
         
         // Read and clear the buffer
         String line = bufferedLine;
@@ -511,7 +524,8 @@ public class BufferedReaderPlus
         
         // Checks the buffer length.
         if (line.length() == 0) {
-            // If the bufferlength == 0, read new line iff allowed. Otherwise return null.
+            // If the bufferlength == 0, read new line iff allowed.
+            // Otherwise return null.
             if (lineBlock) return null;
             
             // Reads the next line
