@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools;
 
 
@@ -29,36 +29,63 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
 
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 
-public class Button2 extends AbstractButton {
-    final private Button2 thisButton = this;
+/* 
+ * Provides a customizable button via images.
+ */
+public class Button2
+    extends AbstractButton {
+    // The default image location.
+    final protected static String IMG_LOC
+        = System.getProperty("user.dir") + "\\tools\\img\\";
     
+    // The conditions of the button.
     final public static int NORMAL = 0;
     final public static int HOOVER = 1;
     final public static int PRESSED = 2;
     final public static int DISABLED = 3;
     
+    // Type of image processing used.
     final public static int TYPE_TURNED = 0;
-    final public static int TYPE_MIRRORED = 1;
-    
-    protected BufferedImage[][][] images;
-    protected Image[][] originalImages;
+    final public static int TYPE_MIRRORED = 1; // Not yet implemented
+    // the current type of image processing used.
     final private int imageType;
-    final private int scaleType;
     
+    // Contains the original provided image.
+    protected Image[][] originalImages;
+    
+    // The states of the button.
     public enum State {
-        NORMAL_OPERATION, NO_CHANGE, HOOVER_EXCEPT_PRESSED, NO_HOOVER, 
-            ALWAYS_PRESSED, ALWAYS_HOOVER, ALWAYS_DISABLED, ALWAYS_NORMAL;
+        // Default state.
+        NORMAL_OPERATION,
+        // Freezes the current condition of the button.
+        NO_CHANGE,
+        // Set the button to hoover and show button presses.
+        HOOVER_EXCEPT_PRESSED,
+        // Ignores hoovering.
+        NO_HOOVER,
+        // Set the button to pressed (action event is fired when switched).
+        ALWAYS_PRESSED,
+        // Set the button to hoover.
+        ALWAYS_HOOVER,
+        // Set the button to disabled (action event is fired when switched).
+        ALWAYS_DISABLED,
+        // Set the button normal (not hoover nor pressed).
+        ALWAYS_NORMAL;
     }
     
+    // The current state of the button.
     private State state = State.NORMAL_OPERATION;
+    // The condition for the State.NO_CHANGE state.
     private int noChangeType = -1;
     
     // Size and barsize
@@ -67,6 +94,11 @@ public class Button2 extends AbstractButton {
     // Contents
     private JLabel label;
     private Image image;
+    
+    // Variables for the image contents.
+    private int imageBarWidth;
+    private int imageBarHeight;
+    private boolean resizeImage;
     
     // Font for the label
     private Font font = new Font(Font.DIALOG, Font.BOLD, 12);
@@ -77,50 +109,65 @@ public class Button2 extends AbstractButton {
     private boolean mouseIsPressed = false;
     
     
-    /* ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Constructors
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
-    public Button2(int sizeX, int sizeY, int barSize, boolean resizable) throws IOException {
+    public Button2(int barSize) throws IOException {
+        this(0, 0, barSize);
+    }
+    
+    public Button2(int sizeX, int sizeY, int barSize) throws IOException {
         this(sizeX, sizeY, barSize,
              LoadImages2.ensureLoadedAndGetImage
-                 (System.getProperty("user.dir") + "\\tools\\button2_img_TYPE_001.png", 16, 16),
-             Button2.TYPE_TURNED, resizable, Image.SCALE_SMOOTH);
+                 (IMG_LOC + "button2_img_TYPE_001.png", 16, 16),
+             Button2.TYPE_TURNED);
     }
     
-    public Button2(int sizeX, int sizeY, int barSize, boolean resizable, char character) throws IOException {
-        this(sizeX, sizeY, barSize, resizable, "" + character);
+    public Button2(int sizeX, int sizeY, int barSize, char character)
+        throws IOException {
+        this(sizeX, sizeY, barSize, "" + character);
     }
     
-    public Button2(int sizeX, int sizeY, int barSize, boolean resizable, String text) throws IOException {
+    public Button2(int sizeX, int sizeY, int barSize, String text)
+        throws IOException {
         this(sizeX, sizeY, barSize,
              LoadImages2.ensureLoadedAndGetImage
-                 (System.getProperty("user.dir") + "\\tools\\button2_img_TYPE_001.png", 16, 16),
-             Button2.TYPE_TURNED, resizable, Image.SCALE_SMOOTH, text);
+                 (IMG_LOC + "button2_img_TYPE_001.png", 16, 16),
+             Button2.TYPE_TURNED, text);
     }
     
-    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type, boolean resizable, int scaleType,
+    public Button2(int barSize, Image[][] img) {
+        this(0, 0, barSize, img);
+    }
+    
+    public Button2(int sizeX, int sizeY, int barSize, Image[][] img) {
+        this(sizeX, sizeY, barSize, img, Button2.TYPE_TURNED);
+    }
+    
+    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type,
                    char character) {
-        this(sizeX, sizeY, barSize, img, type, resizable, scaleType,
+        this(sizeX, sizeY, barSize, img, type,
              "" + character);
     }
     
-    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type, boolean resizable, int scaleType,
+    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type,
                    String text) {
-        this(sizeX, sizeY, barSize, img, type, resizable, scaleType,
+        this(sizeX, sizeY, barSize, img, type,
              new JLabel(text));
     }
     
-    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type, boolean resizable, int scaleType,
+    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type,
                    JLabel label) {
-        this(sizeX, sizeY, barSize, img, type, resizable, scaleType);
+        this(sizeX, sizeY, barSize, img, type);
         this.label = label;
         this.add(label);
         
         label.setHorizontalAlignment(JLabel.CENTER);
         
         label.setLocation(barSize, barSize);
-        label.setSize(this.getWidth() - 2*barSize, this.getHeight() - 2*barSize);
+        label.setSize(this.getWidth() - 2*barSize,
+                      this.getHeight() - 2*barSize);
     }
     
     
@@ -132,9 +179,6 @@ public class Button2 extends AbstractButton {
      *    This generates the corners by rotating them.
      *  - Button2.TYPE_MIRRORED
      *    This generates teh corners by mirroring them.
-     * 
-     * Resizable determines whether it is possible to recalculate the images after
-     * resizing the button.
      * 
      * scaleType determines the scale type which is used to scale the images.
      * Must be one of:
@@ -154,10 +198,9 @@ public class Button2 extends AbstractButton {
      *     o img[1][x] with 1 <= x < 4 contain the backgrounds for the edges.
      *     o img[2][x] with 1 <= x < 4 contain the backgrounds for the center part
      */
-    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type, boolean resizable, int scaleType) {
+    public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type) {
         this.imageType = type;
         this.barSize = barSize;
-        this.scaleType = scaleType;
         
         // Sets the size of the Button.
         // Uses the parent function to avoid throwing errors and
@@ -166,28 +209,21 @@ public class Button2 extends AbstractButton {
         this.setLayout(null);
         
         
-        if (resizable) {
-            originalImages = new Image[3][5];
-            
-            for (int i = 0; i < originalImages.length; i++) {
-                for (int j = 0; j < originalImages[i].length; j++) {
-                    originalImages[i][j] = img[i][j];
-                }
-            }
-            
-        } else {
-            originalImages = null;
-        }
+        originalImages = new Image[3][5];
         
-        generateNewImages(img);
+        for (int i = 0; i < originalImages.length; i++) {
+            for (int j = 0; j < originalImages[i].length; j++) {
+                originalImages[i][j] = img[i][j];
+            }
+        }
         
         this.addMouseListener(listener);
     }
     
     
-    /* ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Mouse listener
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     MouseAdapter listener = new MouseAdapter() {
         @Override
@@ -196,7 +232,7 @@ public class Button2 extends AbstractButton {
             mouseIsOverButton = true;
             
             if (enabled) {
-                thisButton.repaint();
+                repaint();
             }
         }
         
@@ -206,7 +242,7 @@ public class Button2 extends AbstractButton {
             mouseIsOverButton = false;
             
             if (enabled) {
-                thisButton.repaint();
+                repaint();
             }
         }
         
@@ -218,7 +254,6 @@ public class Button2 extends AbstractButton {
                 fireActionEvents(Integer.toString(e.getButton()) + ";pressed",
                                  e.getWhen(),
                                  e.getModifiers());
-                thisButton.repaint();
             }
         }
         
@@ -230,15 +265,13 @@ public class Button2 extends AbstractButton {
                 fireActionEvents(Integer.toString(e.getButton()) + ";released",
                                  e.getWhen(),
                                  e.getModifiers());
-                thisButton.repaint();
             }
         }
     };
     
-    /*
-     * ---------------------------------------------------------------------------------
+    /*--------------------------------------------------------------------------
      * Private functions
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Fires an ActionEvent for all ActionListeners currently listening.
@@ -261,25 +294,22 @@ public class Button2 extends AbstractButton {
      * @param when the time (in ms) when the event occured.
      * @param modifiers the modifiers that are given for the events.
      */
-    private void fireActionEvents(final String command, final long when, final int modifiers) {
-        new Thread("tools.Button2 ActionEvent") {
-            public void run() {
-                ActionListener[] als = thisButton.getListeners(ActionListener.class);
-                ActionEvent e = new ActionEvent(thisButton,
-                                                ActionEvent.ACTION_PERFORMED,
-                                                command, when, modifiers);
-                
-                for (int i = 0; i < als.length; i++) {
-                    als[i].actionPerformed(e);
-                }
-            }
-        }.start();
+    private void fireActionEvents(String command, long when, int modifiers) {
+        fireActionPerformed
+            (new ActionEvent
+                 (this,
+                  ActionEvent.ACTION_PERFORMED,
+                  command, when, modifiers)
+            );
+        
+        mouseIsOverButton = false;
+        mouseIsPressed = false;
+        repaint();
     }
     
-    /*
-     * ---------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Set functions
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Sets the size of the text.
@@ -287,7 +317,7 @@ public class Button2 extends AbstractButton {
      * 
      * @param size the new size of the text.
      */
-    public void setTextSize(int size) {
+    public void setTextSize(float size) {
         if (label == null) return;
         font = font.deriveFont(size);
         label.setFont(font);
@@ -297,9 +327,27 @@ public class Button2 extends AbstractButton {
      * Sets the given image as icon image
      * 
      * @param image the new image of the buttons.
+     * @param barWidth the width size of the bar of the button that
+     *     is still visible.
+     * @param barHeight the height size of the bar of the button that
+     *     is still visible.
+     * @param resize whether the image should be resized to have
+     *     an equal border on all sides.
      */
-    public void setImage(Image image) {
+    public void setImage(Image image, boolean resize) {
+        setImage(image, barSize, barSize, resize);
+    }
+    
+    public void setImage(Image image, int imgBarSize, boolean resize) {
+        setImage(image, imgBarSize, imgBarSize, resize);
+    }
+    
+    public void setImage(Image image, int barWidth, int barHeight,
+                         boolean resize) {
         this.image = image;
+        imageBarWidth = barWidth;
+        imageBarHeight = barHeight;
+        resizeImage = resize;
     }
     
     /* 
@@ -325,9 +373,8 @@ public class Button2 extends AbstractButton {
     /* 
      * en/disables button.
      * When enabled:
-     * A press of the mouse button when the mouse is over the button notifies all ActionListeners.
-     * Also the background is changed accordingly.
-     * 
+     * A press of the mouse button when the mouse is over the button notifies
+     * all ActionListeners. Also the background is changed accordingly.
      * 
      * When disabled:
      * The button ignores the mouse. The background is always "backgroundDisabled".
@@ -336,6 +383,10 @@ public class Button2 extends AbstractButton {
      * nothing happens.
      * 
      * @param enable whether the button should be enabled or disabled.
+     * 
+     * Note: super.setEnabled(enable) sometimes gives a random
+     * NullPointerException (mainly when the button is not yet (fully) drawn.
+     * Not certain what to do with this.
      */
     @Override
     public void setEnabled(boolean enable) {
@@ -343,7 +394,7 @@ public class Button2 extends AbstractButton {
             enabled = enable;
         }
         
-        super.setEnabled(enable);
+        //super.setEnabled(enable);
     }
     
     /* 
@@ -353,12 +404,11 @@ public class Button2 extends AbstractButton {
      * @param y the y location of the button.
      * @param width the width of the button.
      * @param height the height of the button.
-     * @throws UnsupportedOperationException if the button was initialized as not-resizable.
      * 
      * See setBarAndBounds(int, int, int, int, int) for more info.
      */
     @Override
-    public void setBounds(int x, int y, int width, int height) throws UnsupportedOperationException {
+    public void setBounds(int x, int y, int width, int height)  {
         setBarAndBounds(barSize, x, y, width, height);
     }
     
@@ -366,11 +416,10 @@ public class Button2 extends AbstractButton {
      * Sets the barSize of the image.
      * 
      * @param bz the new barsize of the button.
-     * @throws UnsupportedOperationException if the button was initialized as not-resizable.
      * 
      * See setBarAndBounds(int, int, int, int, int) for more info.
      */
-    public void setBarsize(int bz) throws UnsupportedOperationException {
+    public void setBarSize(int bz) {
         setBarAndSize(this.getWidth(), this.getHeight(), bz);
     }
     
@@ -379,12 +428,11 @@ public class Button2 extends AbstractButton {
      * 
      * @param bz the new barsize of the button.
      * @param width the width of the button.
-     * @param height the height of the button.
-     * @throws UnsupportedOperationException if the button was initialized as not-resizable.
+     * @param height the height of the button..
      * 
      * See setBarAndBounds(int, int, int, int, int) for more info.
      */
-    public void setBarAndSize(int bz, int width, int height) throws UnsupportedOperationException {
+    public void setBarAndSize(int bz, int width, int height) {
         setBarAndBounds(bz, this.getX(), this.getY(), width, height);
     }
     
@@ -396,37 +444,28 @@ public class Button2 extends AbstractButton {
      * @param y the y location of the button.
      * @param width the width of the button.
      * @param height the height of the button.
-     * @throws UnsupportedOperationException if the button was initialized as not-resizable.
      */
     public void setBarAndBounds(int bz, int x, int y, int width, int height) {
-        if (this.barSize == bz && this.getWidth() == width && this.getHeight() == height) {
+        if (barSize == bz && getWidth() == width && getHeight() == height) {
             super.setBounds(x, y, width, height);
             
         } else {
-            if (originalImages != null) {
-                if (barSize != bz || width != this.getWidth() || height != this.getHeight()) {
-                    super.setBounds(x, y, width, height);
-                    barSize = bz;
-                    
-                    generateNewImages(originalImages);
-                    
-                    updateLabel();
-                    
-                } else if (x != this.getX() || y != this.getY()) {
-                    super.setBounds(x, y, width, height);
-                }
-            } else {
-                throw new UnsupportedOperationException("Button2 was initialized as not-resizable.");
+            if (barSize != bz || width != getWidth() || height != getHeight()) {
+                super.setBounds(x, y, width, height);
+                barSize = bz;
+                
+                updateLabel();
+                
+            } else if (x != getX() || y != getY()) {
+                super.setBounds(x, y, width, height);
             }
         }
     }
     
     /* 
      * Sets the current state of the button.
-     * Does not fires ActionEvents accordingly.
      * 
-     * @param state the new state of the button. Must be one of NORMAL_OPERATION, NO_CHANGE, HOOVER_EXCEPT_PRESSED,
-     *     NO_HOOVER, ALWAYS_PRESSED, ALWAYS_HOOVER, ALWAYS_DISABLED or ALWAYS_NORMAL.
+     * @param state the new state of the button.
      */
     public void setState(State state) {
         if (state == State.NO_CHANGE) {
@@ -451,8 +490,7 @@ public class Button2 extends AbstractButton {
      * Sets the current state of the button.
      * Does not fires ActionEvents accordingly.
      * 
-     * @param state the new state of the button. Must be one of NORMAL_OPERATION, NO_CHANGE, HOOVER_EXCEPT_PRESSED,
-     *     NO_HOOVER, ALWAYS_PRESSED, ALWAYS_HOOVER, ALWAYS_DISABLED or ALWAYS_NORMAL.
+     * @param state the new state of the button.
      */
     public void setStateNoAction(State state) {
         if (state == State.NO_CHANGE) {
@@ -464,9 +502,9 @@ public class Button2 extends AbstractButton {
     }
     
     /*
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      * Get functions
-     * ---------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * @return the text from the label if the label exists. null otherwise.
@@ -508,117 +546,30 @@ public class Button2 extends AbstractButton {
         return enabled;
     }
     
-    /*
-     * ---------------------------------------------------------------------------------
-     * Action functions
-     * ---------------------------------------------------------------------------------
-     */
     /* 
-     * Generates the images for the background, given the images in img.
-     * img must have the same constraints as the images described in the constructor.
-     * 
-     * @param img see constructor for detailed info.
+     * @return the size of the bar.
      */
-    private void generateNewImages(Image[][] img) {
-        // Generate the new images.
-        if (imageType == TYPE_TURNED || imageType == TYPE_MIRRORED) {
-            images = new BufferedImage[][][] {new BufferedImage[4][4], new BufferedImage[4][4], new BufferedImage[1][4]};
-            
-            Image corner = img[0][0].getScaledInstance(barSize, barSize, scaleType);
-            Image[] cornerBackground = new Image[] {
-                img[0][1].getScaledInstance(barSize, barSize, scaleType),
-                    img[0][2].getScaledInstance(barSize, barSize, scaleType),
-                    img[0][3].getScaledInstance(barSize, barSize, scaleType),
-                    img[0][4].getScaledInstance(barSize, barSize, scaleType)
-            };
-            
-            Image border = img[1][0].getScaledInstance(this.getWidth() - 2*barSize, barSize, scaleType);
-            Image[] borderBackground = new Image[] {
-                img[1][1].getScaledInstance(this.getWidth() - 2*barSize, barSize, scaleType),
-                    img[1][2].getScaledInstance(this.getWidth() - 2*barSize, barSize, scaleType),
-                    img[1][3].getScaledInstance(this.getWidth() - 2*barSize, barSize, scaleType),
-                    img[1][4].getScaledInstance(this.getWidth() - 2*barSize, barSize, scaleType)
-            };
-            
-            Image center = img[2][0].getScaledInstance(this.getWidth() - 2*barSize, this.getHeight() - 2*barSize, scaleType);
-            Image[] centerBackground = new Image[] {
-                img[2][1].getScaledInstance(this.getWidth() - 2*barSize, this.getHeight() - 2*barSize, scaleType),
-                    img[2][2].getScaledInstance(this.getWidth() - 2*barSize, this.getHeight() - 2*barSize, scaleType),
-                    img[2][3].getScaledInstance(this.getWidth() - 2*barSize, this.getHeight() - 2*barSize, scaleType),
-                    img[2][4].getScaledInstance(this.getWidth() - 2*barSize, this.getHeight() - 2*barSize, scaleType)
-            };
-            
-            for (int i = 0; i < images[0].length; i++) {
-                for (int j = 0; j < images[0][i].length; j++) {
-                    ImageTools.SimpleAction sa;
-                    if (i == 1) {
-                        sa = (imageType == TYPE_TURNED
-                                  ? ImageTools.SimpleAction.ROTATE_90_RIGHT
-                                  : ImageTools.SimpleAction.MIRROR_VERTICAL);
-                        
-                    } else if (i == 2) {
-                        sa = (imageType == TYPE_TURNED
-                                  ? ImageTools.SimpleAction.ROTATE_180
-                                  : ImageTools.SimpleAction.MIRROR_DIAGONAL_2);
-                        
-                    } else if (i == 3) {
-                        sa = (imageType == TYPE_TURNED
-                                  ? ImageTools.SimpleAction.ROTATE_90_LEFT
-                                  : ImageTools.SimpleAction.MIRROR_HORIZONTAL);
-                        
-                    } else {
-                        sa = null;
-                    }
-                    
-                    // Corners
-                    images[0][i][j] = ImageTools.imageDeepCopy(cornerBackground[j]);
-                    Graphics2D g2d0 = images[0][i][j].createGraphics();
-                    g2d0.drawImage(corner, 0, 0, null);
-                    g2d0.dispose();
-                    
-                    images[0][i][j] = ImageTools.simpleAction(images[0][i][j], sa);
-                    
-                    // Borders
-                    images[1][i][j] = ImageTools.imageDeepCopy(borderBackground[j]);
-                    Graphics2D g2d1 = images[1][i][j].createGraphics();
-                    g2d1.drawImage(border, 0, 0, null);
-                    g2d1.dispose();
-                    
-                    if (i == 0 || i == 2) {
-                    //if (true) {
-                        images[1][i][j] = ImageTools.simpleAction(images[1][i][j], sa);
-                        
-                    } else {
-                        images[1][i][j] = ImageTools.toBufferedImage
-                            (ImageTools.simpleAction(images[1][i][j], sa)
-                                 .getScaledInstance(barSize, this.getHeight() - 2*barSize, scaleType)
-                            );
-                    }
-                }
-            }
-            
-            for (int i = 0; i < images[2][0].length; i++) {
-                // Background
-                images[2][0][i] = ImageTools.imageDeepCopy(centerBackground[i]);
-                Graphics2D g2d2 = images[2][0][i].createGraphics();
-                g2d2.drawImage(center, 0, 0, null);
-                g2d2.dispose();
-            }
-            
-        } else {
-            images = null;
-            originalImages = null;
-        }
+    public int getBarSize() {
+        return barSize;
     }
     
+    
+    /*
+     * -------------------------------------------------------------------------
+     * Action functions
+     * -------------------------------------------------------------------------
+     */
     /* 
      * Updates the size and location of the label.
      */
     public void updateLabel() {
         if (label == null) return;
         
-        if ((int) (this.getWidth() - barSize * 2) > 0 && (int) (this.getHeight() - barSize * 2) > 0) {
-            label.setSize((int) (this.getWidth() - barSize * 2), (int) (this.getHeight() - barSize * 2));
+        if ((int) (this.getWidth() - barSize * 2) > 0 &&
+            (int) (this.getHeight() - barSize * 2) > 0)
+        {
+            label.setSize((int) (this.getWidth() - barSize * 2),
+                          (int) (this.getHeight() - barSize * 2));
             label.setLocation((int) (barSize * 1), (int) (barSize * 1));
             
         } else {
@@ -645,8 +596,7 @@ public class Button2 extends AbstractButton {
                   0,    // no modifiers
                   0, 0, // click occured at (0,0) relative to source
                   1,    // 1 click
-                  false, button
-                 )
+                  false, button)
             );
     }
     
@@ -668,8 +618,7 @@ public class Button2 extends AbstractButton {
                   0,    // no modifiers
                   0, 0, // click occured at (0,0) relative to source
                   1,    // 1 click
-                  false, button
-                 )
+                  false, button)
             );
     }
     
@@ -691,8 +640,7 @@ public class Button2 extends AbstractButton {
                   0,    // no modifiers
                   0, 0, // click occured at (0,0) relative to source
                   1,    // 1 click
-                  false, button
-                 )
+                  false, button)
             );
     }
     
@@ -714,15 +662,15 @@ public class Button2 extends AbstractButton {
                   0, // no modifiers
                   0, 0, // click occured at (0,0) relative to source
                   1, // 1 click
-                  false, button
-                 )
+                  false, button)
             );
     }
 
     /* 
      * Calculates the type number used for printing the images.
      * 
-     * @return the current state for printing the images. -1 if the current state is not defined.
+     * @return the current state for printing the images.
+     *     -1 if the current state is not defined.
      */
     public int calculateType() {
         if (state == State.NORMAL_OPERATION) {
@@ -779,35 +727,124 @@ public class Button2 extends AbstractButton {
     }
     
     /* 
+     * Repeatedly paints the given image on the given graphics. Rotates the
+     * graphics before each paint action.
+     * 
+     * @param g2d the graphics that will be painted on.
+     * @param img the image that will be painted
+     * @param imgSize the size of the image. Must have 2 elements.
+     * @param panelSize the size of the panel the image will be painted on
+     *     (this simply resizes g2d to this size before painting on it).
+     *     Must have 2 elements.
+     * @param trans the translation of the image to be painted relative to the
+     *     top left corner. Must have 2 elements.
+     * @param repeat the number of times the image should be painted.
+     */
+    private void repeatPaint(Graphics2D g2d, Image img,
+                             double[] imgSize, double[] panelSize,
+                             double[] trans, int repeat) {
+        double[] widthFactor = new double[] {
+            imgSize[0] / img.getWidth(null),
+                imgSize[2] / img.getWidth(null)
+        };
+        double[] heightFactor = new double[] {
+            imgSize[1] / img.getHeight(null),
+                imgSize[3] / img.getHeight(null)
+        };
+        
+        // Retrieve the current g2d transformation.
+        AffineTransform baseTrans = g2d.getTransform();
+        
+        for (int i = 0; i < repeat; i++) {
+            g2d.rotate(i * 0.5*Math.PI, panelSize[i != 3 ? 0 : 1] / 2, panelSize[i != 1 ? 1 : 0] / 2);
+            g2d.scale(widthFactor[i % 2], heightFactor[i % 2]);
+            g2d.translate(trans[0] / widthFactor[i % 2], trans[1] / heightFactor[i % 2]);
+            g2d.drawImage(img, 0, 0, null);
+            
+            // Restore the g2d transformation.
+            g2d.setTransform(baseTrans);
+        }
+    }
+    
+    /* 
      * Painting the button.
      */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
+        // Retrieve button type
         int type = calculateType();
         
-        // Background
-        g.drawImage(images[2][0][type], barSize, barSize, null);
+        // Convert to Graphics2D object
+        Graphics2D g2d = (Graphics2D) g;
         
-        for (int i = 0; i < 4; i++) {
-            // Corners
-            g.drawImage(images[0][i][type],
-                        (i == 0 || i == 3 ? 0 : this.getWidth() - barSize),
-                        (i == 0 || i == 1 ? 0 : this.getHeight() - barSize),
-                        null);
-            
-            // Borders
-            
-            g.drawImage(images[1][i][type],
-                        (i == 0 || i == 2 ? barSize : (i == 1 ? this.getWidth() - barSize : 0)),
-                        (i == 1 || i == 3 ? barSize : (i == 2 ? this.getHeight() - barSize : 0)),
-                        null);
-        }
+        // Determine the images
+        Image corner = originalImages[0][0];
+        Image cornerBackground = originalImages[0][type+1];
+        Image bar = originalImages[1][0];
+        Image barBackground = originalImages[1][type+1];
+        Image center = originalImages[2][0];
+        Image centerBackground = originalImages[2][type+1];
         
-        // Contents
+        // tmp
+        //g2d.drawRect(0, 0, getWidth()-1, getHeight()-1);
+        
+        double[] size = new double[] {getWidth(), getHeight()};
+        
+        // Draw corners background
+        repeatPaint(g2d, cornerBackground,
+                    new double[] {barSize, barSize, barSize, barSize}, // image size
+                    size, // panel size
+                    new double[] {0, 0}, // location on panel
+                    4); // number of iterations
+        
+        // Draw corners
+        repeatPaint(g2d, corner,
+                    new double[] {barSize, barSize, barSize, barSize}, // image size
+                    size, // panel size
+                    new double[] {0, 0}, // location on panel
+                    4); // number of iterations
+        
+        // Draw bar background
+        repeatPaint(g2d, barBackground,
+                    new double[] {getWidth() - 2*barSize, barSize, getHeight() - 2*barSize, barSize}, // image size
+                    size, // panel size
+                    new double[] {barSize, 0}, // location on panel
+                    4); // number of iterations
+        
+        // Draw bar
+        repeatPaint(g2d, bar,
+                    new double[] {getWidth() - 2*barSize, barSize, getHeight() - 2*barSize, barSize}, // image size
+                    size, new double[] {barSize, 0}, 4); // panel size
+        
+        // Draw center background
+        repeatPaint(g2d, centerBackground,
+                    new double[] {getWidth() - 2*barSize, getHeight() - 2*barSize, 0, 0}, // image size
+                    size, // panel size
+                    new double[] {barSize, barSize}, // location on panel
+                    1); // number of iterations
+        
+        // Draw center
+        repeatPaint(g2d, center,
+                    new double[] {getWidth() - 2*barSize, getHeight() - 2*barSize, 0, 0}, // image size
+                    size, // panel size
+                    new double[] {barSize, barSize}, // location on panel
+                    1); // number of iterations
+        
         if (image != null) {
-            g.drawImage(image, (this.getWidth() - image.getWidth(null)) / 2, (this.getHeight() - image.getHeight(null)) / 2, null);
+            int x;
+            int y;
+            if (resizeImage) {
+                repeatPaint(g2d, image,
+                            new double[] {getWidth() - 2*imageBarWidth, getHeight() - 2*imageBarHeight, 0, 0}, // image size
+                            size, // panel size
+                            new double[] {barSize, barSize}, // location on panel
+                            1); // number of iterations
+                
+            } else {
+                g2d.drawImage(image, imageBarWidth, imageBarHeight, null);
+            }
         }
     }
     
@@ -820,39 +857,13 @@ public class Button2 extends AbstractButton {
             + ", showState=" + calculateType()
             + ", location=(" + this.getX() + ", " + this.getY() + ")"
             + ", size=(" + this.getWidth() + ", " + this.getHeight() + ")"
-            + ", resizable=" + (originalImages != null)
             + ", type=" + imageType
-            + ", scaleTyp=" + scaleType
             + ", noChangeType=" + noChangeType + "]";
     }
     
-    /*
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        
-        if (obj instanceof Button2) {
-            Button2 btn = (Button2) obj;
-            if (btn.calculateType() == this.calculateType() && 
-                btn.getX() == this.getX() && 
-                btn.getY() == this.getY() && 
-                btn.getWidth() == this.getWidth() && 
-                btn.getHeight() == this.getHeight() && 
-                btn.imageType == this.imageType && 
-                btn.scaleType == this.scaleType && 
-                btn.noChangeType == this.noChangeType && 
-                btn.images.equals(this.images) && 
-                btn.originalImages.equals(this.originalImages) && 
-                btn.getState() == this.getState() && 
-                btn.getText() == this.getText() && 
-                btn.isPressed() == this.isPressed() && 
-                btn.isHoover() == this.isHoover()
-            ) {
-                return true;
-            }
-        }
-        
-        return false;
+    // tmp
+    public static void main(String[] args) {
+        System.out.println(IMG_LOC);
     }
-    */
+    
 }
