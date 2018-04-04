@@ -1,11 +1,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright (C) 2018 by Kaj Wortel - all rights reserved                *
- * Contact: <kaj.wortel@gmail.com>                                       *
+ * Contact: kaj.wortel@gmail.com                                         *
  *                                                                       *
- * This file is part of the tools project.                               *
+ * This file is part of the tools project, which can be found on github: *
+ * https://github.com/Kaj0Wortel/tools                                   *
  *                                                                       *
  * It is allowed to use, (partially) copy and modify this file           *
- * in any way for private use only.                                      *
+ * in any way for private use only by using this header.                 *
  * It is not allowed to redistribute any (modifed) versions of this file *
  * without my permission.                                                *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -13,7 +14,7 @@
 package tools;
 
 
-// Java packages
+// Java imports
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
@@ -21,6 +22,10 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 
+/* 
+ * Currently under development.
+ * Use with care and check runtimes!
+ */
 public class ImageTools {
     public static enum SimpleAction {
         // These three shoulc not be used since they are way much slower then the java version.

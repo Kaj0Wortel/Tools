@@ -1,14 +1,20 @@
-
-/* * * * * * * * * * * * *
- * Created by Kaj Wortel *
- *     Last modified:    *
- *       07-11-2017      *
- *      (mm-dd-yyyy)     *
- * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright (C) 2018 by Kaj Wortel - all rights reserved                *
+ * Contact: kaj.wortel@gmail.com                                         *
+ *                                                                       *
+ * This file is part of the tools project, which can be found on github: *
+ * https://github.com/Kaj0Wortel/tools                                   *
+ *                                                                       *
+ * It is allowed to use, (partially) copy and modify this file           *
+ * in any way for private use only by using this header.                 *
+ * It is not allowed to redistribute any (modifed) versions of this file *
+ * without my permission.                                                *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package tools.dataStructures;
 
-// Java packages
+
+// Java imports
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Collection;
@@ -16,6 +22,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+/* 
+ * Currently under development.
+ * Do not use!
+ */
 public class MinHeapFibon<K extends Number,E> 
     extends Dictionary<K,E> 
     implements Map<K,E>, Cloneable {//, java.io.Serializable {

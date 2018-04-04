@@ -4,6 +4,9 @@
 # Log file
 *.log
 
+# drJava backup files
+*.java~
+
 # BlueJ files
 *.ctxt
 

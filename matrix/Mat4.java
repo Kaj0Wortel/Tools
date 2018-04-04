@@ -1,14 +1,23 @@
-
-/* * * * * * * * * * * * *
- * Created by Kaj Wortel *
- *     Last modified:    *
- *       24-01-2018      *
- *      (dd-mm-yyyy)     *
- * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright (C) 2018 by Kaj Wortel - all rights reserved                *
+ * Contact: kaj.wortel@gmail.com                                         *
+ *                                                                       *
+ * This file is part of the tools project, which can be found on github: *
+ * https://github.com/Kaj0Wortel/tools                                   *
+ *                                                                       *
+ * It is allowed to use, (partially) copy and modify this file           *
+ * in any way for private use only by using this header.                 *
+ * It is not allowed to redistribute any (modifed) versions of this file *
+ * without my permission.                                                *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package tools.matrix;
 
 
+/* 
+ * Under development.
+ * Use with care!
+ */
 /* 
  * Represents a 4x4 matrix in homogeneous coordinates.
  */
