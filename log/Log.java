@@ -36,6 +36,9 @@ public class Log extends Loggable {
     final private static String ls = System.getProperty("line.separator");
     private static PrintWriter writer;
     
+    /* 
+     * This is a static singleton class. No instances should be made.
+     */
     @Deprecated
     private Log() {}
     

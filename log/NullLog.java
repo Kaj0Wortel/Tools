@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.log;
 
 
@@ -22,18 +22,22 @@ import tools.log.Loggable;
 import java.io.File;
 
 
+/* 
+ * This is a log class that ignores all log action.
+ */
 public class NullLog extends Loggable {
     
+    /* 
+     * This is a static singleton class. No instances should be made.
+     */
     @Deprecated
-    public NullLog() { }
+    private NullLog() { }
     
     public static synchronized void write(Exception e) { }
     
     public static synchronized void write(Object obj) { }
     
-    public static synchronized void write(Object[] obj) {
-        
-    }
+    public static synchronized void write(Object[] obj) { }
     
     public static synchronized boolean clear() {
         return true;

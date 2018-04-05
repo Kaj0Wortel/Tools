@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.io;
 
 
@@ -18,11 +18,13 @@ package tools.io;
 import java.io.OutputStream;
 
 
+/* 
+ * This is an output stream class that ignores all data written to it.
+ */
 public class NullOutputStream extends OutputStream {
-    public NullOutputStream() {
-    }
+    
+    public NullOutputStream() { }
     
     @Override
-    public void write(int i) {
-    }
+    public void write(int i) { }
 }

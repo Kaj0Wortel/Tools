@@ -11,15 +11,15 @@
  * without my permission.                                                *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 //todo
-package tools;
+package tools.swing;
 
 
-// Own packages
+// Tools imports
 import tools.io.LoadImages2;
 import tools.ImageTools;
 
 
-// Java packages
+// Java imports
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;

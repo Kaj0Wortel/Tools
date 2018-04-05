@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file *
  * without my permission.                                                *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.io;
 
 
@@ -18,19 +18,19 @@ package tools.io;
 import java.io.Writer;
 
 
+/* 
+ * This is a writer class that ignores all data written to it.
+ */
 public class NullWriter extends Writer {
-    public NullWriter() {
-    }
+    
+    public NullWriter() { }
     
     @Override
-    public void close() {
-    }
+    public void close() { }
     
     @Override
-    public void flush() {
-    }
+    public void flush() { }
     
     @Override
-    public void write(char[] c, int i, int i2) {   
-    }
+    public void write(char[] c, int i, int i2) { }
 }
