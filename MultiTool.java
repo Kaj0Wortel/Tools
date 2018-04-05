@@ -29,7 +29,6 @@ import java.util.Random;
 
 
 public class MultiTool {
-    
     /* 
      * Simple encoding algorithm.
      * Reeeeaaally old. No idea what it does.
@@ -51,20 +50,22 @@ public class MultiTool {
         return output;
     }
     
-    
     /* 
      * Simple decoding algorithm.
      * Reeeeaaally old. No idea what it does.
      */
-    public static int[][] decode(String[] input) throws IllegalArgumentException {
+    public static int[][] decode(String[] input)
+            throws IllegalArgumentException {
         return decoder(input);
     }
-    public static int[][] decode(String input) throws IllegalArgumentException {
+    public static int[][] decode(String input)
+            throws IllegalArgumentException {
         String[] inputArray = input.split("#");
         return decoder(inputArray);
     }
     
-    private static int[][] decoder(String[] input) throws IllegalArgumentException {
+    private static int[][] decoder(String[] input)
+            throws IllegalArgumentException {
         // check whether the input is not null
         if (input == null) {
             throw new IllegalArgumentException();
@@ -108,7 +109,8 @@ public class MultiTool {
         }
         
         for (int counter = 0; counter < heighestDHexNumber; counter++) {
-            int part = (int)((double)(dHex) / Math.pow(32, heighestDHexNumber - (counter+1)));
+            int part = (int)((double)(dHex) / Math.pow
+                                 (32, heighestDHexNumber- (counter+1)));
             dHex -= part * Math.pow(32, heighestDHexNumber - (counter+1));
             answer += singleDHexToString(part);
         }
@@ -132,7 +134,8 @@ public class MultiTool {
         if (length == 0) throw new NumberFormatException();
         
         for (int counter = 0; counter < length; counter++) {
-            answer += Math.pow(32, length - (counter+1)) * singleStringToDHex(dHex.charAt(counter));
+            answer += Math.pow(32, length - (counter+1))
+                * singleStringToDHex(dHex.charAt(counter));
         }
         return answer;
     }
@@ -143,40 +146,18 @@ public class MultiTool {
      * @param dHex a decimal number (0 <= dHex < 32).
      * @return the 32 based representation of {@code dHex}.
      */
-    private static char singleDHexToString(int dHex) throws NumberFormatException {
-        if (dHex == 0) return '0';
-        else if (dHex == 1) return '1';
-        else if (dHex == 2) return '2';
-        else if (dHex == 3) return '3';
-        else if (dHex == 4) return '4';
-        else if (dHex == 5) return '5';
-        else if (dHex == 6) return '6';
-        else if (dHex == 7) return '7';
-        else if (dHex == 8) return '8';
-        else if (dHex == 9) return '9';
-        else if (dHex == 10) return 'A';
-        else if (dHex == 11) return 'B';
-        else if (dHex == 12) return 'C';
-        else if (dHex == 13) return 'D';
-        else if (dHex == 14) return 'E';
-        else if (dHex == 15) return 'F';
-        else if (dHex == 16) return 'G';
-        else if (dHex == 17) return 'H';
-        else if (dHex == 18) return 'I';
-        else if (dHex == 19) return 'J';
-        else if (dHex == 20) return 'K';
-        else if (dHex == 21) return 'L';
-        else if (dHex == 22) return 'M';
-        else if (dHex == 23) return 'N';
-        else if (dHex == 24) return 'O';
-        else if (dHex == 25) return 'P';
-        else if (dHex == 26) return 'Q';
-        else if (dHex == 27) return 'R';
-        else if (dHex == 28) return 'S';
-        else if (dHex == 29) return 'T';
-        else if (dHex == 30) return 'U';
-        else if (dHex == 31) return 'V';
-        else throw new NumberFormatException();
+    private static char singleDHexToString(int dHex)
+            throws NumberFormatException {
+        if (dHex >= 0 && dHex <= 9) {
+            return (char) (dHex + '0');
+            
+        } else if (dHex >= 10 && dHex <= 31) {
+            return (char) (dHex - 10 + 'A');
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected: 0 <= n <= 31, but found: " + dHex);
+        }
     }
     
     /* 
@@ -185,44 +166,20 @@ public class MultiTool {
      * @param dHex a 32 based number ('0' <= dHex <= '9' || 'A' <= dHex <= 'V').
      * @return the decimal representation of {@code dHex}.
      */
-    private static int singleStringToDHex(char dHex)  throws NumberFormatException {
-        if (dHex == '0') return 0;
-        else if (dHex == '1') return 1;
-        else if (dHex == '2') return 2;
-        else if (dHex == '3') return 3;
-        else if (dHex == '4') return 4;
-        else if (dHex == '5') return 5;
-        else if (dHex == '6') return 6;
-        else if (dHex == '7') return 7;
-        else if (dHex == '8') return 8;
-        else if (dHex == '9') return 9;
-        else if (dHex == 'A') return 10;
-        else if (dHex == 'B') return 11;
-        else if (dHex == 'C') return 12;
-        else if (dHex == 'D') return 13;
-        else if (dHex == 'E') return 14;
-        else if (dHex == 'F') return 15;
-        else if (dHex == 'G') return 16;
-        else if (dHex == 'H') return 17;
-        else if (dHex == 'I') return 18;
-        else if (dHex == 'J') return 19;
-        else if (dHex == 'K') return 20;
-        else if (dHex == 'L') return 21;
-        else if (dHex == 'M') return 22;
-        else if (dHex == 'N') return 23;
-        else if (dHex == 'O') return 24;
-        else if (dHex == 'P') return 25;
-        else if (dHex == 'Q') return 26;
-        else if (dHex == 'R') return 27;
-        else if (dHex == 'S') return 28;
-        else if (dHex == 'T') return 29;
-        else if (dHex == 'U') return 30;
-        else if (dHex == 'V') return 31;
-        else throw new NumberFormatException();
+    private static int singleStringToDHex(char dHex)
+            throws NumberFormatException {
+        if (dHex >= '0' && dHex <= '9') {
+            return dHex - '0';
+            
+        } else if (dHex >= 'A' && dHex <= 'V') {
+            return dHex - 'A' + 10;
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected: '0' <= n <= '9' or 'A' <= n <= 'V'"
+                     + ", but found: " + dHex);
+        }
     }
-    
-    
-    
     
     /* 
      * Lists all files in a dir.
@@ -230,35 +187,38 @@ public class MultiTool {
      * @param listDirs whether the directories should be listed or not.
      * @param pathSoFar the path that has been traversed so far.
      * 
-     * @return an ArrayList containing an array of File objects of length 2 for which holds:
+     * @return an ArrayList containing an array of File objects of
+     *     length 2 for which holds:
      *     - The first element contains the full path of the file.
-     *     - The second element contains the path of the file relative to the given rootDir
-     *       (excl. the rootdir and the file itself).
+     *     - The second element contains the path of the file relative to
+     *       the given rootDir (excl. the rootdir and the file itself).
      * 
      * @throws IllegalArgumentException if the root dir is not a directory.
      * @throws IllegalStateException if a file found in a certain directory, is not located in that directory.
      * 
      * Furthermore is guarenteed that:
      * - For every directory that all its children (sub-dirs included) are listed
-     *     directly below its own entry.
+     *   directly below its own entry.
      * - When the files X in directory dirX and Y NOT in dirX are listed consecutively,
-     *     then all children (including sub-children) of dirX are listed.
+     *   then all children (including sub-children) of dirX are listed.
      * - No other assumptions regarding file-order can be made on the output.
      * 
      * Note: ONLY use the THIRD function when you know what you are doing!
      */
     public static ArrayList<File[]> listFilesAndPathsFromRootDir(File rootDir)
-        throws IllegalArgumentException, IllegalStateException {
+            throws IllegalArgumentException, IllegalStateException {
         return listFilesAndPathsFromRootDir(rootDir, "", true);
     }
     
-    public static ArrayList<File[]> listFilesAndPathsFromRootDir(File rootDir, boolean listDirs)
-        throws IllegalArgumentException, IllegalStateException {
+    public static ArrayList<File[]> listFilesAndPathsFromRootDir
+            (File rootDir, boolean listDirs)
+            throws IllegalArgumentException, IllegalStateException {
         return listFilesAndPathsFromRootDir(rootDir, "", listDirs);
     }
     
-    public static ArrayList<File[]> listFilesAndPathsFromRootDir(File rootDir, String pathSoFar, boolean listDirs)
-        throws IllegalArgumentException, IllegalStateException {
+    public static ArrayList<File[]> listFilesAndPathsFromRootDir
+            (File rootDir, String pathSoFar, boolean listDirs)
+            throws IllegalArgumentException, IllegalStateException {
         
         if (rootDir.isFile()) {
             new IllegalArgumentException("The file \"" + rootDir.getPath() + "\" is no dir.");
@@ -358,18 +318,21 @@ public class MultiTool {
      * @throws IllegalArgumentException iff start < end.
      */
     @SuppressWarnings("unchecked")
-    public static <A, B extends A> A[] listToArray(List<B> list, Class<B> classValue) {
+    public static <A, B extends A> A[] listToArray(List<B> list,
+                                                   Class<B> classValue) {
         return listToArray(list, classValue, 0);
     }
     
     @SuppressWarnings("unchecked")
-    public static <A, B extends A> A[] listToArray(List<B> list, Class<B> classValue, int start) {
+    public static <A, B extends A> A[] listToArray
+            (List<B> list, Class<B> classValue, int start) {
         return listToArray(list, classValue, start, list.size());
     }
     
     @SuppressWarnings("unchecked")
-    public static <A, B extends A> A[] listToArray(List<B> list, Class<B> classValue, int start, int end)
-        throws IllegalArgumentException {
+    public static <A, B extends A> A[] listToArray
+            (List<B> list,Class<B> classValue, int start, int end)
+           throws IllegalArgumentException {
         if (list == null || classValue == null) return null;
         if (start >= end) throw new IllegalArgumentException("start(" + start + ") > end(" + end + ").");
         
@@ -387,14 +350,17 @@ public class MultiTool {
      * 
      * @param array the input array
      * @param classValue the input/output class type
-     * @return the elements from the output ArrayList in the same order as in the input array.
+     * @return the elements from the output ArrayList in the same order as
+     *     in the input array.
      *     Returns null iff the given array or class are null.
      * 
      * WARNING! THIS FUNCTION HAS NOT BEEN EXTENSIVLY TESTED!
-     * If you get class cast exceptions (e.g. cannot convert/cast Object[] to XXX[]), here's you problem.
+     * If you get class cast exceptions (e.g. cannot convert/cast
+     * Object[] to XXX[]), here's you problem.
      */
     @SuppressWarnings("unchecked")
-    public static <A, B extends A> ArrayList<A> arrayToArrayList(B[] array, Class<B> classValue) {
+    public static <A, B extends A> ArrayList<A> arrayToArrayList
+            (B[] array, Class<B> classValue) {
         if (array == null) return null;
         
         List<A> list = new ArrayList<A>(array.length);
@@ -434,7 +400,8 @@ public class MultiTool {
     public static <T> T[] copyArray(T[] array) {
         if (array == null) return null;
         
-        T[] newArray = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length);
+        T[] newArray = (T[]) Array.newInstance
+            (array.getClass().getComponentType(), array.length);
         
         for (int i = 0; i < array.length; i++) {
             newArray[i] = (T) array[i];
@@ -464,8 +431,10 @@ public class MultiTool {
      * 
      * See fireActioneEvents(String, long, int, ActionListener[]) for more info.
      */
-    public static void fireActionEvents(Object source, String command, int modifiers, ActionListener[] als) {
-        fireActionEvents(source, command, System.currentTimeMillis(), modifiers, als);
+    public static void fireActionEvents(Object source, String command,
+                                        int modifiers, ActionListener[] als) {
+        fireActionEvents(source, command, System.currentTimeMillis(),
+                         modifiers, als);
     }
     
     /* 
@@ -476,10 +445,13 @@ public class MultiTool {
      * @param command the command used for the event.
      * @param when the time when the event occured.
      * @param modifiers the modifiers for the event.
-     * @param als array containing the ActionListeners that need to be notified of the event.
+     * @param als array containing the ActionListeners that
+     *     need to be notified of the event.
      */
-    public static void fireActionEvents(final Object source, final String command,
-                                        final long when, final int modifiers, final ActionListener[] als) {
+    public static void fireActionEvents(final Object source,
+                                        final String command, final long when,
+                                        final int modifiers,
+                                        final ActionListener[] als) {
         if (als == null) return;
         
         new Thread(source.getClass().getName() + " ActionEvent") {
@@ -505,7 +477,8 @@ public class MultiTool {
      * @return String representation of a double, having 'decimals' decimals.
      */
     public static String doubleToStringDecimals(double num, int decimals) {
-        if (decimals < 0) throw new IllegalArgumentException("Number of decimals was negative: " + decimals);
+        if (decimals < 0) throw new IllegalArgumentException
+            ("Number of decimals was negative: " + decimals);
         
         String number = Double.toString(num);
         for (int i = 0; i < number.length(); i++) {
@@ -536,12 +509,14 @@ public class MultiTool {
     }
     
     /* 
-     * Converts an Integer to a String, with zero's filled till the n'th position.
+     * Converts an Integer to a String, with zero's filled
+     * till the n'th position.
      * 
      * @param i number to be converted.
      * @param n the length of the number + number of leading zeroes.
      * 
-     * If the length of the number is bigger then n, then the full number is returned.
+     * If the length of the number is bigger then n, then the full number
+     * is returned.
      */
     public static String fillZero(int i, int n) throws NumberFormatException {
         String number = Integer.toString(i);
@@ -588,7 +563,8 @@ public class MultiTool {
     }
     
     /* 
-     * Converts all spaces in the input String to spaces that are visible in html.
+     * Converts all spaces in the input String to spaces that
+     * are visible in html.
      * 
      * @param text text to process.
      */
@@ -638,9 +614,6 @@ public class MultiTool {
      * 
      * @param in the input array.
      * @param rnd the used Random object.
-     * 
-     * Copy-pasted from:
-     * "http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/8u40-b25/java/util/Collections.java#Collections.shuffle%28java.util.List%2Cjava.util.Random%29"
      */
     public static <V> V[] shuffleArray(V[] in) {
         return shuffleArray(in, new Random());
@@ -680,8 +653,12 @@ public class MultiTool {
      * @param i the first element of the swap.
      * @param j the second element of the swap.
      * @return arr, but then with the elements i and j swapped.
+     * @throws throws ArrayIndexOutOfBoundsException if {@code i} or {@code j}
+     *     are invallid indices of {@code arr}.
+     *     
      */
-    public static <V> V[] swap(V[] arr, int i, int j) {
+    public static <V> V[] swap(V[] arr, int i, int j)
+            throws ArrayIndexOutOfBoundsException {
         V tmp = arr[i];
         arr[i] = arr[j];
         arr[j] = tmp;
@@ -690,8 +667,19 @@ public class MultiTool {
     
     /* 
      * Calculates a hashValue for an object with the given dependant objects.
+     * 
+     * @param objArr immutable dependant variables of a class.
+     * @return a hash code for the class, given the dependant objects.
+     * 
+     * Note: this method will always return the same number if the input
+     * objects are equal. This also holds for null objects.
+     * If no objects are given (i.e. {@code objArr == null}),
+     * then 0 is returned.
+     * 
      */
-    public static int calcHashCode(Object[] objArr) {
+    public static int calcHashCode(Object... objArr) {
+        if (objArr == null) return 0;
+        
         int result = 41;
         
         for (Object obj : objArr) {

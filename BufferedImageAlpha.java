@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools;
 
 
@@ -33,8 +33,13 @@ import javax.imageio.ImageIO;
 
 
 /*
- * This file is currently under development and should not be used.
- * (reviving old artefact class).
+ * This file is currently under development.
+ * Do not use this class.
+ * 
+ * todo: reviving old artefact class.
+ */
+/* 
+ * Provides easy alpha handeling for a {@link BufferedImage}.
  */
 public class BufferedImageAlpha {
     final private BufferedImage baseImage;
@@ -94,7 +99,15 @@ public class BufferedImageAlpha {
         }
     }
     
-    
+    /* -------------------------------------------------------------------------
+     * Function
+     * -------------------------------------------------------------------------
+     */
+    /* 
+     * Sets the alpha value of the image
+     * 
+     * @param alpha the new alpha value.
+     */
     public void setAlpha(int alpha) {
         if (alpha > 255) {
             this.alpha = 255;
@@ -105,6 +118,10 @@ public class BufferedImageAlpha {
         }
     }
     
+    /* 
+     * Sets the background color.
+     * @param color the new background color.
+     */
     public void setBackgroundColor(Color color) { // not tested yet
         backgroundColor = color;
     }
@@ -133,7 +150,11 @@ public class BufferedImageAlpha {
         }
     }
     
-    public static BufferedImage changeAlpha(Image image, int alpha) throws IllegalArgumentException {
+    /* 
+     * Changes the alpha value of an image.
+     */
+    public static BufferedImage changeAlpha(Image image, int alpha)
+        throws IllegalArgumentException {
         if (alpha < 0 || alpha > 255) {
             throw new IllegalArgumentException("Illegal alpha value: " + alpha);
         }
@@ -192,16 +213,31 @@ public class BufferedImageAlpha {
         }
     }
     
+    /* -------------------------------------------------------------------------
+     * Get function
+     * -------------------------------------------------------------------------
+     */
     public int getAlpha() {
         return alpha;
     }
+    
+    /* 
+     * @return the width of the image.
+     */
     public int getWidth() {
         return alphaImage.getWidth();
     }
+    
+    /* 
+     * @return the height of the image.
+     */
     public int getHeight() {
         return alphaImage.getHeight();
     }
     
+    /* 
+     * @return the current image.
+     */
     public BufferedImage getBufferedImage() {
         //redraw();
         if (alphaImage == null) {
@@ -210,11 +246,4 @@ public class BufferedImageAlpha {
         return alphaImage;
     }
     
-    public BufferedImage getImage() {
-        //redraw()
-        if (alphaImage == null) {
-            Log.write("Null", true);
-        }
-        return (BufferedImage) alphaImage;
-    }
 }

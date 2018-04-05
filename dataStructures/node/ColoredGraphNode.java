@@ -35,14 +35,16 @@ public class ColoredGraphNode<E> extends Node<E> {
         this.singleEdgeOnly = singleEdgeOnly;
     }
     
-    public ColoredGraphNode(E entry, boolean isDirected, boolean singleEdgeOnly) {
+    public ColoredGraphNode(E entry, boolean isDirected,
+                            boolean singleEdgeOnly) {
         super(entry);
         edges = new ArrayList<Edge>();
         directed = isDirected;
         this.singleEdgeOnly = singleEdgeOnly;
     }
     
-    public ColoredGraphNode(E entry, ArrayList<Edge> edges, boolean isDirected, boolean singleEdgeOnly) {
+    public ColoredGraphNode(E entry, ArrayList<Edge> edges, boolean isDirected,
+                            boolean singleEdgeOnly) {
         super(entry);
         edges = new ArrayList<Edge>();
         this.edges.addAll(edges);
@@ -50,7 +52,8 @@ public class ColoredGraphNode<E> extends Node<E> {
         this.singleEdgeOnly = singleEdgeOnly;
     }
     
-    public ColoredGraphNode(ArrayList<Edge> edges, boolean isDirected, boolean singleEdgeOnly) {
+    public ColoredGraphNode(ArrayList<Edge> edges, boolean isDirected,
+                            boolean singleEdgeOnly) {
         super(null);
         edges = new ArrayList<Edge>();
         this.edges.addAll(edges);
@@ -80,34 +83,36 @@ public class ColoredGraphNode<E> extends Node<E> {
         id = cgn.getId();
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Set/add/remove methods
-     * ----------------------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
-     * Overwrites all current Edges with colors by the new Edges in the given list.
-     * XXXX
-     * Overwrites all current edges with colors by the new ones in the given list.
-     * The first element of Object[] is always a Node and the second an int
-     * representing the color.
+     * Overwrites all current Edges with colors by the new Edges in the
+     * given list. The first element of Object[] is always a Node and the
+     * second an int representing the color.
      * If the length is 2 or longer, only the first two fields will be used.
      * Note:
-     * If the length is 0 or 1, or the the first element if not a Node or the 
+     * If the length is 0 or 1, or the the first element is not a Node or the 
      * second element is not an int, then the enty is ignored.
-     * Throws a NullPointerException if the list equal to null.
+     * @throws NullPointerException if the list equal to null.
      */
-    public void setEdges(ArrayList<Edge> newEdges) {
+    public void setEdges(List<Edge> newEdges) {
         edges.clear();
         edges.addAll(newEdges);
     }
     
     /* 
-     * Overwrites all current edges with colors by the new ones in the given lists.
-     * If the lists are unequal in length, add only the complete edges to the list.
-     * Throws a NullPointerException if either of the given lists are equal to null.
+     * Overwrites all current edges with colors by the new ones in the
+     * given lists. If the lists are unequal in length, add only the complete
+     * edges to the list.
+     * 
+     * @throws a NullPointerException if either of the given lists are null.
      *//*
     public int setEdges(ArrayList<Edge> nodes) {
-        int size = (nodes.size() >= colors.size() ? nodes.size() : colors.size());
+        int size = (nodes.size() >= colors.size()
+                        ? nodes.size()
+                        : colors.size());
         boolean[] added = new boolean[edges.size()];
         this.edges = new ArrayList<Edge>(edges.size());
         
@@ -127,7 +132,8 @@ public class ColoredGraphNode<E> extends Node<E> {
     @SuppressWarnings("unchecked") // For creating an edge
     public boolean addEdge(Node newEdge, Integer color) {
         if (!singleEdgeOnly) {
-            edges.add(new Edge<ColoredGraphNode, Node>(this, newEdge, color, directed));
+            edges.add(new Edge<ColoredGraphNode, Node>
+                      (this, newEdge, color, directed));
             return true;
             
         } else {
@@ -138,7 +144,8 @@ public class ColoredGraphNode<E> extends Node<E> {
                 }
             }
             
-            edges.add(new Edge<ColoredGraphNode, Node>(this, newEdge, color, directed));
+            edges.add(new Edge<ColoredGraphNode, Node>
+                      (this, newEdge, color, directed));
             return true;
         }
     }
@@ -146,12 +153,13 @@ public class ColoredGraphNode<E> extends Node<E> {
     /* 
      * Adds all edges with a color from the list.
      * See "addEdge(Node, int)" for more information.
-     * Returns a boolean value for each element determining whether it was added or not.
-     * Throws a NullPointerException iff
-     *  - newEdged == null
-     *  - there exists an element in newEdges which has less then two elements.
-     * Ignores the elements in newEdges in which the first element is not an instance of
-     *     Node and the second element is not an instance of Integer.
+     * @return a boolean value for each element determining whether it
+     *     was added or not.
+     * @throws a NullPointerException iff newEdged == null or there exists
+     *     an element in newEdges which has less then two elements.
+     * Ignores the elements in newEdges in which the first element is not
+     *     an  instance of Node and the second element is not an instance
+     *     of Integer.
      */
     public boolean[] addAllEdges(ArrayList<Object[]> newEdges) {
         boolean[] returnValue = new boolean[newEdges.size()];
@@ -171,7 +179,8 @@ public class ColoredGraphNode<E> extends Node<E> {
     
     /* 
      * Removes all edges from the current node to the given node.
-     * Returns the number of removed edges.
+     * 
+     * @return the number of removed edges.
      */
     public int removeEdge(Node removeEdge) {
         int removed = 0;
@@ -188,7 +197,10 @@ public class ColoredGraphNode<E> extends Node<E> {
     
     /* 
      * Removes all edges of the given color.
-     * Returns the number of removed edges
+     * 
+     * @param removedEdge edge to be removed.
+     * @parame removeColor the color of the edge to be removed.
+     * @return the number of removed edges.
      */
     public int removeEdgeColored(Node removeEdge, Integer removeColor) {
         int removed = 0;
@@ -206,6 +218,9 @@ public class ColoredGraphNode<E> extends Node<E> {
     
     /* 
      * Removes all edges of the given color.
+     * 
+     * @param the color of the edges to be removed.
+     * @return the number of removed edges.
      */
     public int removeColor(Integer removeColor) {
         int removed = 0;
@@ -222,9 +237,11 @@ public class ColoredGraphNode<E> extends Node<E> {
     
     /* 
      * Removes all edges from the current node to the given nodes.
-     * Returns the number of nodes removed.
+     * 
+     * @param removeEdges list containing all edges to be removed
+     * @return the number of nodes removed.
      */
-    public int removeAllEdges(ArrayList<Node> removeEdges) {
+    public int removeAllEdges(List<Node> removeEdges) {
         int removed = 0;
         
         for (int i = 0; i < edges.size(); i++) {
@@ -241,19 +258,23 @@ public class ColoredGraphNode<E> extends Node<E> {
     }
     
     /* 
-     * Removes all edges with a given color from the current node to the given nodes.
-     * Returns the number of nodes removed.
+     * Removes all edges with a given color from this node to the given nodes.
+     * 
+     * @param removeEdges 
+     * @return the number of nodes removed.
+     * 
+     * Note: might do something else (todo: restoring old artefact).
      */
-    public int removeAllEdgesColored(ArrayList<Edge> removeEdges) {
+    public int removeAllEdgesColored(List<Edge> removeEdges) {
         int removed = 0;
         
         for (int i = 0; i < edges.size(); i++) {
             for (int j = 0; j < removeEdges.size(); j++) {
                 if ((edges.get(i).getColor() == null || edges.get(i).getColor().equals(removeEdges.get(j).getColor())) && 
-                    (edges.get(i).getDestNode().equals(removeEdges.get(j).getDestNode()) || 
-                     (edges.get(i).isDirected() && removeEdges.get(j).isDirected() && 
-                      edges.get(i).getDestNode().equals(removeEdges.get(j).getSourceNode()) && 
-                      edges.get(i).getSourceNode().equals(removeEdges.get(j).getDestNode())) ) ) {
+                        (edges.get(i).getDestNode().equals(removeEdges.get(j).getDestNode()) || 
+                         (edges.get(i).isDirected() && removeEdges.get(j).isDirected() && 
+                          edges.get(i).getDestNode().equals(removeEdges.get(j).getSourceNode()) && 
+                          edges.get(i).getSourceNode().equals(removeEdges.get(j).getDestNode())) ) ) {
                     edges.remove(i--);
                     removed++;
                     break;
@@ -266,9 +287,10 @@ public class ColoredGraphNode<E> extends Node<E> {
     
     /* 
      * Removes all edges.
-     * Returns the number of nodes removed.
+     * 
+     * @return the number of edges removed.
      */
-    public int removeAllEdges() {
+    public int clear() {
         int size = edges.size();
         edges.clear();
         return size;
@@ -278,14 +300,11 @@ public class ColoredGraphNode<E> extends Node<E> {
      * Get methods
      * ----------------------------------------------------------------------------------------------------------------
      */
-    
     /* 
-     * Returns the edges from this node to other nodes.
-     * The compiler might complain about an "unchecked warning".
-     * Just use @SuppressWarnings("unchecked") to ignore them
+     * @return all edges this node has
      */
     public List<Edge> getEdges() {
-        return edges;
+        return (List<Edge>) edges;
     }
     
     
@@ -294,7 +313,9 @@ public class ColoredGraphNode<E> extends Node<E> {
      * ----------------------------------------------------------------------------------------------------------------
      */
     /* 
-     * Checks if the given node is directly connected. Returns true iff so.
+     * @param node the node to check.
+     * @return whether this node is directly connected to the given node
+     *     with an edge.
      */
     public boolean isDirectConnected(Node node) {
         for (int i = 0; i < edges.size(); i++) {
@@ -307,8 +328,10 @@ public class ColoredGraphNode<E> extends Node<E> {
     }
     
     /* 
-     * Check if the given node is directly connected with an edge of the given color.
-     * Returns true iff so.
+     * @param node the node to check for.
+     * @param color the color the edge should have.
+     * @return whether this node is directly connected to the given node
+     *     with an edge having the given color
      */
     public boolean isDirectConnected(Node node, Integer color) {
         for (int i = 0; i < edges.size(); i++) {
@@ -329,7 +352,7 @@ public class ColoredGraphNode<E> extends Node<E> {
      *     o The number of edges is equal and
      *       the equals(Object) method of the lists containing them yields true.
      * 
-     * Note 1:
+     * Note:
      * It is possible for two nodes to be not entirely equal, but
      * equals(Object) will still yield true since the id's are equal.
      */

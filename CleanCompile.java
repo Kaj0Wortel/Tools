@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools;
 
 
@@ -27,18 +27,26 @@ import java.util.ArrayList;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+
 /* 
- * Not that this class only works when it uses JDK and  *NOT*  JRE!
- * Use with caution!
+ * Contains a method to clean and compile an entire folder or file.
+ * 
+ * Notes:
+ * - Only works when it uses JDK and NOT JRE!
+ * - Ignores the files from CleanCompile and MultiTool.
+ * So use with caution!
  */
 public class CleanCompile {
     public static void cleanCompile(File dir) {
-        ArrayList<File[]> filesInDir = MultiTool.listFilesAndPathsFromRootDir(dir, false);
+        ArrayList<File[]> filesInDir =
+            MultiTool.listFilesAndPathsFromRootDir(dir, false);
         
         // Delete all class files.
         for (File[] file : filesInDir) {
             String name = file[0].getName();
-            if (name.endsWith(".class") && !name.equals("CleanCompile.class") && !name.equals("MultiTool.class")) {
+            if (name.endsWith(".class") &&
+                    !name.equals("CleanCompile.class") &&
+                    !name.equals("MultiTool.class")) {
                 file[0].delete();
             }
         }
@@ -58,8 +66,16 @@ public class CleanCompile {
         compiler.run(null, null, null, filesToCompile);
     }
     
+    /* 
+     * Cleans and compiles all given files/directorys.
+     */
     public static void main(String[] args) {
-        CleanCompile.cleanCompile(new File(System.getProperty("user.dir")));
-        System.out.println("done");
+        if (args == null) return;
+        
+        for (String file : args) {
+            System.out.println("Begin clean compile of: " + file);
+            CleanCompile.cleanCompile(new File(file));
+            System.out.println("done");
+        }
     }
 }
