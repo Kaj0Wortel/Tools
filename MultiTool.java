@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools;
 
 
@@ -30,114 +30,55 @@ import java.util.Random;
 
 public class MultiTool {
     /* 
-     * Simple encoding algorithm.
-     * Reeeeaaally old. No idea what it does.
-     */
-    public static String[] encode(int[][] input) throws IllegalArgumentException {
-        return encoder(input);
-    }
-    
-    private static String[] encoder(int[][] input) throws IllegalArgumentException {
-        String[] output = new String[input.length];
-        String line;
-        for (int row = 0; row < input.length; row++) {
-            line = "";
-            for (int col = 0; col < input[row].length; col++) {
-                line += Integer.toHexString(input[row][col]);
-            }
-            output[row] = line;
-        }
-        return output;
-    }
-    
-    /* 
-     * Simple decoding algorithm.
-     * Reeeeaaally old. No idea what it does.
-     */
-    public static int[][] decode(String[] input)
-            throws IllegalArgumentException {
-        return decoder(input);
-    }
-    public static int[][] decode(String input)
-            throws IllegalArgumentException {
-        String[] inputArray = input.split("#");
-        return decoder(inputArray);
-    }
-    
-    private static int[][] decoder(String[] input)
-            throws IllegalArgumentException {
-        // check whether the input is not null
-        if (input == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        // It is known here that the input != null. It is not known whether
-        // every row has the same length, but this wil be checked later.
-        int[][] output = new int[input.length][input[0].length()];
-        
-        for (int row = 0; row < input.length; row++) {
-            // checks whether every row has the same length
-            if (input[row] == null
-                    ||
-                input[0].length() != input[row].length()) {
-                throw new IllegalArgumentException();
-            }
-            // the decoding
-            for (int col = 0; col < input[row].length(); col++) {
-                String letter = "0x" + input[row].charAt(col);
-                output[row][col] = Long.decode(letter).intValue();
-            }
-        }
-        return output;
-    }
-    
-    /* 
      * Converts a decimal integer to a 32 based number String.
      * 
      * @param dHex a decimal number.
      * @return a String containing the 32 based representation of {@code dHex}.
      */
     public static String dHexToString(int dHex) throws NumberFormatException {
+        if (dHex < 0) throw new NumberFormatException
+            ("Cannot convert a negative number.");
         
-        if (dHex < 0) throw new NumberFormatException();
-        
-        String answer = "";
+        String result = "";
         int heighestDHexNumber = 1;
         
-        while (Math.pow(32, heighestDHexNumber) - 1 < dHex) {
-            heighestDHexNumber += 1;
-        }
+        // Compute the length of the result.
+        while (intPow(32, heighestDHexNumber++) - 1 < dHex) { }
         
+        // Compute the result.
         for (int counter = 0; counter < heighestDHexNumber; counter++) {
             int part = (int)((double)(dHex) / Math.pow
                                  (32, heighestDHexNumber- (counter+1)));
             dHex -= part * Math.pow(32, heighestDHexNumber - (counter+1));
-            answer += singleDHexToString(part);
+            result += singleDHexToString(part);
         }
         
-        return answer;
+        return result;
     }
     
     /* 
      * Converts a 32 based number String to a decimal integer.
      * 
      * @param dHex 32 based number String.
-     * @return an integer represented by the 32 based number {@code dHex}.
+     * @return an integer represented by the 32 based number of {@code dHex}.
      */
     public static int stringToDHex(String dHex) throws NumberFormatException {
+        if (dHex == null) throw new NullPointerException("Input is null.");
         
-        if (dHex == null) throw new NumberFormatException();
-        
+        // Convert to upper case
         dHex = dHex.toUpperCase();
-        int answer = 0;
-        int length = dHex.length();
-        if (length == 0) throw new NumberFormatException();
         
-        for (int counter = 0; counter < length; counter++) {
-            answer += Math.pow(32, length - (counter+1))
+        // Compute the result.
+        int result = 0;
+        if (dHex.length() == 0) throw new NumberFormatException
+            ("Invallid length. Expected: length > 0, but found length == 0.");
+        
+        for (int counter = 0; counter < dHex.length(); counter++) {
+            result += intPow(32, dHex.length() - (counter+1))
                 * singleStringToDHex(dHex.charAt(counter));
         }
-        return answer;
+        
+        return result;
     }
     
     /* 
@@ -194,14 +135,17 @@ public class MultiTool {
      *       the given rootDir (excl. the rootdir and the file itself).
      * 
      * @throws IllegalArgumentException if the root dir is not a directory.
-     * @throws IllegalStateException if a file found in a certain directory, is not located in that directory.
+     * @throws IllegalStateException if a file found in a certain directory,
+     *     is not located in that directory.
      * 
      * Furthermore is guarenteed that:
-     * - For every directory that all its children (sub-dirs included) are listed
-     *   directly below its own entry.
-     * - When the files X in directory dirX and Y NOT in dirX are listed consecutively,
-     *   then all children (including sub-children) of dirX are listed.
-     * - No other assumptions regarding file-order can be made on the output.
+     * - If {@code listDirs}, then it holds for every directory that all its
+     *   children (sub-dirs included) are listed directly below (higher index)
+     *   its own entry.
+     * - All files X that are part of a directory tree always occur
+     *   in consecutive order (so no other directory trees that are not
+     *   contained by the former one will be in this part of the array).
+     * No other assumptions regarding file-order can be made on the output.
      * 
      * Note: ONLY use the THIRD function when you know what you are doing!
      */
@@ -221,7 +165,8 @@ public class MultiTool {
             throws IllegalArgumentException, IllegalStateException {
         
         if (rootDir.isFile()) {
-            new IllegalArgumentException("The file \"" + rootDir.getPath() + "\" is no dir.");
+            new IllegalArgumentException
+                ("The file \"" + rootDir.getPath() + "\" is no dir.");
         }
         
         pathSoFar = (pathSoFar == null ? "" : pathSoFar);
@@ -235,18 +180,24 @@ public class MultiTool {
         }
         
         for (int i = 0; i < listOfFiles.length; i++) {
-            if (!root.equals(listOfFiles[i].getPath().substring(0, root.length()))) {
-                throw new IllegalStateException("File \"" + listOfFiles[i] + "\" could not be found in dir \"" + root + "\"");
+            if (!root.equals(listOfFiles[i].getPath()
+                                 .substring(0, root.length()))) {
+                throw new IllegalStateException
+                    ("File \"" + listOfFiles[i]
+                         + "\" could not be found in dir \"" + root + "\"");
             }
             
             if (listOfFiles[i].isFile()) {
                 output.add(new File[] {listOfFiles[i],
-                    new File(pathSoFar + listOfFiles[i].getParent().substring(root.length()))});
+                    new File(pathSoFar + listOfFiles[i].getParent()
+                                 .substring(root.length()))});
                 
             } else {
                 output.addAll
                     (listFilesAndPathsFromRootDir
-                         (listOfFiles[i], pathSoFar + listOfFiles[i].getPath().substring(root.length()), listDirs));
+                         (listOfFiles[i], pathSoFar
+                              + listOfFiles[i].getPath()
+                              .substring(root.length()), listDirs));
             }
         }
         
@@ -272,12 +223,11 @@ public class MultiTool {
     }
     
     /* 
-     * Checks if a given value is in the array.
-     * Generic version of the function above.
+     * Checks if a given generic value is in the array.
      * 
-     * @param array array to look in.
-     * @param number number to look for.
-     * @return true iff the number is in the array.
+     * @param array the array to look in.
+     * @param value the value to look for.
+     * @return true iff value is in the array.
      */
     public static <T> boolean isInArray(T[] array, T value) {
         for (T entry : array) {
@@ -291,7 +241,8 @@ public class MultiTool {
      * Converts an ArrayList to an array.
      * 
      * @param array the array to be converted.
-     * @return an ArrayList containing every element of {@code array} and in the same order.
+     * @return an ArrayList containing every element of {@code array} and
+     *     in the same order.
      */
     public static <T> ArrayList<T> toArrayList(T[] array) {
         if (array == null) return null;
@@ -305,7 +256,6 @@ public class MultiTool {
         return list;
     }
     
-    
     /* 
      * Converts a List to an array.
      * 
@@ -313,8 +263,8 @@ public class MultiTool {
      * @param classValue the input/output class type
      * @param start the first element that will be put in the array.
      * @param end the last element that will NOT be put in the array.
-     * @return the elements from the output array in the same order as in the input List.
-     *     returns null iff the given list or class are null.
+     * @return the elements from the output array in the same order as in the
+     *     input List, and null iff the given list or class are null.
      * @throws IllegalArgumentException iff start < end.
      */
     @SuppressWarnings("unchecked")
@@ -334,7 +284,8 @@ public class MultiTool {
             (List<B> list,Class<B> classValue, int start, int end)
            throws IllegalArgumentException {
         if (list == null || classValue == null) return null;
-        if (start >= end) throw new IllegalArgumentException("start(" + start + ") > end(" + end + ").");
+        if (start >= end) throw new IllegalArgumentException
+            ("start(" + start + ") > end(" + end + ").");
         
         A[] array = (A[]) Array.newInstance(classValue, end - start);
         
@@ -357,6 +308,9 @@ public class MultiTool {
      * WARNING! THIS FUNCTION HAS NOT BEEN EXTENSIVLY TESTED!
      * If you get class cast exceptions (e.g. cannot convert/cast
      * Object[] to XXX[]), here's you problem.
+     * 
+     * Note to me: Easier default function might exist. First look
+     * at those before actually trying to fix this.
      */
     @SuppressWarnings("unchecked")
     public static <A, B extends A> ArrayList<A> arrayToArrayList
@@ -377,6 +331,9 @@ public class MultiTool {
      * 
      * @param list ArrayList to copy
      * WARNING! THIS FUNCTION HAS NOT BEEN EXTENSIVLY TESTED!
+     * 
+     * Note to me: Easier default function might exist. First look
+     * at those before actually trying to fix this.
      */
     public static <T> ArrayList<T> copyArrayList(ArrayList<T> list) {
         if (list == null) return null;
@@ -395,6 +352,9 @@ public class MultiTool {
      * 
      * @param array array to copy.
      * WARNING! THIS FUNCTION HAS NOT BEEN EXTENSIVLY TESTED!
+     * 
+     * Note to me: Easier default function might exist. First look
+     * at those before actually trying to fix this.
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] copyArray(T[] array) {
@@ -415,6 +375,8 @@ public class MultiTool {
      * Mainly used to avoid the annoying catch statement.
      * 
      * @param time time in ms that the thread sleeps.
+     * 
+     * @see Thead#sleep(long)
      */
     public static void sleepThread(long time) {
         try {

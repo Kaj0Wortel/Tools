@@ -34,18 +34,21 @@ import javax.imageio.ImageIO;
 
 
 /* 
- * Provides an easy way of loading images that are used at multiple location
- * in the application at the same time.
+ * Provides an easy, time efficient and storage efficient way for retrieving
+ * image sheets that are used at multiple threads at the same time.
+ * 
+ * Is thread safe.
  */
 public class LoadImages2 {
-    public static ConcurrentHashMap<String, BufferedImage[][]> images
+    // Map where the images will be stored.
+    final public static ConcurrentHashMap<String, BufferedImage[][]> images
         = new ConcurrentHashMap<String, BufferedImage[][]>();
     
     /* 
      * This is a static singleton class. No instances should be made.
      */
     @Deprecated
-    private LoadImages2() {}
+    private LoadImages2() { }
     
     
     /* 
@@ -197,84 +200,82 @@ public class LoadImages2 {
             throws IllegalArgumentException, IOException {
         BufferedImage[][] newImg = null;
         
-        synchronized(images) {
-            // Check if the store name is correct
-            if (images.contains(name))
-                throw new IllegalArgumentException
-                ("Name was already used: \"" + name + "\"");
+        // Check if the store name is correct
+        if (images.contains(name))
+            throw new IllegalArgumentException
+            ("Name was already used: \"" + name + "\"");
+        
+        // Read the image
+        BufferedImage bigImg;
+        try {
+            bigImg = ImageIO.read(file);
             
-            // Read the image
-            BufferedImage bigImg;
-            try {
-                bigImg = ImageIO.read(file);
-                
-            } catch (IIOException e) {
-                throw new IOException
-                    ("File \""+ name
-                         + "\" does not exist or is not accessable.");
+        } catch (IIOException e) {
+            throw new IOException
+                ("File \""+ name
+                     + "\" does not exist or is not accessable.");
+        }
+        
+        // Check if the end coords are correct
+        if (endX == -1) {
+            endX = bigImg.getWidth();
+            
+        } else if (endX > bigImg.getWidth()) {
+            throw new IllegalArgumentException
+                ("Given end x was larger then the image. end x = "
+                     + endX + ", img width: " + bigImg.getWidth());
+        }
+        
+        if (endY == -1 ) {
+            endY = bigImg.getHeight();
+            
+        } else if (endY > bigImg.getHeight()) {
+            throw new IllegalArgumentException
+                ("Given end y was larger then the image. end y = "
+                     + endY + ", img height: " + bigImg.getHeight());
+        }
+        
+        // Check if the end-coords are bigger then the starting coords.
+        if (startX >= endX)
+            throw new IllegalArgumentException
+            ("Starting x coord >= end x coord: " + startX + " >= " + endX);
+        if (startY >= endY)
+            throw new IllegalArgumentException
+            ("Starting x coord >= end x coord" + startY + " >= " + endY);
+        
+        int dX = endX - startX;
+        int dY = endY - startY;
+        
+        // Check if the image sizes are valid
+        if (width == -1) {
+            width = endX - startX;
+            
+        } else if (dX % width != 0) {
+            throw new IllegalArgumentException
+                ("Given width (" + width + "), startX (" + startX
+                     + ") and/or endX (" + endX + ") is invallid");
+        }
+        
+        if (height == -1) {
+            height = endY - startY;
+            
+        } else if (dY % height != 0) {
+            throw new IllegalArgumentException
+                ("Given width (" + height + "), startY (" + startY
+                     + ") and/or endY (" + endY + ") is invallid");
+        }
+        
+        // Split the image into parts
+        newImg = new BufferedImage[dX / width][dY / height];
+        for (int i = startX ; i < endX; i += width) {
+            for (int j = startY ; j < endY; j += height) {
+                newImg[(i - startX) / width][(j - startY) / height]
+                    = bigImg.getSubimage(i, j, width, height);
             }
-            
-            // Check if the end coords are correct
-            if (endX == -1) {
-                endX = bigImg.getWidth();
-                
-            } else if (endX > bigImg.getWidth()) {
-                throw new IllegalArgumentException
-                    ("Given end x was larger then the image. end x = "
-                         + endX + ", img width: " + bigImg.getWidth());
-            }
-            
-            if (endY == -1 ) {
-                endY = bigImg.getHeight();
-                
-            } else if (endY > bigImg.getHeight()) {
-                throw new IllegalArgumentException
-                    ("Given end y was larger then the image. end y = "
-                         + endY + ", img height: " + bigImg.getHeight());
-            }
-            
-            // Check if the end-coords are bigger then the starting coords.
-            if (startX >= endX)
-                throw new IllegalArgumentException
-                ("Starting x coord >= end x coord: " + startX + " >= " + endX);
-            if (startY >= endY)
-                throw new IllegalArgumentException
-                ("Starting x coord >= end x coord" + startY + " >= " + endY);
-            
-            int dX = endX - startX;
-            int dY = endY - startY;
-            
-            // Check if the image sizes are valid
-            if (width == -1) {
-                width = endX - startX;
-                
-            } else if (dX % width != 0) {
-                throw new IllegalArgumentException
-                    ("Given width (" + width + "), startX (" + startX
-                         + ") and/or endX (" + endX + ") is invallid");
-            }
-            
-            if (height == -1) {
-                height = endY - startY;
-                
-            } else if (dY % height != 0) {
-                throw new IllegalArgumentException
-                    ("Given width (" + height + "), startY (" + startY
-                         + ") and/or endY (" + endY + ") is invallid");
-            }
-            
-            // Split the image into parts
-            newImg = new BufferedImage[dX / width][dY / height];
-            for (int i = startX ; i < endX; i += width) {
-                for (int j = startY ; j < endY; j += height) {
-                    newImg[(i - startX) / width][(j - startY) / height]
-                        = bigImg.getSubimage(i, j, width, height);
-                }
-            }
-            
-            if (newImg != null) {
-                images.put(name, newImg);
-            }
+        }
+        
+        if (newImg != null) {
+            images.put(name, newImg);
         }
         
         return newImg;
@@ -413,16 +414,14 @@ public class LoadImages2 {
              int endX, int endY,
              int width, int height)
             throws IllegalArgumentException, IOException {
-        synchronized(images) {
-            if (images.containsKey(name)) {
-                return images.get(name);
-                
-            } else {
-                return loadImage(file, name,
-                                 startX, startY,
-                                 endX, endY,
-                                 width, height);
-            }
+        if (images.containsKey(name)) {
+            return images.get(name);
+            
+        } else {
+            return loadImage(file, name,
+                             startX, startY,
+                             endX, endY,
+                             width, height);
         }
     }
     
@@ -433,9 +432,7 @@ public class LoadImages2 {
      * @return the image stored at "name", if it exists. null otherwise.
      */
     public static BufferedImage[][] getImage(String name) {
-        synchronized(images) {
-            return images.get(name);
-        }
+        return images.get(name);
     }
     
     /* 
@@ -447,14 +444,12 @@ public class LoadImages2 {
      */
     public static BufferedImage[][] getImageException(String name)
             throws NoSuchFieldException {
-        synchronized(images) {
-            if (images.containsKey(name)) {
-                return getImage(name);
-                
-            } else {
-                throw new NoSuchFieldException
-                    ("Image \"" + name + "\" does not exist.");
-            }
+        if (images.containsKey(name)) {
+            return getImage(name);
+            
+        } else {
+            throw new NoSuchFieldException
+                ("Image \"" + name + "\" does not exist.");
         }
     }
     
@@ -465,18 +460,14 @@ public class LoadImages2 {
      * @return true iff the image was in the hashtable and removed.
      */
     public static BufferedImage[][] removeImage(String name) {
-        synchronized(images) {
-            return images.remove(name);
-        }
+        return images.remove(name);
     }
     
     /* 
      * Removes all stored images.
      */
     public static void clear() {
-        synchronized(images) {
-            images.clear();
-        }
+        images.clear();
     }
     
     /* 
