@@ -11,7 +11,11 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools;
+package tools.event;
+
+
+// Tools imports
+import tools.MultiTool;
 
 
 // Java imports
@@ -124,6 +128,9 @@ public class Key implements tools.Cloneable {
     final public static int ALT_MASK   = InputEvent.ALT_DOWN_MASK;       // =      0b0010_0000_0000
     final public static int ALT_GRAPH  = InputEvent.ALT_GRAPH_DOWN_MASK; // = 0b0010_0000_0000_0000
     
+    // Default values
+    final public static int DEFAULT_MASK = 0;
+    final public static boolean DEFAULT_KEY_RELEASE = false;
     
     // Whether the key is immutable or not
     final private boolean immutable;
@@ -142,25 +149,45 @@ public class Key implements tools.Cloneable {
      * -------------------------------------------------------------------------
      */
     /* 
+     * Converts a key event to a key.
      * 
+     * @param e the key event.
+     * @param onKeyRelease whether the key was released or pressed.
      */
-    public Key(Key key) {
-        this.immutable = key.immutable;
-        this.key = key.key;
-        this.mask = key.mask;
-        this.onKeyRelease = key.onKeyRelease;
+    public Key(KeyEvent e) {
+        this(e, DEFAULT_KEY_RELEASE);
     }
     
+    public Key(KeyEvent e, boolean onKeyRelease) {
+        this(true, e.getExtendedKeyCode(), e.getModifiers(), onKeyRelease);
+    }
+    
+    /* 
+     * Clones the key.
+     * Identical to {@link Key#clone()}.
+     */
+    public Key(Key key) {
+        this(key.immutable, key.key, key.mask, key.onKeyRelease);
+    }
+    
+    /* 
+     * Creates a new key.
+     * 
+     * @param immutable whether this key should be immutable.
+     * @param key value for this key.
+     * @param modifier the modifier of the key.
+     * @param onKeyRelease whether the key was released or pressed.
+     */
     public Key(int key) {
         this(false, key);
     }
     
     public Key(int key, int mask) {
-        this(false, key, mask, false);
+        this(false, key, mask, DEFAULT_KEY_RELEASE);
     }
     
     public Key(int key, boolean onKeyRelease) {
-        this(false, key, 0, onKeyRelease);
+        this(false, key, DEFAULT_MASK, onKeyRelease);
     }
     
     public Key(int key, int mask, boolean onKeyRelease) {
@@ -169,15 +196,9 @@ public class Key implements tools.Cloneable {
     
     // Private constructors
     private Key(boolean immutable, int key) {
-        this(immutable, key, 0, false);
+        this(immutable, key, DEFAULT_MASK, DEFAULT_KEY_RELEASE);
     }
     
-    /* 
-     * @param immutable whether this key should be immutable.
-     * @param key value for this key.
-     * @param modifier the modifier of the key.
-     * @param onKeyRelease whether the key was released or pressed.
-     */
     private Key(boolean immutable, int key, int mask, boolean onKeyRelease) {
         this.immutable = immutable;
         this.key = key;
@@ -324,6 +345,9 @@ public class Key implements tools.Cloneable {
     
     /* 
      * Clones the current key.
+     * Uses {@link Key#Key(Key)} for the cloning.
+     * 
+     * @return a clone of {@code this}
      */
     @Override
     public Key clone() {
