@@ -14,6 +14,14 @@
 package tools;
 
 
+/* 
+ * Provides various sorting algorithms.
+ * 
+ * Todo:
+ * - Add sorting algorithms:
+ *   o Radix sort
+ *   o Coctail sort
+ */
 public class Sort {
     final public static int TYPE_LETTERS_Aa_Zz = 0;
     final public static int TYPE_LETTERS_Zz_Aa = 1;
@@ -49,15 +57,20 @@ public class Sort {
      * The sorted String array is also returned.
      */
     public static String[] bubbleSort(String[] inArray, 
-                                      int typeLetters, int typeNum, int sortingHint, int lengthHint) {
+                                      int typeLetters, int typeNum,
+                                      int sortingHint, int lengthHint) {
         if (typeLetters < 0 || typeLetters > 1) 
-            throw new IllegalArgumentException("Invallid type for letters: " + typeLetters);
+            throw new IllegalArgumentException
+                ("Invallid type for letters: "+ typeLetters);
         if (typeNum < 2 || typeNum > 3) 
-            throw new IllegalArgumentException("Invallid type for numbers: " + typeNum);
+            throw new IllegalArgumentException
+                ("Invallid type for numbers: " + typeNum);
         if (sortingHint < 4 || sortingHint > 9) 
-            throw new IllegalArgumentException("Invallid sorting hint: " + sortingHint);
+            throw new IllegalArgumentException
+                ("Invallid sorting hint: " + sortingHint);
         if (lengthHint < 10 || lengthHint > 11) 
-            throw new IllegalArgumentException("Invallid length hint: " + lengthHint);
+            throw new IllegalArgumentException
+                ("Invallid length hint: " + lengthHint);
         
         synchronized(inArray) {
             String switchElem = null;
@@ -73,11 +86,11 @@ public class Sort {
                 changed = false;
                 
                 //System.out.println(start + ", " + end);
-                for (int i = (direction ? start   : end - 2)
-                         ;   (direction ? i < end - 1 : i >= start)
-                         ;   i = (direction ? i+1 : i-1))
-                {
-                    if (!inOrder(inArray[i], inArray[i + 1], typeLetters, typeNum, sortingHint, lengthHint)) {
+                for (int i = (direction ? start   : end - 2);
+                         (direction ? i < end - 1 : i >= start);
+                         i = (direction ? i+1 : i-1)) {
+                    if (!inOrder(inArray[i], inArray[i + 1], typeLetters,
+                                 typeNum, sortingHint, lengthHint)) {
                         switchElem = inArray[i];
                         inArray[i] = inArray[i+1];
                         inArray[i+1] = switchElem;
@@ -105,7 +118,8 @@ public class Sort {
      * False otherwise.
      */
     public static boolean inOrder(String str1, String str2, 
-                                  int typeLetters, int typeNum, int sortingHint, int lengthHint) {
+                                  int typeLetters, int typeNum,
+                                  int sortingHint, int lengthHint) {
         // Check for equality
         if (str1.equals(str2)) {
             return true;

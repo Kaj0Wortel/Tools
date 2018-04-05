@@ -38,11 +38,19 @@ import javax.swing.JPanel;
 
 
 // tmp
-//import javax.swing.JFrame;
+import javax.swing.JFrame;
 
 
+/* 
+ * Provides a customizable slider via images.
+ * 
+ * Todo:
+ * - implement "good" rescaling images by rescaling them in the repaint
+ *   method instead of the setBounds.
+ */
 public class Slider extends JPanel{
-    public static String workingPath = System.getProperty("user.dir") + "\\tools\\";
+    public static String WORKING_DIR
+        = System.getProperty("user.dir") + "\\tools\\";
     private static double SPACING_FACTOR = 0.25;
     private int spacing = 0;
     
@@ -53,9 +61,11 @@ public class Slider extends JPanel{
     private int minValue = 0;
     private int maxValue = 100;
     
+    // Denotes whether the raised or lowered slider should be used.
     final public static int RAISED_SLIDER = 0;
     final public static int LOWERED_SLIDER = 1;
     
+    // Denotes whether the raised or lowered button should be used.
     final public static int RAISED_BUTTON = 0;
     final public static int LOWERED_BUTTON = 1;
     
@@ -73,37 +83,51 @@ public class Slider extends JPanel{
     }
     
     /* 
+     * Creates a lowered or a raised slider.
+     * 
+     * @param type denotes the slider and button type. Must be either
+     *     RAISED_SLIDER or LOWERED_SLIDER.
+     */
+    public Slider(final int type) throws IOException {
+        this(type, type);
+    }
+    
+    /* 
      * Creates a Slider using the predefined image sheet.
      * 
-     * @param st Denotes the slider type. Must be either RAISED_SLIDER
+     * @param st denotes the slider type. Must be either RAISED_SLIDER
      *     or LOWERED_SLIDER.
-     * @param bt Denotes the button type. Must be either RAISED_BUTTON
+     * @param bt denotes the button type. Must be either RAISED_BUTTON
      *     or LOWERED_BUTTON.
      */
-    public Slider(final int st, final int bt) throws IOException, IIOException {
+    public Slider(final int st, final int bt) throws IOException {
         this(// leftEnd
              LoadImages2.ensureLoadedAndGetImage
-                 (workingPath + "slider_img_TYPE_00" + st + ".png", // File loc
-                  workingPath + "slider_img_TYPE_00" + st + ".png_left_right_end", // Name
+                 (WORKING_DIR + "slider_img_TYPE_00" + st + ".png", // File loc
+                  WORKING_DIR + "slider_img_TYPE_00" + st
+                      + ".png_left_right_end", // Name
                   0, 0,   // Start X/Y
                   12, 48, // End X/Y
                   12, 24  // Size X/Y per image
                  )[0][0],
              // middle
              LoadImages2.ensureLoadedAndGetImage
-                 (workingPath + "slider_img_TYPE_00" + st + ".png",  // File loc
-                  workingPath + "slider_img_TYPE_00" + st + ".png_middle_bar", // Name
+                 (WORKING_DIR + "slider_img_TYPE_00" + st + ".png",  // File loc
+                  WORKING_DIR + "slider_img_TYPE_00" + st
+                      + ".png_middle_bar", // Name
                   12, 0,  // Start X/Y
                   36, 24, // End X/Y
                   24, 24  // Size X/Y per image
                  )[0][0],
              // rightEnd
              LoadImages2.ensureLoadedAndGetImage
-                 (workingPath + "slider_img_TYPE_00" + st + ".png_left_right_end")[0][1], // Name
+                 (WORKING_DIR + "slider_img_TYPE_00" + st
+                      + ".png_left_right_end")[0][1], // Name
              // button
              LoadImages2.ensureLoadedAndGetImage
-                 (workingPath + "slider_img_TYPE_00" + bt + ".png", // File loc
-                  workingPath + "slider_img_TYPE_00" + bt + ".png_middle_button", // name
+                 (WORKING_DIR + "slider_img_TYPE_00" + bt + ".png", // File loc
+                  WORKING_DIR + "slider_img_TYPE_00" + bt
+                      + ".png_middle_button", // name
                   12, 24,  // Start X/Y
                   36, 48, // End X/Y
                   24, 24  // Size X/Y per image
@@ -123,20 +147,27 @@ public class Slider extends JPanel{
      * @param rightEnd denotes the image of the right end of the slider.
      * @param button denotes the image of the button of the slider.
      * 
-     * All parameters are not allowed to be null.
+     * No parameters is allowed to be null.
      */
-    public Slider(Image leftEnd, Image middle, Image rightEnd, Image button) {
+    public Slider(Image leftEnd, Image middle, Image rightEnd, Image button)
+            throws IllegalArgumentException {
         super(null);
+        
+        if (leftEnd == null ||
+            middle == null ||
+            rightEnd == null ||
+            button == null)
+                throw new IllegalArgumentException
+                    ("One of the images was null!");
         
         source = new BufferedImage[] {
             ImageTools.toBufferedImage(leftEnd),
-                ImageTools.toBufferedImage(middle),
-                ImageTools.toBufferedImage(rightEnd),
-                ImageTools.toBufferedImage(button)
+            ImageTools.toBufferedImage(middle),
+            ImageTools.toBufferedImage(rightEnd),
+            ImageTools.toBufferedImage(button)
         };
         
         this.addMouseMotionListener(ml);
-        
         
         createImages(source[0], source[1], source[2], source[3]);
         this.setBackground(new Color(0, 0, 0, 0));
@@ -144,9 +175,9 @@ public class Slider extends JPanel{
         
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Set functions
-     * ----------------------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Sets the value of the slider.
@@ -199,9 +230,9 @@ public class Slider extends JPanel{
         }
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Get functions
-     * ----------------------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * @return the value of the slider.
@@ -224,11 +255,11 @@ public class Slider extends JPanel{
         return minValue;
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Functions
-     * ----------------------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
-    /* 
+    /* --- OLD CODE---
      * Creates the show images from the four given images.
      * 
      * @param leftEnd the image for the left end of the slider.
@@ -365,7 +396,7 @@ public class Slider extends JPanel{
         }
     }
     
-    /*
+    
     // tmp
     public static void main(String[] args) {
         try {
@@ -421,7 +452,7 @@ public class Slider extends JPanel{
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 }
 
 
