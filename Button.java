@@ -16,8 +16,10 @@ package tools;
 
 // Tools imports
 import tools.ImageTools;
-import tools.Log2;
-import tools.LoadImages2;
+
+import tools.io.LoadImages2;
+
+import tools.log.Log2;
 
 
 // Java imports

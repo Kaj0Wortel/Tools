@@ -15,7 +15,7 @@ package tools;
 
 
 // Own packages
-import tools.LoadImages2;
+import tools.io.LoadImages2;
 import tools.ImageTools;
 
 

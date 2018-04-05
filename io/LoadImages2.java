@@ -11,7 +11,7 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools;
+package tools.io;
 
 
 // Tools imports
@@ -25,7 +25,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -33,9 +33,13 @@ import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 
+/* 
+ * Provides an easy way of loading images that are used at multiple location
+ * in the application at the same time.
+ */
 public class LoadImages2 {
-    public static Hashtable<String, BufferedImage[][]> images
-        = new Hashtable<String, BufferedImage[][]>();
+    public static ConcurrentHashMap<String, BufferedImage[][]> images
+        = new ConcurrentHashMap<String, BufferedImage[][]>();
     
     /* 
      * This is a static singleton class. No instances should be made.

@@ -15,8 +15,8 @@ package tools;
 
 
 // Tools imports
-import tools.Log2;
-import tools.Loggable;
+import tools.log.Log2;
+import tools.log.Loggable;
 
 
 // Java imports

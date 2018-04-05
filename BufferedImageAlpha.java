@@ -10,12 +10,12 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// todo
 package tools;
 
 
 // Tools imports
-import tools.Log;
+import tools.log.Log;
 
 
 // Java imports

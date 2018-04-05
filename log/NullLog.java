@@ -11,7 +11,11 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 //todo
-package tools;
+package tools.log;
+
+
+// Tools imports
+import tools.log.Loggable;
 
 
 // Java imports
