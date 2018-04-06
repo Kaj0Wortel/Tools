@@ -20,7 +20,6 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import java.util.HashSet;
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
@@ -374,12 +373,13 @@ public abstract class Logger {
     
     /* 
      * Sets the message that will be logged when the application shuts down.
-     * Use {@code null} to prevent any message to be printed.
+     * Use {@code msg = null} to prevent any message to be written.
      * Note that no message will be printed if no default log is selected.
      * 
      * @param msg the message to be logged.
+     * @param type the severity type of the message.
      */
-    public static void setShutDownMessage(String[] msg, Type type) {
+    public static void setShutDownMessage(Type type, String... msg) {
         terminateMsg = msg;
         terminateType = checkType(type);
     }
@@ -415,15 +415,6 @@ public abstract class Logger {
      */
     public static void setLogHeader(String logHeader) {
         header = logHeader;
-    }
-    
-    /* 
-     * Writes the terminal message to the log.
-     */
-    protected void writeTerminalMessage(Date timeStamp) {
-        if (terminateMsg != null) {
-            writeO(terminateMsg, terminateType, timeStamp);
-        }
     }
     
     
