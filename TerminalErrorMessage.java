@@ -10,13 +10,16 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools;
 
-// Java imports
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
+// Tools imports
+import tools.log.Log;
+import tools.log.Logger;
+
+
+// Java imports
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -28,8 +31,22 @@ import javax.swing.JPanel;
  * Gives a message to the user about the error.
  * Kills the program after the user presses the ok button.
  */
-public class TerminalErrorMessage {
-    public TerminalErrorMessage (String errorMessage) {
+public class TerminalErrorMessage extends RuntimeException {
+    private static Boolean terminalMessageStarted = false;
+    
+    public TerminalErrorMessage(String errorMessage, Object... data) {
+        super();
+        
+        // Checks if another thread is has already invoked this method.
+        synchronized(terminalMessageStarted) {
+            if (terminalMessageStarted) {
+                return;
+                
+            } else {
+                terminalMessageStarted = true;
+            }
+        }
+        
         JFrame errorFrame = new JFrame("Error");
         JPanel errorPanel = new JPanel();
         JLabel errorText_1 = new JLabel("A fatal error occured:");
@@ -61,12 +78,24 @@ public class TerminalErrorMessage {
         
         errorFrame.setVisible(true);
         
-        ok.addMouseListener(exitProgram);
+        ok.addActionListener((e) -> {
+            System.exit(0);
+        });
+        
+        Logger.write(new Object[] {
+            "= = = = = = = = = = = = = =  TERMINAL ERROR!  = = = = = = = = = = = = = =",
+            "Word list is empty or consists of one element.",
+            data,
+            " === STACK === ",
+            (new Throwable()).getStackTrace(), // This is 10x faster then Thread.currentThread.getStackTrace()
+            " === END TERMINAL ERROR MESSAGE === ",
+            ""
+        }, Logger.Type.ERROR);
     }
     
-    MouseAdapter exitProgram = new MouseAdapter() {
-        public void mousePressed(MouseEvent e) {
-            System.exit(0);
-        }
-    };
+    public static void main(String[] args) {
+        Logger.setDefaultLogger(Log.getInstance());
+        throw new TerminalErrorMessage("test", "line 1", "line 2");
+    }
+    
 }
