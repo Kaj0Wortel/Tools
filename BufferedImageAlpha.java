@@ -15,7 +15,7 @@ package tools;
 
 
 // Tools imports
-import tools.log.Log;
+import tools.log.Logger;
 
 
 // Java imports
@@ -241,7 +241,7 @@ public class BufferedImageAlpha {
     public BufferedImage getBufferedImage() {
         //redraw();
         if (alphaImage == null) {
-            Log.write("Null", true);
+            Logger.write("Null");
         }
         return alphaImage;
     }

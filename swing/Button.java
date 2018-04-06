@@ -19,8 +19,6 @@ import tools.ImageTools;
 
 import tools.io.LoadImages2;
 
-import tools.log.Log2;
-
 
 // Java imports
 import java.awt.Component;
@@ -91,7 +89,8 @@ public class Button
         this.image = image;
     }
     
-    public Button(int sizeX, int sizeY, int barSize, String text) throws IOException {
+    public Button(int sizeX, int sizeY, int barSize, String text)
+        throws IOException {
         this(sizeX, sizeY, barSize);
         this.setText(text);
     }
@@ -105,16 +104,16 @@ public class Button
                 ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[2][0]), 
                 ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[3][0])
             }, {
-                    ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[0][1]),
-                    ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[1][1]),
-                    ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[2][1]),
-                    ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[3][1])
-                }, {
-                        ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[0][2]),
-                        ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[1][2]),
-                        ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[2][2]),
-                        ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[3][2]) 
-                    }
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[0][1]),
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[1][1]),
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[2][1]),
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[3][1])
+            }, {
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[0][2]),
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[1][2]),
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[2][2]),
+                ImageTools.imageDeepCopy(LoadImages2.getImage(imgLoc + "button_img_TYPE_001.png")[3][2]) 
+            }
         });
     }
     

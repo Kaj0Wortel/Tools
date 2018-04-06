@@ -15,7 +15,7 @@ package tools;
 
 
 // Tools imports
-import tools.log.Log2;
+import tools.log.Log;
 import tools.log.Logger;
 
 
@@ -77,77 +77,44 @@ public class MultiFileSelector extends JPanel {
     JButton approveButton;
     
     
-    private Class<Loggable> logClass;
     /* -----------------------------
      * Constructors
      */
     
-    // No log class and no approve text
+    // No approve text
     public MultiFileSelector(FieldData... fieldData) {
-        this(0, 0, 0, 0, "OK", null, fieldData);
+        this(0, 0, 0, 0, "OK", fieldData);
     }
     public MultiFileSelector(int width, int height,
                              FieldData... fieldData) {
-        this(0, 0, width, height, "OK", null, fieldData);
+        this(0, 0, width, height, "OK", fieldData);
     }
     public MultiFileSelector(int x, int y,int width, int height,
                              FieldData... fieldData) {
-        this(x, y, width, height, "OK", null, fieldData);
+        this(x, y, width, height, "OK", fieldData);
     }
     
-    // No log class, but approve text
+    // Approve text
     public MultiFileSelector(String approveButtontext,
                              FieldData... fieldData) {
-        this(0, 0, 0, 0, approveButtontext, null, fieldData);
+        this(0, 0, 0, 0, approveButtontext, fieldData);
     }
     public MultiFileSelector(String approveButtontext,
                              int width, int height,
                              FieldData... fieldData) {
-        this(0, 0, width, height, approveButtontext, null, fieldData);
+        this(0, 0, width, height, approveButtontext, fieldData);
     }
     public MultiFileSelector(String approveButtontext,
                              int x, int y,int width, int height,
                              FieldData... fieldData) {
-        this(x, y, width, height, approveButtontext, null, fieldData);
-    }
-    
-    // Log class, but no approve text
-    public <L extends Loggable> MultiFileSelector(Class<L> logClass,
-                                                  FieldData... fieldData) {
-        this(0, 0, 0, 0, "OK", logClass, fieldData);
-    }
-    public <L extends Loggable> MultiFileSelector(int width, int height,
-                                                  Class<L> logClass,
-                                                  FieldData... fieldData) {
-        this(0, 0, width, height, "OK", logClass, fieldData);
-    }
-    public <L extends Loggable> MultiFileSelector(int x, int y,int width, int height,
-                                                  Class<L> logClass,
-                                                  FieldData... fieldData) {
-        this(x, y, width, height, "OK", logClass, fieldData);
-    }
-    
-    // Log class and approve text
-    public <L extends Loggable> MultiFileSelector(String approveButtontext, Class<L> logClass,
-                                                  FieldData... fieldData) {
-        this(0, 0, 0, 0, approveButtontext, logClass, fieldData);
-    }
-    public <L extends Loggable> MultiFileSelector(int width, int height,
-                                                  String approveButtontext, Class<L> logClass,
-                                                  FieldData... fieldData) {
-        this(0, 0, width, height, approveButtontext, logClass, fieldData);
+        this(x, y, width, height, approveButtontext, fieldData);
     }
     
     // Full
     @SuppressWarnings("unchecked")
-    public <L extends Loggable> MultiFileSelector(int x, int y, int width, int height, 
-                                                  String approveButtonText, Class<L> logClass,
+    public MultiFileSelector(int x, int y, int width, int height, 
+                                                  String approveButtonText,
                                                   FieldData... fieldData) {
-        
-        if (logClass != null && !Loggable.class.isAssignableFrom(logClass)) {
-            throw new IllegalArgumentException ("\"" + logClass.toString() + "\" does not implement \"" + Loggable.class.toString() + "\".");
-        }
-        this.logClass = (Class<Loggable>) logClass;
         this.setBounds(x, y, width, height);
         this.setLayout(null);
         this.setBackground(Color.GREEN);
@@ -201,7 +168,7 @@ public class MultiFileSelector extends JPanel {
         feh = new FileEntryHeader(fieldData, calculateInitialLabelBreaks(), filePanel.getWidth(), filePanel.getHeight());
         //this.add(feh);
         
-        writeToLog(this.getClass().getName() + " Object was created.");
+        Logger.write(this.getClass().getName() + " Object was created.");
     }
     
     @Override
@@ -470,7 +437,7 @@ public class MultiFileSelector extends JPanel {
             }
             
         } catch (InterruptedException e) {
-            writeToLog(e);
+            Logger.write(e);
             throw new IllegalStateException("Thread was interrupted: " + curThread);
         }
         
@@ -499,141 +466,6 @@ public class MultiFileSelector extends JPanel {
         return fileEntries;
     }
     
-    /* 
-     * Writes any Object to a log file using a Loggable class.
-     * Iff the Object is an instance of Exception, log it as an
-     *     Exception. Otherwise log it as obj.toString().
-     *     If error == true, use System.err in case Loggable.write(Object)
-     *     is not supported
-     * 
-     * See "void writeObjToLog(Object, boolean, boolean)" and
-     * "void writeExToLog(Object, boolean)" for more info.
-     */
-    public synchronized void writeToLog(Object obj) {
-        writeToLog(obj, false);
-    }
-    public synchronized void writeToLog(Object obj, boolean error) {
-        if (obj instanceof Exception) {
-            writeExToLog((Exception) obj, showErrTextIfLogNotSupported);
-            
-        } else {
-            writeObjToLog((Object) obj, showErrTextIfLogNotSupported, error);
-        }
-    }
-    
-    /* 
-     * If a Loggable class is available, try to use
-     *     Loggable.write(Object) for obj.
-     * If this funcion is not supported, then handle it as if
-     *     no Loggable class is available.
-     * If an other Exception occured during the execution of the write method,
-     *     always print the stacktrace of this Exception.
-     * If no Loggable class is available, then iff showIfNotSupported:
-     *     - if obj is an instance of Exception:
-     *         obj.printStackTrace()
-     *     - if error == true:
-     *         System.err.println(obj.toString())
-     *     - if error == false:
-     *         System.out.println(obj.toString())
-     */
-    private synchronized void writeObjToLog(Object obj, boolean showIfNotSupported, boolean error) {
-        // If a loggable class is available, try to write to this loggable class
-        if (logClass != null) {
-            try {
-                logClass.getMethod("write", Object.class).invoke(null, obj);
-                
-            } catch (UnsupportedOperationException e) {
-                if (showIfNotSupported) {
-                    System.err.println("The function \"" + logClass.getName() + ".write(Object)\" was not supported.");
-                    
-                    if (obj instanceof Exception) {
-                        ((Exception) obj).printStackTrace();
-                        
-                    } else if (error) {
-                        System.err.println(obj.toString());
-                        
-                    } else {
-                        System.out.println(obj.toString());
-                    }
-                }
-                
-            } catch (Exception e) {
-                if (showIfNotSupported) {
-                    if (obj instanceof Exception) {
-                        ((Exception) obj).printStackTrace();
-                        
-                    } else if (error) {
-                        System.err.println(obj.toString());
-                        
-                    } else {
-                        System.out.println(obj.toString());
-                    }
-                }
-                
-                e.printStackTrace();
-            }
-            
-        } else { // No log class available
-            if (showIfNotSupported) {
-                if (obj instanceof Exception) {
-                    ((Exception) obj).printStackTrace();
-                    
-                } else if (error) {
-                    System.err.println(obj.toString());
-                    
-                } else {
-                    System.out.println(obj.toString());
-                }
-            }
-            
-        }
-    }
-    
-    /* 
-     * If a Loggable class is available, try to use
-     *     Loggable.write(Exception) for obj.
-     * If this funcion is not supported, then delegate the work to
-     *     writeObjToLog(Object, boolean, boolean).
-     * If an other Exception occured during the execution of the write method,
-     *     delegate the work of both Exceptions to writeObjToLog(Object, boolean, boolean).
-     * If no Loggable class is available, then iff showIfNotSupported:
-     *     - if obj is an instance of Exception:
-     *         obj.printStackTrace()
-     *     - if error == true:
-     *         System.err.println(obj.toString())
-     *     - if error == false:
-     *         System.out.println(obj.toString())
-     */
-    private synchronized void writeExToLog(Exception e, boolean showIfNotSupported) {
-        // If a loggable class is available, try to write to this loggable class
-        if (logClass != null) {
-            try {
-                logClass.getMethod("write", Exception.class).invoke(null, e);
-                
-            } catch (UnsupportedOperationException ex) {
-                writeObjToLog("The function \"" + logClass.getName() + ".write(Exception)\" was not supported", true, true);
-                
-                writeObjToLog(e, showIfNotSupported, true);
-                
-            } catch (Exception ex) {
-                writeObjToLog(e, true, true);
-                writeObjToLog(ex, true, true);
-            }
-            
-        } else { // No log class available
-            e.printStackTrace();
-        }
-    }
-    
-    @Deprecated
-    private synchronized void writeObjArrToLog(Object[] objArr, boolean showIfNotSupported) {
-        
-        
-        
-        
-        
-    }
-    
     /* -----------------------------
      * Listeners
      */
@@ -658,7 +490,7 @@ public class MultiFileSelector extends JPanel {
                             addFile(newFiles[i]);
                             
                         } catch (IOException ex) {
-                            writeToLog(ex);
+                            Logger.write(ex);
                         }
                     }
                 }
@@ -727,9 +559,12 @@ public class MultiFileSelector extends JPanel {
         mainFrame.setLocation(100, 100);
         mainFrame.getContentPane().setBackground(Color.YELLOW);
         
-        Log2.setLogFileS(new File("C:\\Users\\s155587\\Documents\\_projects\\tmp\\log.txt"));
+        // Setup the logger.
+        Logger.setDefaultLogger(Log.getInstance());
+        Logger.setShutDownMessage(Logger.Type.INFO,
+                                  " === Terminating application === ");
         
-        MultiFileSelector mfs = new MultiFileSelector(10, 10, 400, 400, "Generate", Log2.class, 
+        MultiFileSelector mfs = new MultiFileSelector(10, 10, 400, 400, "Generate", 
                                                       FieldData.FILE_NAME, FieldData.FILE_SIZE, FieldData.CHECKBOX);
         
         mainFrame.add(mfs);
