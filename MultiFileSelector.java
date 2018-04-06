@@ -16,7 +16,7 @@ package tools;
 
 // Tools imports
 import tools.log.Log2;
-import tools.log.Loggable;
+import tools.log.Logger;
 
 
 // Java imports
@@ -727,7 +727,7 @@ public class MultiFileSelector extends JPanel {
         mainFrame.setLocation(100, 100);
         mainFrame.getContentPane().setBackground(Color.YELLOW);
         
-        Log2.setLogFile(new File("C:\\Users\\s155587\\Documents\\_projects\\tmp\\log.txt"));
+        Log2.setLogFileS(new File("C:\\Users\\s155587\\Documents\\_projects\\tmp\\log.txt"));
         
         MultiFileSelector mfs = new MultiFileSelector(10, 10, 400, 400, "Generate", Log2.class, 
                                                       FieldData.FILE_NAME, FieldData.FILE_SIZE, FieldData.CHECKBOX);

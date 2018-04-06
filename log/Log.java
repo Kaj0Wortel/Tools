@@ -14,8 +14,13 @@
 package tools.log;
 
 
+// Tools imports
+import tools.MultiTool;
+
+
 // Java imports
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -25,119 +30,186 @@ import java.text.SimpleDateFormat;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
 
-
-/*
- * This file is currently under development and should not be used.
- * (reviving old artefact class).
+/* 
+ * Class for logging data.
+ * All functions are thread safe.
  */
-public class Log extends Loggable {
-    final private static String logFile = System.getProperty("user.dir") + "\\tools\\log.txt";
-    final private static String ls = System.getProperty("line.separator");
+public class Log extends Logger {
+    // The only instance of this class.
+    private static Log instance = new Log();
+    
+    // The writer used to write the log data to the file.
     private static PrintWriter writer;
     
     /* 
-     * This is a static singleton class. No instances should be made.
+     * Only a single private constructor because of singleton design pattern.
      */
-    @Deprecated
-    private Log() {}
-    
-    public static void write(boolean text) {
-        write(text, true);
+    private Log() {
+        lock = new ReentrantLock(true);
     }
-    public static void write(boolean text, boolean showDate) {
-        if (text) {
-            write("true", showDate);
-        } else {
-            write("false", showDate);
+    
+    /* 
+     * @return the singleton instance of this class.
+     */
+    public static synchronized Log getInstance() {
+        return instance;
+    }
+    
+    /* 
+     * Checks if the writer non-null.
+     * If the writer is null, create a new writer.
+     * Also in this case, if {@code !append}, write the header of the log file.
+     * After calling this method it is guaranteed that either
+     * {@code writer != null} or an IOException has been thrown.
+     * 
+     * @param append whether to append to the previous log file.
+     * 
+     * Also see: {@link writeHeader()}.
+     */
+    private void checkWriter(boolean append) throws IOException {
+        if (writer != null) return;
+        
+        writer = new PrintWriter
+            (new BufferedWriter(new FileWriter(logFile, append)));
+        
+        if (!append) writeHeader();
+    }
+    
+    /* 
+     * Writes the header of the log file.
+     * Here is given that {@code writer != null}.
+     */
+    private void writeHeader() {
+        if (header == null) return;
+        writer.println(header.replaceAll("&date&", formatDate(new Date())));
+    }
+    
+    /* 
+     * Writes a given text to the log file.
+     */
+    protected void writeText(String text, Type type, Date timeStamp,
+                           boolean useDate) {
+        try {
+            checkWriter(false);
+            
+            String dateLine;
+            String infoLine;
+            
+            // Check if there is a writer active.
+            // Append if not yet created.
+            checkWriter(true);
+            
+            // Determine the date line
+            dateLine = dateFormat.format(timeStamp) + " ";
+            if (!useDate) {
+                dateLine = MultiTool.fillSpaceRight("", dateLine.length());
+            }
+            
+            // Determine the info line
+            infoLine = MultiTool
+                .fillSpaceRight("[" + type.toString() + "]", 10);
+            
+            // Print text
+            writer.println(dateLine + infoLine + text);
+            
+        } catch (IOException e){
+            System.err.println(e);
         }
     }
     
-    public static void write(char text) {
-        write(text, true);
-    }
-    public static void write(char text, boolean showDate) {
-        write(text + "", showDate);
-    }
-    
-    public static void write(int number) {
-        write(number, true);
-    }
-    public static void write(int number, boolean showDate) {
-        write(Integer.toString(number), showDate);
-    }
-    
-    public static void write(double number) {
-        write(number, true);
-    }
-    public static void write(double number, boolean showDate) {
-        write(Double.toString(number), showDate);
-    }
-    
-    public static void write(Exception e) {
-        write(e, true, true);
-    }
-    public static void write(Exception e, boolean full) {
-        write(e, full, true);
-    }
-    public static void write(Exception e, boolean full, boolean showDate) {
-        if (full) {
+    @Override
+    protected void writeE(Exception e, Type type, Date timeStamp) {
+        if (useFull) {
             String[] text = Arrays.toString(e.getStackTrace()).split(", ");
-            String message = "[ERROR] " + e.getClass().getName() + ": " + e.getMessage();
-            write(message, showDate);
-            for (int i = 0; i < text.length; i++) {
-                write("        " + text[i], false);
+            String message = e.getClass().getName() + ": " + e.getMessage();
+            
+            lock.lock();
+            try {
+                writeText(message, type, timeStamp, useTimeStamp);
+                
+                for (int i = 0; i < text.length; i++) {
+                    writeText(text[i], Type.NONE, timeStamp, false);
+                }
+                
+                flush();
+                
+            } finally {
+                lock.unlock();
             }
             
         } else {
-            String message = "[ERROR] " + e.getClass().getName() + ": " + e.getMessage();
-            write(message, showDate);
-        }
-    }
-    
-    public static void write(String text) {
-        write(text, true);
-    }
-    public static void write(String text, boolean showDate) {
-        try {
-            // create file writer (append to/create file)
-            writer = new PrintWriter(new BufferedWriter(new FileWriter(logFile, false)));
+            String message = e.getClass().getName() + ": " + e.getMessage();
             
-            if (showDate) {
-                // determine and print date
-                DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss:SSS");
-                Date date = new Date();
-                writer.write("[" + dateFormat.format(date) + "] ");
+            lock.lock();
+            try {
+                writeText(message, Type.ERROR, timeStamp, useTimeStamp);
+                flush();
                 
-            } else {
-                writer.write("             ");
+            } finally {
+                lock.unlock();
             }
-            // print text
-            writer.write(text + ls);
-            
-            writer.close();
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Could not write to log file");
         }
     }
     
-    public static boolean clear() {
+    @Override
+    protected void writeO(Object obj, Type type, Date timeStamp) {
+        lock.lock();
         try {
-            // create file writer (overwrite/create file)
-            writer = new PrintWriter(new BufferedWriter(new FileWriter(logFile, false)));
-            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy - HH:mm:ss:SSS");
-            Date date = new Date();
-            writer.write(dateFormat.format(date));
-            writer.write(ls);
-            writer.close();
+            writeText(obj.toString(), type, timeStamp, useTimeStamp);
+            flush();
+            
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    @Override
+    protected void setFile(File file, boolean append) {
+        try {
+            // Close the previous log file.
+            close();
+            
+            // Set the new log file.
+            logFile = file;
+            
+            // Create a new writer.
+            checkWriter(append);
             
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("[ERROR] Could not clear the log file");
-            return false;
+            System.err.println(e);
         }
-        return true;
     }
+    
+    @Override
+    protected void clear() {
+        try {
+            // Close the previous log file.
+            close();
+            
+            // Create a new writer.
+            checkWriter(false);
+            
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+    
+    @Override
+    protected void close() {
+        if (writer != null) writer.close();
+        writer = null;
+    }
+    
+    @Override
+    protected boolean isClosed() {
+        return writer == null;
+    }
+    
+    @Override
+    protected void flush() {
+        if (writer != null) writer.flush();
+    }
+    
 }

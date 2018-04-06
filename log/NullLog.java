@@ -14,40 +14,64 @@
 package tools.log;
 
 
-// Tools imports
-import tools.log.Loggable;
-
-
 // Java imports
 import java.io.File;
+
+import java.util.Date;
 
 
 /* 
  * This is a log class that ignores all log action.
  */
-public class NullLog extends Loggable {
+public class NullLog extends Logger {
+    // The only instance of this class.
+    private static NullLog instance = new NullLog();
     
     /* 
-     * This is a static singleton class. No instances should be made.
+     * Only a single private constructor because of singleton design pattern.
      */
-    @Deprecated
     private NullLog() { }
     
-    public static synchronized void write(Exception e) { }
+    /* 
+     * @return the only null log instance.
+     */
+    public static synchronized NullLog getInstance() {
+        return instance;
+    }
     
-    public static synchronized void write(Object obj) { }
+    @Override
+    protected void writeE(Exception e, Date timeStamp) { }
     
-    public static synchronized void write(Object[] obj) { }
+    @Override
+    protected void writeE(Exception e, Type type, Date timeStamp) { }
     
-    public static synchronized boolean clear() {
+    @Override
+    protected void writeO(Object obj, Date timeStamp) { }
+    
+    @Override
+    protected void writeO(Object obj, Type type, Date timeStamp) { }
+    
+    @Override
+    protected void writeOA(Object[] objArr, Date timeStamp) { }
+    
+    @Override
+    protected void writeOA(Object[] objArr, Type type, Date timeStamp) { }
+    
+    @Override
+    protected void setFile(File file, boolean append) { }
+    
+    @Override
+    protected void clear() { }
+    
+    @Override
+    protected void close() { }
+    
+    @Override
+    protected boolean isClosed() {
         return true;
     }
     
-    public static synchronized boolean setLogFile(File file) {
-        return true;
-    }
+    @Override
+    protected void flush() { }
     
-    public static synchronized void setUseTimeStamp(boolean newTimeStamp) { }
-    
-    public static synchronized void setUseFull(boolean newFull) { }
 }
