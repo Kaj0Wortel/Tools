@@ -329,18 +329,10 @@ public class Key implements tools.Cloneable {
     
     /* 
      * @return the hash code of this object.
-     * 
-     * Note that keys with the same key, immutability and onKeyRelease
-     * but with different masks are mapped to the same location.
-     * However, when used in practice, this will not occur very often
-     * (assuming that entries of this class are only stored for a short amount
-     * of time before being removed (processed)). It's quite hard to press
-     * a key, then shift and then another key within ~1/24 sec (which would be
-     * the minimal fps for any GUI using an update function).
      */
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(immutable, key, onKeyRelease);
+        return MultiTool.calcHashCode(immutable, key, mask, onKeyRelease);
     }
     
     /* 
