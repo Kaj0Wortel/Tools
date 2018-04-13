@@ -136,13 +136,13 @@ public class Key implements tools.Cloneable {
     final private boolean immutable;
     
     // Stores the key value.
-    final private int key;
+    private int key;
     
     // The modifier for this key
     private int mask;
     
     // Whether the key was released or pressed.
-    final private boolean onKeyRelease;
+    private boolean onKeyRelease;
     
     /* -------------------------------------------------------------------------
      * Constructors
@@ -194,12 +194,11 @@ public class Key implements tools.Cloneable {
         this(false, key, mask, onKeyRelease);
     }
     
-    // Private constructors
-    private Key(boolean immutable, int key) {
+    public Key(boolean immutable, int key) {
         this(immutable, key, DEFAULT_MASK, DEFAULT_KEY_RELEASE);
     }
     
-    private Key(boolean immutable, int key, int mask, boolean onKeyRelease) {
+    public Key(boolean immutable, int key, int mask, boolean onKeyRelease) {
         this.immutable = immutable;
         this.key = key;
         this.mask = mask;
@@ -293,7 +292,15 @@ public class Key implements tools.Cloneable {
      *     has the given key value.
      */
     public Key newKeyValue(int k) {
-        return new Key(k, mask);
+        if (k == key) return this;
+        
+        if (immutable) {
+            return new Key(k, mask, onKeyRelease);
+            
+        } else {
+            key = k;
+            return this;
+        }
     }
     
     /* 
@@ -301,7 +308,15 @@ public class Key implements tools.Cloneable {
      *     has the given onKeyRelease value.
      */
     public Key newOnKeyRelease(boolean okr) {
-        return new Key(key, mask, okr);
+        if (onKeyRelease == okr) return this;
+        
+        if (immutable) {
+            return new Key(key, mask, okr);
+            
+        } else {
+            onKeyRelease = okr;
+            return this;
+        }
     }
     
     /* 
