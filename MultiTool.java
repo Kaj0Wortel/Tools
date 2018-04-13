@@ -628,6 +628,42 @@ public class MultiTool {
     }
     
     /* 
+     * Compares two arrays. Does a deep check.
+     * 
+     * @param a array to compare.
+     * @param b array to compare.
+     * @return whether the two given arrays {@code a} and {@code b} are
+     *     fully identical.
+     */
+    public static boolean compareDeepArray(Object[] a, Object[] b) {
+        if (a == null || b == null) return a == b;
+        if (a.length != b.length) return false;
+        
+        for (int i = 0; i < a.length; i++) {
+            boolean isArrayA = a[i].getClass().isArray();
+            boolean isArrayB = b[i].getClass().isArray();
+            
+            if (isArrayA && isArrayB) {
+                // If both are an array, recursivly determine whether
+                // they are equal.
+                if (!compareDeepArray((Object[]) a[i], (Object[]) b[i])) {
+                    return false;
+                }
+                
+            } else if (isArrayA ^ isArrayB) {
+                // If either of them is an array, they can never be equal.
+                return false;
+                
+            } else {
+                // If both are plain elements, simply check for equality.
+                if (!a[i].equals(b[i])) return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /* 
      * Calculates a hash code for an object with the given dependant objects.
      * 
      * @param objArr immutable dependant variables of a class.
