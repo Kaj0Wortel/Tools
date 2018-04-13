@@ -14,6 +14,10 @@
 package tools;
 
 
+// Tools imports
+import tools.log.Logger;
+
+
 // Java imports
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,13 +25,17 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import java.lang.reflect.Array;
-//import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 
+/* 
+ * This class contains multiple handy methods.
+ */
 public class MultiTool {
     /* 
      * Converts a decimal integer to a 32 based number String.
@@ -661,6 +669,125 @@ public class MultiTool {
         }
         
         return true;
+    }
+    
+    /* 
+     * Makes a deep clone of the given value.
+     * If the value is an array, recursivly make a clone of each element
+     * and put them in a new array.
+     * 
+     * Supported types:
+     * - {@code value} contains tools.Cloneable elements, then each element is
+     *   simply cloned by invoking the clone method.
+     * - {@code value} contains java.lang.Cloneable elements, then each element
+     *   is cloned by bypassing the private access modifier of clone method.
+     *   Note that the clone method should be overridden by that class.
+     * - {@code value} contains a primitive data type (boolean, char, byte,
+     *   short, int, long, float, double) or is a String.
+     * 
+     * @param value the value to be cloned.
+     * @return a clone of the value. This means that {@code value != \return
+     *     && value.equals(\return)} will hold afterwards (assuming that the
+     *     equals method is implemented correctly).
+     * @throws IllegalStateException iff
+     *     the clone method could not terminate normally.
+     * @throws UnsupportedOperationException iff
+     *     the provided value does not contain one of the supported types.
+     */
+    @SuppressWarnings("unchecked")
+    public static <V> V deepArrayClone(V value)
+            throws IllegalStateException, UnsupportedOperationException {
+        if (value.getClass().isArray()) {
+            return (V) deepArrayCloneArr((Object[]) value);
+            
+        } else {
+            if (value instanceof tools.Cloneable) {
+                return (V) ((Cloneable) value).clone();
+                
+            } else if (value instanceof java.lang.Cloneable) {
+                try {
+                    Method clone = value.getClass().getMethod("clone");
+                    clone.setAccessible(false);
+                    return (V) clone.invoke(value);
+                    
+                } catch (NoSuchMethodException |
+                         SecurityException |
+                         IllegalAccessException e) {
+                    // When the method was not reacheable.
+                    Logger.write(new Object[] {
+                        "Unaccessable clone method of object \""
+                            + value.toString() + "\"!", e
+                    });
+                    
+                    throw new IllegalStateException
+                        ("Could not finish cloning! Last element: "
+                             + value.toString());
+                    
+                } catch (InvocationTargetException e) {
+                    // When the clone method threw an exception.
+                    Logger.write(new Object[] {
+                        "An error occured while cloning the object \""
+                            + value.toString() + "\":", e.getCause()
+                    });
+                    
+                    throw new IllegalStateException
+                        ("An error occured while cloning the object \""
+                            + value.toString() + "\".");
+                }
+                
+            } else {
+                if (value instanceof Boolean) {
+                    return (V) new Boolean((Boolean) value);
+                    
+                } else if (value instanceof Character) {
+                    return (V) new Character((Character) value);
+                    
+                } else if (value instanceof Byte) {
+                    return (V) new Byte((Byte) value);
+                    
+                } else if (value instanceof Short) {
+                    return (V) new Short(((Short) value).shortValue());
+                    
+                } else if (value instanceof Integer) {
+                    return (V) new Integer(((Integer) value).intValue());
+                    
+                } else if (value instanceof Long) {
+                    return (V) new Long(((Long) value).longValue());
+                    
+                } else if (value instanceof Float) {
+                    return (V) new Float(((Float) value).floatValue());
+                    
+                } else if (value instanceof Double) {
+                    return (V) new Double(((Double) value).doubleValue());
+                    
+                } else if (value instanceof String) {
+                    return (V) new String((String) value);
+                    
+                }
+                
+                // For anything else
+                throw new UnsupportedOperationException
+                    ("Expected a cloneable object, but found: "
+                         + value.getClass().toString());
+            }
+            
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T> T[] deepArrayCloneArr(T[] objArr)
+            throws IllegalStateException, IllegalArgumentException {
+        T[] newObjArr = (T[]) Array.newInstance(objArr
+                                                    .getClass()
+                                                    .getComponentType(),
+                                                objArr.length);
+        for (int i = 0; i < objArr.length; i++) {
+            newObjArr[i] = (T) deepArrayClone(objArr[i]);
+        }
+        
+        System.out.println(objArr.getClass().toString());
+        System.out.println(objArr.getClass().toString());
+        return (T[]) newObjArr;
     }
     
     /* 
