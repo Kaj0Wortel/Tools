@@ -26,7 +26,7 @@ import javax.swing.KeyStroke;
 
 
 /* 
- * Class containing shorting naming for keys all under one roof instead
+ * Class containing shorter naming for keys all under one roof instead
  * of spread out over multiple classes.
  */
 public class Key implements tools.Cloneable {
