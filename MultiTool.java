@@ -628,7 +628,7 @@ public class MultiTool {
     }
     
     /* 
-     * Calculates a hashValue for an object with the given dependant objects.
+     * Calculates a hash code for an object with the given dependant objects.
      * 
      * @param objArr immutable dependant variables of a class.
      * @return a hash code for the class, given the dependant objects.
@@ -637,7 +637,6 @@ public class MultiTool {
      * objects are equal. This also holds for null objects.
      * If no objects are given (i.e. {@code objArr == null}),
      * then 0 is returned.
-     * 
      */
     public static int calcHashCode(Object... objArr) {
         if (objArr == null) return 0;
