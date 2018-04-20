@@ -17,8 +17,6 @@ package tools;
 
 // Java imports
 import java.util.List;
-//import java.util.Observer;
-//import java.util.Observable;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -30,7 +28,7 @@ public interface ObservableInterface {
     // List containing all observers. The CopyOnWriteArrayList is used
     // because it automatically achieves synchronization by copying the
     // array when modified.
-    List<Observer2> obs = new CopyOnWriteArrayList<>();
+    List<Observer> obs = new CopyOnWriteArrayList<>();
     
     // Whether there was a modification.
     // An array is used since the interface does only supports final values.
@@ -44,7 +42,7 @@ public interface ObservableInterface {
      * 
      * Implementation via {@link Observer#addObserver(Observer)}.
      */
-    default public void addObserver(Observer2 o) {
+    default public void addObserver(Observer o) {
         obs.add(o);
     }
     
@@ -55,7 +53,7 @@ public interface ObservableInterface {
      * 
      * Implementation via {@link Observer#deleteObserver(Observer)}.
      */
-    default public void deleteObserver(Observer2 o) {
+    default public void deleteObserver(Observer o) {
         obs.remove(o);
     }
     
