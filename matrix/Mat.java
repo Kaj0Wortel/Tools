@@ -247,17 +247,17 @@ public class Mat
      */
     public static <M extends Mat> M multiplyAll(Mat... mats)
             throws IllegalArgumentException, MatrixDimensionException {
-        return multiplyAll(mats, null);
+        return multiplyAll(null, mats);
     }
     
     public static <M extends Mat> M multiplyAll(int begin, int end, Mat... mats)
             throws IllegalArgumentException, MatrixDimensionException {
-        return multiplyAll(mats, null, begin, end);
+        return multiplyAll(null, begin, end, mats);
     }
     
     public static <M extends Mat> M multiplyAll(M result, Mat... mats)
             throws IllegalArgumentException, MatrixDimensionException {
-        return multiplyAll(mats, result, 0, mats.length);
+        return multiplyAll(result, 0, mats.length, mats);
     }
     
     public static <M extends Mat> M multiplyAll(M result, int begin,
