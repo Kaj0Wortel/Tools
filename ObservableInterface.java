@@ -16,34 +16,25 @@ package tools;
 
 
 // Java imports
-import java.util.Observable;
-import java.util.Observer;
+import java.util.List;
+//import java.util.Observer;
+//import java.util.Observable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /* 
- * 
+ * Observer interface for when an object that already extends another
+ * class can still become an observer.
  */
 public interface ObservableInterface {
+    // List containing all observers. The CopyOnWriteArrayList is used
+    // because it automatically achieves synchronization by copying the
+    // array when modified.
+    List<Observer2> obs = new CopyOnWriteArrayList<>();
     
-    /* 
-     * Class for making the two private methods {@code setChanged()} and
-     * {@code clearChanged()} of the {@link Observable} class public.
-     */
-    static class PublicObservable
-            extends Observable {
-        @Override
-        public synchronized void setChanged() {
-            super.setChanged();
-        }
-        
-        @Override
-        public synchronized void clearChanged() {
-            super.clearChanged();
-        }
-    }
-    
-    // The observer used to relay all calls.
-    PublicObservable obs = new PublicObservable();
+    // Whether there was a modification.
+    // An array is used since the interface does only supports final values.
+    boolean[] modified = {false};
     
     /* 
      * Adds the given observer to the list of observers.
@@ -53,8 +44,8 @@ public interface ObservableInterface {
      * 
      * Implementation via {@link Observer#addObserver(Observer)}.
      */
-    default public void addObserver(Observer o) {
-        obs.addObserver(o);
+    default public void addObserver(Observer2 o) {
+        obs.add(o);
     }
     
     /* 
@@ -64,8 +55,8 @@ public interface ObservableInterface {
      * 
      * Implementation via {@link Observer#deleteObserver(Observer)}.
      */
-    default public void deleteObserver(Observer o) {
-        obs.deleteObserver(o);
+    default public void deleteObserver(Observer2 o) {
+        obs.remove(o);
     }
     
     /*
@@ -76,7 +67,7 @@ public interface ObservableInterface {
      * Implementation via {@link Observer#notifyObservers()}.
      */
     default public void notifyObservers() {
-        obs.notifyObservers();
+        notifyObservers(null);
     }
     
     /*
@@ -88,7 +79,14 @@ public interface ObservableInterface {
      * Implementation via {@link Observer#notifyObservers(Object)}.
      */
     default public void notifyObservers(Object arg) {
-        obs.notifyObservers(arg);
+        boolean mod;
+        synchronized(this) {
+            mod = modified[0];
+        }
+        
+        if (mod) {
+            obs.forEach(observer -> observer.update(this, arg));
+        }
     }
     
     /* 
@@ -97,7 +95,7 @@ public interface ObservableInterface {
      * Implementation via {@link Observer#deleteObservers()}.
      */
     default public void deleteObservers() {
-        obs.deleteObservers();
+        obs.clear();
     }
     
     /* 
@@ -106,7 +104,9 @@ public interface ObservableInterface {
      * Implementation via {@link Observer#setChanged()}.
      */
     default void setChanged() {
-        obs.setChanged();
+        synchronized(this) {
+            modified[0] = true;
+        }
     }
     
     /* 
@@ -115,7 +115,9 @@ public interface ObservableInterface {
      * Implementation via {@link Observer#clearChanged()}.
      */
     default void clearChagned() {
-        obs.clearChanged();
+        synchronized(this) {
+            modified[0] = false;
+        }
     }
     
     /* 
@@ -124,14 +126,16 @@ public interface ObservableInterface {
      * Implementation via {@link Observer#hasChanged()}.
      */
     default public boolean hasChanged() {
-        return obs.hasChanged();
+        synchronized(this) {
+            return modified[0];
+        }
     }
     
     /* 
      * @return the number of observers of this object.
      */
     default public int countObservers() {
-        return obs.countObservers();
+        return obs.size();
     }
     
 }
