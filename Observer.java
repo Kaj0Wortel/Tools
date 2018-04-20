@@ -18,7 +18,7 @@ package tools;
  * Observer for the ObservableInterface.
  */
 @FunctionalInterface
-interface Observer2 {
+interface Observer {
     /* 
      * This method is called whenever the observed object is changed.
      * 
