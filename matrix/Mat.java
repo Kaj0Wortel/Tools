@@ -10,43 +10,153 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.matrix;
 
+
+// Tools imports
+import tools.MultiTool;
+import tools.ObservableInterface;
+
+import tools.numbers.PrimitiveNumber;
+import tools.numbers.ToolNumber;
+import tools.numbers.ToolNumberAdapter;
+
+
 /* 
- * In development.
- * Use with care.
+ * Matrix class for matrix operations.
  */
-public class Mat {
-    protected double[][] values;
-    protected int row;
-    protected int col;
-    protected boolean square;
+public class Mat
+        extends ToolNumberAdapter<Mat>
+        implements tools.Cloneable, ObservableInterface {
     
-    /* ----------------------------------------------------------------------------------------------------------------
+    private ToolNumber[][] values;
+    
+    /* -------------------------------------------------------------------------
      * Constructors
-     * ----------------------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
-    public Mat(double[]... mat) throws MatrixDimensionException {
-        setMatrix(mat);
+    /* 
+     * Creates a 1x1 matrix only containing {@code 0.0}.
+     */
+    public Mat() {
+        this(0.0);
     }
     
-    public Mat(int row, int col, double... mat) throws MatrixDimensionException {
-        if (mat.length != row*col)
-            throw new MatrixDimensionException("Given 1D matrix has an invallid length. Expected: " + (row*col)
-                                                   + ", found: " + mat.length + ".");
-        double[][] newValues = new double[row][col];
+    /* 
+     * Creates a 1x1 matrix only containing the given number.
+     * 
+     * @param num the sole value in the matrix.
+     * @throws IllegalArgumentException iff
+     *     {@code num} is not a primative number data type class.
+     */
+    public Mat(Number num) {
+        this((PrimitiveNumber<?>) PrimitiveNumber.toPrimNumber(num));
+    }
+    
+    /* 
+     * Creates a 1x1 matrix only containing the given ToolNumber.
+     * 
+     * @param value the sole value in the matrix.
+     */
+    public Mat(ToolNumber value) {
+        setMatrix(new ToolNumber[][] {
+            new ToolNumber[] {
+                value.clone()
+            }
+        }, false);
+    }
+    
+    /* 
+     * Creates a matrix object from another matrix.
+     * 
+     * @param mat the matrix to copy.
+     */
+    public Mat(Mat mat) {
+        this(true, mat.values);
+    }
+    
+    /* 
+     * Creates a matrix from the given numbers.
+     */
+    public Mat(Number[]... values) {
+        this(true, (PrimitiveNumber[][]) PrimitiveNumber.toPrimNumber(values));
+    }
+        
+    /* 
+     * Creates a matrix object of the given matrix.
+     * 
+     * @param values the given matrix.
+     * @param cloneMat whether to clone the given matrix.
+     *     Default is true.
+     */
+    public Mat(ToolNumber[]... values)
+            throws MatrixDimensionException {
+        this(true, values);
+    }
+    
+    public Mat(boolean cloneMat, ToolNumber[]... values)
+            throws MatrixDimensionException {
+        setMatrix(values, cloneMat);
+    }
+    
+    /* 
+     * Creates a matrix with a given number of rows and columns.
+     * Fills the matrix from left to right, top to down with the given values.
+     * 
+     * @param row the number of rows.
+     * @param col the number of columns.
+     * @param values the contents of the matrix.
+     */
+    public Mat(int row, int col, Number... values) {
+        this(row, col,
+             (PrimitiveNumber[]) PrimitiveNumber.toPrimNumber(values));
+    }
+    
+    public Mat(int row, int col, ToolNumber... values)
+            throws MatrixDimensionException {
+        if (values.length != row * col)
+            throw new MatrixDimensionException
+                ("Given 1D matrix has an invallid length. Expected: "
+                     + (row*col) + ", found: " + values.length + ".");
+        ToolNumber[][] newValues = new ToolNumber[row][col];
         
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                newValues[i][j] = mat[i*col + j];
+                newValues[i][j] = values[i*col + j].clone();
             }
         }
         
-        setMatrix(newValues);
+        setMatrix(newValues, false);
     }
     
-    public Mat(Mat mat_1, double fillValue_1, double fillValue_2, Mat mat_2) throws MatrixDimensionException{
+    /* 
+     * Creates a matrix from 2 other matrices, where the two matrices
+     * are placed such that the lower right corner of {@code mat_1} hits the
+     * upper left corner of {@code mat_2}. The values on the right of
+     * {@code mat_1} and the left of {@code mat_2} are filled with resp.
+     * {@code fillValue_1} and {@code fillValue_2}.
+     * The matrix will look like this:
+     * [[A, B]
+     *  [C, D]]
+     * with {@code A = mat_1, B = fillValue_1, C = fillValue_2, D = mat_2}.
+     * 
+     * @param mat_1 the upper left part matrix.
+     * @param fillValue_1 the value to be filled for the upper right part
+     *     of the matrix.
+     * @param fillValue_2 the value to be filled for the lower left part
+     *     of the matrix.
+     * @param mat_2 the lower right part matrix.
+     */
+    public Mat(Mat mat_1, Number fillValue_1, Number fillValue_2, Mat mat_2) {
+        this(mat_1, (PrimitiveNumber) PrimitiveNumber
+                 .toPrimNumber(fillValue_1),
+             (PrimitiveNumber) PrimitiveNumber
+                 .toPrimNumber(fillValue_2), mat_2);
+    }
+    
+    public Mat(Mat mat_1, ToolNumber fillValue_1, ToolNumber fillValue_2, 
+               Mat mat_2) {
         int rowsMat_1 = mat_1.getNumRows();
         int rowsMat_2 = mat_2.getNumRows();
         int colsMat_1 = mat_1.getNumCols();
@@ -54,529 +164,1438 @@ public class Mat {
         
         int row = rowsMat_1 + rowsMat_2;
         int col = colsMat_1 + colsMat_2;
-        double[][] newValues = new double[row][col];
+        ToolNumber[][] newValues = new ToolNumber[row][col];
         
-        double[][] valuesMat_1 = mat_1.getValues();
-        double[][] valuesMat_2 = mat_2.getValues();
+        ToolNumber[][] valuesMat_1 = mat_1.getValues();
+        ToolNumber[][] valuesMat_2 = mat_2.getValues();
         
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
                 if (i < rowsMat_1) {
                     // Upper left part: copy mat_1
                     if (j < colsMat_1) {
-                        newValues[i][j] = valuesMat_1[i][j];
+                        newValues[i][j] = valuesMat_1[i][j].clone();
                         
                         // Upper right part: use fillValue_1
                     } else {
-                        newValues[i][j] = fillValue_1;
+                        newValues[i][j] = fillValue_1.clone();
                     }
                     
                 } else {
-                    
                     // Lower left part: copy mat_1
                     if (j < colsMat_1) {
-                        newValues[i][j] = fillValue_2;
+                        newValues[i][j] = fillValue_2.clone();
                         
                         // Lower right part: use fillValue_1
                     } else {
-                        newValues[i][j] = valuesMat_2[i - rowsMat_1][j - colsMat_1];
+                        newValues[i][j]
+                            = valuesMat_2[i - rowsMat_1][j - colsMat_1].clone();
                     }
                 }
             }
         }
         
-        setMatrix(newValues);
+        setMatrix(newValues, false);
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
+    
+    /* -------------------------------------------------------------------------
      * Public static methods
-     * ----------------------------------------------------------------------------------------------------------------
+     * -------------------------------------------------------------------------
      */
     /* 
      * Creates an identity matrix of size (width x height).
+     * 
+     * @param width the width of the new matrix.
+     * @param height the height of the new matrix.
      */
-    public static Mat getIMat(int width, int height) {
-        double[][] matIValues = new double[width][height];
-        
+    protected static <M extends Mat> M getIMat(int width, int height) {
+        ToolNumber[][] matIValues = new ToolNumber[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                matIValues[i][j] = (i == j ? 1.0 : 0.0);
-            }
-        }
-        
-        return new Mat(matIValues);
-    }
-    
-    /* 
-     * Multiplies two matrices.
-     * Returns the resulting matrix.
-     */
-    public static Mat multiply(Mat matLeft, Mat matRight) throws MatrixDimensionException {
-        // Bound checking
-        if (matLeft.col != matRight.row)
-            throw new MatrixDimensionException("Number of colums of the left matrix ("+ matLeft.col
-                                                   + ") is not equal to the number of rows of the right matrix ("
-                                                   + matRight.row + ")");
-        
-        double[][] newMat = new double[matLeft.row][matRight.col];
-        double[][] left   = matLeft.getValues();
-        double[][] right  = matRight.getValues();
-        
-        for (int i = 0; i < matLeft.row; i++) {
-            for (int j = 0; j < matRight.col; j++) {
-                newMat[i][j] = 0.0;
-                
-                for (int k = 0; k < matLeft.col; k++) {
-                    newMat[i][j] += left[i][k] * right[k][j];
+                if (i == j) {
+                    matIValues[i][j] = new PrimitiveNumber<Double>(1.0);
+                    
+                } else {
+                    matIValues[i][j] = new PrimitiveNumber<Double>(0.0);
                 }
             }
         }
         
-        return new Mat(newMat);
+        return createDefaultInstance().setMatrix(matIValues, false);
     }
     
     /* 
-     * Multiplies the matrix with a constant.
-     * Returns the resulting matrix
-     */
-    public static Mat multiply(double value, Mat mat) {
-        double[][] values = mat.getValues();
-        
-        for (int i = 0; i < values.length; i++) {
-            values[i][i] *= value;
-        }
-        
-        return new Mat(values);
-    }
-    
-    /* 
-     * Multiplies all matrices mats, assuming the order left to right.
-     * (so mat[0] * mat[1] * ... * mat[n]).
-     * Returns the result.
-     */
-    public static Mat multiplyAll(Mat... mats) {
-        if (mats == null) return null;
-        if (mats.length == 0) throw new IllegalArgumentException("The length of the variable 'mats' is not allowed to be 0.");
-        
-        Mat calcMat = mats[0];
-        for (int i = 1; i < mats.length; i++) {
-            calcMat.rightMultiply(mats[i]);
-        }
-        
-        return calcMat;
-    }
-    
-    /* 
-     * Transposes the given matrix.
-     * Returns transposed matrix.
-     * update denotes whether the given matrix should be updated.
-     */
-    public static Mat transpose(Mat mat) {
-        return transpose(mat, true);
-    }
-    
-    public static Mat transpose(Mat mat, boolean update) {
-        double[][] oldV = mat.getValues();
-        double[][] newV = new double[oldV[0].length][oldV.length];
-        
-        for (int i = 0; i < oldV.length; i++) {
-            for (int j = 0; j < oldV[0].length; j++) {
-                newV[j][i] = oldV[i][j];
-            }
-        }
-        
-        if (update) {
-            mat.setMatrix(newV);
-            return mat;
-        } else {
-            return new Mat(newV);
-        }
-    }
-    
-    public static Mat multiplyConstAddMat(double val_1, Mat mat_1, double val_2, Mat mat_2) {
-        if (mat_1.getNumRows() != mat_2.getNumRows())
-            throw new MatrixDimensionException("The number rows of the matrices are not equal.");
-        if (mat_1.getNumCols() != mat_2.getNumCols())
-            throw new MatrixDimensionException("The number columns of the matrices are not equal.");
-        
-        double[][] values_1 = mat_1.getValues();
-        double[][] values_2 = mat_2.getValues();
-        double[][] newValues = new double[values_1.length][values_1[0].length];
-        
-        for (int i = 0; i < values_1.length; i++) {
-            for (int j = 0; j < values_1[0].length; j++) {
-                newValues[i][j] = val_1 * values_1[i][j] + val_2 * values_2[i][j];
-            }
-        }
-        
-        return new Mat(newValues);
-    }
-    
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Public methods
-     * ----------------------------------------------------------------------------------------------------------------
-     */
-    /* 
-     * This method is called when the matrix is set, and
-     * is supposed to be overridden by subclasses that have
-     * a (semi) static dimension.
+     * Multiplies all matrices, assuming the order left to right.
+     * (so mat[begin] * mat[begin+1] * ... * mat[end-1]).
      * 
-     * Returns false iff the check fails, true otherwise.
-     * Throw exceptions in this method to improve retracing.
+     * @param result matrix that will contain the result of the operation.
+     *     Default is {@code null}.
+     * @param begin the first index of {@code mats} that will be used in
+     *     the multiplication (inclusive). Default is 0.
+     * @param end the last index of {@code mats} that will be used in the
+     *     multiplication (exclusive). default is mats.length.
+     * @param mats the matrices to be multiplied.
+     * 
+     * @return {@code result}.
+     * 
+     * @throws NullPointerException iff {@code mats == null}.
+     * @throws IllegalArgumentException iff
+     *     {@code 0 <= begin < end <= mats.length} does not hold.
+     * @throws MatrixDimensionException iff any of the matrix multiplications
+     *     is not allowed due to incorrect matrix dimensions.
      */
-    protected boolean matrixDimCheck(int row, int col) {
-        return true;
+    public static <M extends Mat> M multiplyAll(Mat... mats)
+            throws IllegalArgumentException, MatrixDimensionException {
+        return multiplyAll(mats, null);
+    }
+    
+    public static <M extends Mat> M multiplyAll(int begin, int end, Mat... mats)
+            throws IllegalArgumentException, MatrixDimensionException {
+        return multiplyAll(mats, null, begin, end);
+    }
+    
+    public static <M extends Mat> M multiplyAll(M result, Mat... mats)
+            throws IllegalArgumentException, MatrixDimensionException {
+        return multiplyAll(mats, result, 0, mats.length);
+    }
+    
+    public static <M extends Mat> M multiplyAll(M result, int begin,
+                                                int end, Mat... mats)
+            throws IllegalArgumentException, MatrixDimensionException {
+        if (mats == null) throw new NullPointerException
+                ("mats is not allowed to be null!");
+        if (mats.length == 0) throw new IllegalArgumentException
+                ("There must be at least 1 matrix to be multiplied!");
+        
+        if (begin < 0) throw new IllegalArgumentException
+                ("begin(" + begin + ") < 0");
+        if (end > mats.length) throw new IllegalArgumentException
+                ("end(" + begin + ") > mats.length");
+        if (begin >= end) throw new IllegalArgumentException
+                ("begin(" + begin + ") >= end(" + end + ")");
+        
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        result.setMatrix(mats[begin].getValues(true), false);
+        
+        // Multiply all matrices in order with the result.
+        for (int i = begin + 1; i < end; i++) {
+            result.muli(mats[i]);
+        }
+        
+        // Return the result.
+        return result;
+    }
+    
+    /* todo
+     * @param matLeft the left matrix of the inproduct.
+     * @param matRight the right matrix of the inproduct.
+     * @param result the result of the operatrion.
+     *     Default is null.
+     * @return the inproduct of {@code matLeft} with {@code matRight}.
+     * @throws MatrixDimensionException iff
+     *     the given matrices have invallid dimensions.
+     *//*
+    public static <M extends Mat> M inproduct(Mat matLeft, Mat matRight)
+            throws MatrixDimensionException {
+        return inproduct(matLeft, matRight, null);
+    }
+    
+    public static <M extends Mat> M inproduct(Mat matLeft, Mat matRight,
+                                              M result)
+            throws MatrixDimensionException {
+        return multiply(matLeft.transpose(), matRight, result);
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Functions
+     * -------------------------------------------------------------------------
+     */
+    /* 
+     * Sets the values of the matrix.
+     * 
+     * @param num the new values of the matrix.
+     * @return {@code this}.
+     * @throws NullPointerException iff {@code mat == null} or
+     *     any {@code mat[i] == null}.
+     * @throws IllegalArgumentException iff
+     *     {@code mat == null || mat[i] == null}.
+     * @throws MatrixDimensionException iff {@code mat.length == 0}.
+     * 
+     * Converts each value of {@code} to a {@code PrimitiveNumber}.
+     * Then uses {@link setMatrix(ToolNumber[][])} for setting the matrix.
+     */
+    public <M extends Mat> M setMatrix(Number[][] num) {
+        return setMatrix((ToolNumber[][]) PrimitiveNumber.toPrimNumber(num),
+                         false);
     }
     
     /* 
      * Sets the values of the matrix.
+     * 
+     * @param mat the new matrix.
+     * @param cloneMat whether to clone the given matrix. Default is true.
+     * @return {@code this}.
+     * @throws NullPointerException iff {@code mat == null} or
+     *     any {@code mat[i] == null}.
+     * @throws IllegalArgumentException iff
+     *     {@code mat == null || mat[i] == null}.
+     * @throws MatrixDimensionException iff {@code mat.length == 0}.
      */
-    protected Mat setMatrix(double[][] mat) {
-        if (mat == null)
-            throw new NullPointerException("Variable 'mat' is not allowed to be null.");
+    public <M extends Mat> M setMatrix(ToolNumber[][] num) {
+        return setMatrix(num, true);
+    }
+    
+    @SuppressWarnings("unchecked") // <this> instanceof Mat
+    public <M extends Mat> M setMatrix(ToolNumber[][] num, boolean cloneMat) 
+            throws NullPointerException, MatrixDimensionException {
+        // Check for null
+        if (num == null)
+            throw new IllegalArgumentException
+                ("Given matrix is not allowed to be null.");
+        // Check for emty size
+        if (num.length == 0)
+            throw new MatrixDimensionException
+                ("Invallid matrix dimension: length = 0");
         
-        if (!matrixDimCheck(mat.length, mat[0].length))
-            throw new MatrixDimensionException("Invallid matrix dimension: " + mat.length + "x" + mat[0].length);
+        // Determine the new row and col
+        int rows = num.length;
+        int cols = num[0].length;
         
-        row = mat.length;
-        col = mat[0].length;
-        square = row == col;
-        values = new double[row][col];
+        // Check for null and equal column length
+        for (int i = 0; i < num.length; i++) {
+            if (num[i] == null)
+                throw new IllegalArgumentException
+                    ("Given matrix is not allowed to be null.");
+            if (num[i].length != cols)
+                throw new MatrixDimensionException
+                    ("Invallid column size(" + num[i].length
+                         + ") at row: " + i);
+        }
         
-        for (int i = 0; i < row; i++) {
-            if (mat[i].length != col)
-                throw new MatrixDimensionException("Invallid raster format. Expected: " + row + "x" + col
-                                                       + ", found height of " + mat[i].length + " at col = " + i + ".");
+        // Might throw exceptions for invallid dimensions.
+        matrixDimCheck(rows, cols);
+        
+        if (!cloneMat) {
+            // If the matrix should not be cloned, simply replace
+            // the values variable.
+            this.values = num;
+            setChanged();
             
-            for (int j = 0; j < col; j++) {
-                values[i][j] = mat[i][j];
+        } else {
+            // If the matrix should be cloned, copy all values.
+            values = new ToolNumber[rows][cols];
+            
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    values[i][j] = num[i][j].clone();
+                }
             }
         }
         
-        return this;
+        setChanged();
+        
+        // Notify the observers that {@code values} might have been changed.
+        // Note that {@code values} is not modified when they have the same
+        // dimensions and contain the same values.
+        notifyObservers(values);
+        
+        return (M) this;
     }
     
     /* 
-     * Does a right multiplication for this matrix.
-     * Stores and returns the result.
-     * Uses the static method multiply for the calculation.
+     * Transposes this matrix.
      * 
-     * mat denotes the matrix that this matrix will be multiplied
-     * with.
-     * updateMat denotes whether the result should be stored
-     * in the current Matrix. Default is true.
+     * @param result matrix that will contain the result of the operation.
+     *     Default is {@code this}.
+     * @param clone whether to clone the values of the new matrix.
+     *     Default if no result matrix is given is false.
+     *     Default if a result matrix is given is true.
+     * @throws NullPointerException iff {@code mat == null}.
+     * @return {@code result}.
      */
-    public Mat rightMultiply(Mat mat) {
-        return rightMultiply(mat, true);
+    @SuppressWarnings("unchecked") // <this> instanceof Mat
+    public <M extends Mat> M transpose() {
+        return transpose((M) this, false);
     }
     
-    public Mat rightMultiply(Mat mat, boolean updateMat) {
-        Mat resultMatrix = multiply(this, mat);
+    @SuppressWarnings("unchecked") // <this> instanceof Mat
+    public <M extends Mat> M transpose(boolean clone) {
+        return transpose((M) this, clone);
+    }
+    
+    public <M extends Mat> M transpose(M result) {
+        return transpose(result, true);
+    }
+    
+    @SuppressWarnings("unchecked") // <this> instanceof Mat
+    public <M extends Mat> M transpose(M result, boolean clone) {
+        ToolNumber[][] newValues
+            = new ToolNumber[values[0].length][values.length];
         
-        if (updateMat) {
-            this.values = resultMatrix.getValues();
-            return this;
-        }
-        
-        return resultMatrix;
-    }
-    
-    /*
-     * Does a left multiplication for this matrix.
-     * Stores and returns the result.
-     * Uses the static method multiply for the calculation.
-     * 
-     * mat denotes the matrix that this matrix will be multiplied
-     * with. updateMat denotes whether the result should be stored
-     * in the current Matrix. Default is true.
-     */
-    public Mat leftMultiply(Mat mat) {
-        return leftMultiply(mat, true);
-    }
-    
-    public Mat leftMultiply(Mat mat, boolean updateMat) {
-        Mat resultMatrix = Mat.multiply(mat, this);
-        
-        if (updateMat) {
-            this.values = resultMatrix.getValues();
-            return this;
-        }
-        
-        return resultMatrix;
-    }
-    
-    /*
-     * Multiplies the matrix with a value.
-     * Uses the static method multiply for the calculation.
-     * 
-     * value denotes the value that is multiplied with the matrix.
-     * updateMat denotes whether the result should be stored
-     * in the current Matrix. Default is true.
-     */
-    public Mat multiply(double value) {
-        return multiply(value, true);
-    }
-    
-    public Mat multiply(double value, boolean updateMat) {
-        Mat newMat = multiply(value, this);
-        
-        if (updateMat) {
-            this.values = newMat.getValues();
-            return this;
-        }
-        
-        return newMat;
-    }
-    
-    /* 
-     * Adds a matrix to the current matrix.
-     * update denotes whether the result should be stored
-     * in the current matrix. Default is true.
-     */
-    public Mat add(Mat mat) {
-        return add(mat, true);
-    }
-    
-    public Mat add(Mat mat, boolean update) {
-        Mat newMat = multiplyConstAddMat(1, this, 1, mat);
-        
-        if (update) {
-            this.setMatrix(newMat.getValues());
-            return this;
-            
-        } else {
-            return newMat;
-        }
-    }
-    
-    /* 
-     * Subtracts a matrix to the current matrix.
-     * update denotes whether the result should be stored
-     * in the current matrix. Default is true.
-     */
-    public Mat sub(Mat mat) {
-        return add(mat, true);
-    }
-    
-    public Mat sub(Mat mat, boolean update) {
-        Mat newMat = multiplyConstAddMat(1, this, -1, mat);
-        
-        if (update) {
-            this.setMatrix(newMat.getValues());
-            return this;
-            
-        } else {
-            return newMat;
-        }
-    }
-    
-    /* 
-     * Multiplies a value with the current matrix, 
-     * and a value with another matrix, then adds the matrices.
-     * 
-     * update denotes whether the result should be stored
-     * in the current matrix. Default is true.
-     */
-    public Mat multiplyConstAddMat(double val_this, double val_mat, Mat mat) {
-        return multiplyConstAddMat(val_this, val_mat, mat, true);
-    }
-    
-    public Mat multiplyConstAddMat(double val_this, double val_mat, Mat mat, boolean update) {
-        Mat newMat = multiplyConstAddMat(val_this, this, val_mat, mat);
-        
-        if (update) {
-            this.setMatrix(newMat.getValues());
-            return this;
-            
-        } else {
-            return newMat;
-        }
-    }
-    
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Get functions
-     * ----------------------------------------------------------------------------------------------------------------
-     */
-    /*
-     * Returns the values of this matrix.
-     */
-    public double[][] getValues() {
-        return values;
-    }
-    
-    /* 
-     * Returns the number of rows of the matrix.
-     */
-    public int getNumRows() {
-        return row;
-    }
-    
-    /* 
-     * Returns the number of columns of the matrix.
-     */
-    public int getNumCols() {
-        return col;
-    }
-    
-    /* 
-     * Returns whether the matrix is square.
-     * Equivalent to width == height.
-     */
-    public boolean isSquare() {
-        return square;
-    }
-    
-    /*
-     * Converts the matrix to a matrix compatible with the gl shader.
-     */
-    public double[] toGLMatrix() {
-        double[] result = new double[values.length * values[0].length];
-        
-        int counter = 0;
-        for (int i = 0; i < values.length; i++) {
-            for (int j = 0; j < values[0].length; j++) {
-                result[counter++] = values[j][i]; // Note the transpose here
+        for (int row = 0; row < values.length; row++) {
+            for (int col = 0; col < values[0].length; col++) {
+                newValues[col][row] = (clone
+                                           ? values[row][col].clone()
+                                           : values[row][col]);
             }
         }
         
-        return result;
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
     }
     
-    /*
-     * Transpose the current matrix.
-     * Returns the transposed matrix.
+    /* 
+     * Calculates the cofactor matrix of the current matrix.
+     * 
+     * @param result the matrix in which the result will be stored.
+     *     Default is null. If null, the default matrix is used.
+     * @return the cofactor matrix.
+     * @throws MatrixDimensionException iff the matrix is not square.
+     * 
+     * Calculation:
+     * Cof_[i, j](mat) = det(M_[mat, i, j]) * (-1)^(i+j)
+     * where:
+     * - Cof_[i, j] = cofactor at (i, j);
+     * - mat = the matrix to be calculated.
+     * - det(x) = calculate the determinant of x.
+     * - M_[m, i, j] = the minor of matrix m at (i, j).
      */
-    public Mat transpose() {
-        return transpose(this, true);
+    public Mat calcCoMatrix() {
+        return calcCoMatrix(null);
     }
     
-    public double det() {
-        if (!square)
-            throw new MatrixDimensionException("Determinant is undefined for non-square matrices. "
-                                                   + "Expected: nxn with n >= 2, "
-                                                   + "found: " + row + "x" + col + ".");
-        if (row <= 1) {
+    public Mat calcCoMatrix(Mat result) {
+        if (!isSquare()) {
+            throw new MatrixDimensionException
+                ("Cofactor matrix is undefined for non-square matrices. "
+                     + "Expected: nxn with n >= 1, "
+                     + "but found: " + getNumRows() + "x" + getNumCols() + ".");
+        }
+        
+        ToolNumber[][] newValues
+            = new ToolNumber[getNumRows()][getNumCols()];
+        
+        for (int row = 0; row < getNumRows(); row++) {
+            for (int col = 0; col < getNumRows(); col++) {
+                newValues[row][col] = calcMinor(row, col).det();
+                if ((row + col) % 2 == 1) {
+                    newValues[row][col].muli(-1);
+                }
+            }
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    /* 
+     * Calculates the transpose cofactor matrix of the current matrix.
+     * 
+     * @param result the matrix in which the result will be stored.
+     *     Default is null. If null, the default matrix is used.
+     * @return the cofactor matrix.
+     * @throws MatrixDimensionException iff the matrix is not square.
+     * 
+     * For calculation, see {@link calcCoMatrix()}.
+     */
+    public Mat calcTransCoMatrix() {
+        return calcTransCoMatrix(null);
+    }
+    
+    public Mat calcTransCoMatrix(Mat result) {
+        if (!isSquare()) {
+            throw new MatrixDimensionException
+                ("Cofactor matrix is undefined for non-square matrices. "
+                     + "Expected: nxn with n >= 1, "
+                     + "but found: " + getNumRows() + "x" + getNumCols() + ".");
+        }
+        
+        ToolNumber[][] newValues
+            = new ToolNumber[getNumRows()][getNumCols()];
+        
+        for (int row = 0; row < getNumRows(); row++) {
+            for (int col = 0; col < getNumRows(); col++) {
+                newValues[col][row] = calcMinor(row, col).det();
+                if ((row + col) % 2 == 1) {
+                    newValues[col][row].muli(-1);
+                }
+            }
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    /* 
+     * Calculates the minor matrix at (row, col) of the current matrix.
+     * 
+     * @param row the row to ignore for the minor.
+     * @param col the column to ignore for the minor.
+     * @param result the matrix used for storing the result.
+     * @param clone whether to clone the values.
+     * @return the minor of the current matrix at (row, col).
+     */
+    public Mat calcMinor(int row, int col) {
+        return calcMinor(row, col, null, true);
+    }
+    
+    public Mat calcMinor(int row, int col, Mat result) {
+        return calcMinor(row, col, result, true);
+    }
+    
+    public Mat calcMinor(int row, int col, boolean clone) {
+        return calcMinor(row, col, null, clone);
+    }
+    
+    public Mat calcMinor(int row, int col, Mat result, boolean clone) {
+        ToolNumber[][] newValues
+            = new ToolNumber[getNumRows() - 1][getNumCols() - 1];
+        
+        for (int i = 0; i < getNumRows(); i++) {
+            for (int j = 0; j < getNumCols(); j++) {
+                if (i == row || j == col) continue;
+                
+                int newRow = i - (i < row ? 0 : 1);
+                int newCol = j - (j < col ? 0 : 1);
+                newValues[newRow][newCol] = (clone
+                                                 ? values[i][j].clone()
+                                                 : values[i][j]);
+            }
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    /* 
+     * @result the determinant of the current matrix.
+     * @throws MatrixDimensionException iff the matrix is not square.
+     * 
+     * Calculation:
+     * det(mat)[i][j] = mat[i][j] * det(M_[mat, i, j])
+     * where:
+     *  - det(m) = the determinant of matrix m.
+     *  - mat = the current matrix.
+     *  - M_[m, i, j] = the minor matrix at (i, j).
+     */
+    public ToolNumber det() {
+        int rows = getNumRows();
+        int cols = getNumCols();
+        
+        if (!isSquare()) {
+            throw new MatrixDimensionException
+                ("Determinant is undefined for non-square matrices. "
+                     + "Expected: nxn with n >= 1, "
+                     + "but found: " + rows + "x" + cols + ".");
+        }
+        
+        if (rows == 1) {
             return values[0][0];
             
-        } else if (row == 2) {
-            return values[0][0] * values[1][1]
-                -  values[0][1] * values[1][0];
+        } else if (rows == 2) {
+            return values[0][0].mul(values[1][1])
+                .sub(values[0][1].mul(values[1][0]));
             
-        } else if (row == 3) {
-            return values[0][0] * values[1][1] * values[2][2]
-                +  values[0][1] * values[1][2] * values[2][0]
-                +  values[0][2] * values[1][0] * values[2][1]
-                -  values[0][2] * values[1][1] * values[2][0]
-                -  values[0][1] * values[1][0] * values[2][2]
-                -  values[0][0] * values[1][2] * values[2][1];
+        } else if (rows == 3) {
+            return values[0][0].mul(values[1][1]).mul(values[2][2])
+                .add(values[0][1].mul(values[1][2]).mul(values[2][0]))
+                .add(values[0][2].mul(values[1][0]).mul(values[2][1]))
+                .sub(values[0][2].mul(values[1][1]).mul(values[2][0]))
+                .sub(values[0][1].mul(values[1][0]).mul(values[2][2]))
+                .sub(values[0][0].mul(values[1][2]).mul(values[2][1]));
             
-        } else { // row > 3
-            double result = 0.0;
+        } else { // rows > 3
+            ToolNumber result = new PrimitiveNumber<Double>(0.0);
             
-            // Multiply every number on the first row with the determinant
-            // of the remaining matrix, where all numbers on the same row
-            // and collumn are deleted.
-            for (int i = 0; i < col; i++) {
-                double[][] newValues = new double[row-1][col-1];
+            for (int i = 0; i < cols; i++) {
+                // Create the minor matrix at the point row=0, col=i.
+                Mat minor = this.calcMinor(0, i, false);
                 
-                for (int j = 1; j < row; j++) {
-                    for (int k = 0; k < col; k++) {
-                        if (i == k) continue;
-                        if (k > i) {
-                            newValues[j-1][k-1] = values[j][k];
-                        } else {
-                            newValues[j-1][k] = values[j][k];
-                        }
-                    }
-                }
-                
-                double detResult = values[0][i] * new Mat(newValues).det();
+                // Recursivly determine the determinant.
+                ToolNumber detResult = values[0][i].mul(minor.det());
                 if (i/2 == i/2.0) {
-                    result += detResult;
+                    result.addi(detResult);
+                    
                 } else {
-                    result -= detResult;
+                    result.subi(detResult);
                 }
-                //System.out.println(new Mat(newValues));
-                //System.out.println(new Mat(newValues).det());
-                //System.out.println(result);
             }
             
             return result;
         }
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Overridden functions
-     * ----------------------------------------------------------------------------------------------------------------
+    /*
+     * Converts the current matrix to a matrix compatible with the gl shader.
+     * 
+     * @return linear matrix compatible with the gl shader.
      */
-    /* 
-     * Overrides the equals function from the Object class.
-     * Used for easy comparison between Matrix objects.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (this == obj) return true;
-        if (!(obj instanceof Mat)) return false;
-        Mat mat = (Mat) obj;
+    public double[] toGLMatrix() {
+        double[] result = new double[values.length * values[0].length];
         
-        // Check if both matrices are equal in size.
-        if (this.getNumRows() != mat.getNumRows() ||
-            this.getNumCols() != mat.getNumCols()) return false;
-        
-        // Check if the values are equal.
-        double[][] values = mat.getValues();
-        
-        for (int i = 0; i < values.length; i++) {
-            for (int j = 0; j < values[i].length; j++) {
-                if (values[i][j] != this.values[i][j]) return false;
+        for (int i = 0; i < getNumRows(); i++) {
+            for (int j = 0; j < getNumCols(); j++) {
+                // Note the transpose here
+                result[i*getNumCols() + j] = values[j][i].doubleValue();
             }
         }
         
-        return true;
+        return result;
     }
     
     /* 
-     * Overrides the toString function from the Object class.
-     * Creates a nice String representation of this matix.
+     * @return the identity matrix that has
+     *     the same size as the current matrix.
+     */
+    public <M extends Mat> M getIMat() {
+        return getIMat(values.length, values[0].length);
+    }
+    
+    /* 
+     * Resets the matrix to the identity matrix.
+     */
+    public void clear() {
+        setMatrix(getIMat().values, false);
+    }
+    
+    /* 
+     * Gets the values of the matrix.
+     * 
+     * @param cloneMat whether the values should be cloned
+     *     before being returned. Default is true.
+     * @return the values of the matrix.
+     */
+    public ToolNumber[][] getValues() {
+        return getValues(true);
+    }
+    
+    public ToolNumber[][] getValues(boolean cloneMat) {
+        if (cloneMat) {
+            return MultiTool.deepArrayClone(values);
+            
+        } else {
+            return values;
+        }
+    }
+    
+    /* 
+     * @return the number of rows the matrix has.
+     */
+    public int getNumRows() {
+        return values.length;
+    }
+    
+    /* 
+     * @return the number of columns the matrix has.
+     */
+    public int getNumCols() {
+        return values[0].length;
+    }
+    
+    /* 
+     * @return whether the current matrix is square.
+     */
+    public boolean isSquare() {
+        return values.length == values[0].length;
+    }
+    
+    /* 
+     * Adds the values of {@code rowFrom} to {@code rowTo}.
+     * 
+     * @param rowFrom the row used for adding.
+     * @param rowTo the destination row.
+     * @param scalar the factor which the from-row is pre-multiplied with
+     *     before being added to the to-row.
+     * @param clone denotes whether to do the operation in-place or return
+     *     a clone.
+     * @return a matrix where the from-row was added to the to-row.
+     * @throws IllegalArgumentException iff
+     *     {@code rowFrom < 0 || rowFrom >= #rows ||
+     *         rowTo < 0 || rowTo >= #rows}.
+     * 
+     * Note that {@code rowFrom} and {@code rowTo} denote the indeces
+     * of the matrix.
+     */
+    protected Mat addRowToRow(int rowFrom, int rowTo, Number scalar,
+                              boolean clone) {
+        if (rowFrom < 0 || rowFrom >= getNumRows())
+            throw new IllegalArgumentException
+            ("From-row exceeds matrix boundries!");
+        if (rowTo < 0 || rowTo >= getNumRows())
+            throw new IllegalArgumentException
+            ("From-row exceeds matrix boundries!");
+        
+        // Get the result
+        ToolNumber[][] result = getValues(clone);
+        
+        for (int i = 0; i < getNumCols(); i++) {
+            result[rowTo][i].addi(values[rowFrom][i].mul(scalar));
+        }
+        
+        return clone
+            ? createDefaultInstance().setMatrix(result, false)
+            : this;
+    }
+    
+    public Mat addRowToRow(int rowFrom, int rowTo, Number scalar) {
+        return addRowToRow(rowFrom, rowTo, scalar, true);
+    }
+    
+    public Mat addRowToRowi(int rowFrom, int rowTo, Number scalar) {
+        return addRowToRow(rowFrom, rowTo, scalar, false);
+    }
+    
+    /* 
+     * Adds the values of {@code colFrom} to {@code colTo}.
+     * 
+     * @param colFrom the Col used for adding.
+     * @param colTo the destination Col.
+     * @param scalar the factor which the from-col is pre-multiplied with
+     *     before being added to the to-col.
+     * @param clone denotes whether to do the operation in-place or return
+     *     a clone.
+     * @return a matrix where the from-col was added to the to-col.
+     * @throws IllegalArgumentException iff
+     *     {@code colFrom < 0 || colFrom >= #cols ||
+     *         colTo < 0 || colTo >= #cols}.
+     * 
+     * Note that {@code colFrom} and {@code colTo} denote the indeces
+     * of the matrix.
+     */
+    protected Mat addColToCol(int colFrom, int colTo, Number scalar,
+                              boolean clone) {
+        if (colFrom < 0 || colFrom >= getNumCols())
+            throw new IllegalArgumentException
+            ("From-col exceeds matrix boundries!");
+        if (colTo < 0 || colTo >= getNumCols())
+            throw new IllegalArgumentException
+            ("From-col exceeds matrix boundries!");
+        
+        ToolNumber[][] result = getValues(clone);
+        
+        for (int i = 0; i < getNumCols(); i++) {
+            result[i][colTo].addi(values[i][colFrom].mul(scalar));
+        }
+        
+        return clone
+            ? createDefaultInstance().setMatrix(result, false)
+            : this;
+    }
+    
+    public Mat addColToCol(int colFrom, int colTo, Number scalar) {
+        return addColToCol(colFrom, colTo, scalar, true);
+    }
+    
+    public Mat addColToColi(int colFrom, int colTo, Number scalar) {
+        return addColToCol(colFrom, colTo, scalar, false);
+    }
+    
+    /* 
+     * Multiplies the given row with a scalar.
+     * 
+     * @param row row to multiply.
+     * @param scalar the used scalar.
+     * @param clone denotes whether to do the operation in-place or return
+     *     a clone.
+     * @return a matrix where all values on the given row are multiplied with
+     *     the given scalar.
+     * @throws IllegalArgumentException iff {@code row < 0 || row >= #rows}.
+     */
+    protected Mat mulRow(int row, Number scalar, boolean clone) {
+        if (row < 0 || row >= getNumRows())
+            throw new IllegalArgumentException
+            ("Row exceeds matrix boundries!");
+        ToolNumber[][] result = getValues(clone);
+        
+        for (int i = 0; i < getNumRows(); i++) {
+            result[row][i].muli(scalar);
+        }
+        
+        return clone
+            ? createDefaultInstance().setMatrix(result, false)
+            : this;
+    }
+    
+    public Mat mulRow(int row, Number scalar) {
+        return mulRow(row, scalar, true);
+    }
+    
+    public Mat mulRowi(int row, Number scalar) {
+        return mulRow(row, scalar, false);
+    }
+    
+    /* 
+     * Multiplies the given col with a scalar.
+     * 
+     * @param col col to multiply.
+     * @param scalar the used scalar.
+     * @param clone denotes whether to do the operation in-place or return
+     *     a clone.
+     * @return a matrix where all values on the given col are multiplied with
+     *     the given scalar.
+     * @throws IllegalArgumentException iff {@code col < 0 || col >= #cols}.
+     */
+    protected Mat mulCol(int col, Number scalar, boolean clone) {
+        if (col < 0 || col >= getNumCols())
+            throw new IllegalArgumentException
+            ("Col exceeds matrix boundries!");
+        
+        ToolNumber[][] result = getValues(clone);
+        
+        for (int i = 0; i < getNumCols(); i++) {
+            result[i][col].muli(scalar);
+        }
+        
+        return clone
+            ? createDefaultInstance().setMatrix(result)
+            : this;
+    }
+    
+    public Mat mulCol(int col,  Number scalar) {
+        return mulCol(col, scalar, true);
+    }
+    
+    public Mat mulColi(int col, Number scalar) {
+        return mulCol(col, scalar, false);
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Overrides from ToolNumber
+     * -------------------------------------------------------------------------
      */
     @Override
-    public String toString() {
-        String text = "[[";
+    public Number getValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].getValue();
+            
+        } else {
+            throw new IllegalStateException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    /* 
+     * @return the inverse of this matrix.
+     * 
+     * Calculation notes:
+     * Calculates the inverse by adding rows of the matrix to other rows to
+     * create the I matrix. Then do the exact same operations (in the same
+     * order) for an I matrix. This matrix will then be the result.
+     * 
+     * Note that the types of the ToolNumbers used in {@code values} will
+     * be converted to {@code Double}. To prevent this from happening,
+     * use {@link inverseKeepType()}. Also note that this method is
+     * ~2.4 times faster!
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public  <T extends ToolNumber> T inverse() {
+        if (!isSquare()) {
+            throw new MatrixDimensionException
+                ("Cofactor matrix is undefined for non-square matrices. "
+                     + "Expected: nxn with n >= 1, "
+                     + "but found: " + getNumRows() + "x" + getNumCols() + ".");
+        }
         
-        for (int i = 0; i < values.length; i++) {
-            if (i != 0) {
-                text += " [";
+        Mat cloneMat = this.clone();
+        ToolNumber[][] cloneValues = cloneMat.getValues(false);
+        Mat resultMat = this.getIMat();
+        ToolNumber[][] result  = resultMat.getValues(false);
+        
+        for (int i = 0; i < getNumRows(); i++) {
+            ToolNumber addValue = cloneValues[i][i];
+            if (addValue.doubleValue() == 0.0) {
+                /* If the value on the center line equals 0, find
+                   another row where there is a value on that column and
+                   add that row to the current row.
+                   Note that j starts with {@code i+1} since the values above
+                   already have a 1 on the columns on the left.*/
+                boolean found = false;
+                for (int j = i+1; j < getNumRows(); j++) {
+                    if (cloneValues[j][i].doubleValue() != 0.0) {
+                        ToolNumber divVal = cloneValues[j][i].divInv(1.0);
+                        resultMat.addRowToRowi(j, i, divVal);
+                        cloneMat.addRowToRowi(j, i, divVal);
+                        
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (!found)
+                    throw new MatrixLinearDependancyException();
+                
+            } else {
+                addValue = addValue.divInv(1.0);
+                resultMat.mulRowi(i, addValue);
+                cloneMat.mulRowi(i, addValue);
             }
             
-            for (int j = 0; j < values[i].length; j++) {
-                text += this.values[i][j];
-                
-                if (j + 1 != values[i].length) {
-                    text += ", ";
+            for (int j = 0; j < getNumRows(); j++) {
+                if (i == j) continue;
+                resultMat.addRowToRowi(i, j, cloneValues[j][i].mul(-1.0));
+                cloneMat.addRowToRowi(i, j, cloneValues[j][i].mul(-1.0));
+            }
+        }
+        
+        return (T) resultMat;
+    }
+    
+    /* 
+     * @return the inverse of this matrix.
+     * 
+     * Calculation notes:
+     * CM_[mat]^T / det(mat)
+     * where:
+     *  - CM_[m] = the cofactor matrix of m.
+     *  - m^T = transpose matrix of m.
+     *  - det(m) = determinant of m.
+     * 
+     * Note that the type of the ToolNumbers used in {@code values} will remain
+     * the same. To convert the default type to Double,
+     * use {@link inverse()}. Also note that this method is ~2.4 times slower!
+     */
+    public Mat inverseKeepType() {
+        if (!isSquare()) {
+            throw new MatrixDimensionException
+                ("Cofactor matrix is undefined for non-square matrices. "
+                     + "Expected: nxn with n >= 1, "
+                     + "but found: " + getNumRows() + "x" + getNumCols() + ".");
+        }
+        
+        ToolNumber det = det();
+        if (det.doubleValue() == 0.0)
+            throw new MatrixLinearDependancyException();
+            
+        return calcTransCoMatrix().divi(det);
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Overrides from ToolNumberAdapter
+     * -------------------------------------------------------------------------
+     */
+    /* 
+     * Adds the first two numbers an outputs the result using the result matrix.
+     * 
+     * @throws MatrixDimensionException iff
+     *     o either of {@code tn1} or {@code tn2} is a matrix, and the other
+     *       a value and the matrix has not the dimension 1x1
+     *     o both {@code tn1} or {@code tn2} are matrices and their number
+     *       of rows and columns differ from eachother.
+     * @throws NumberFormatException iff
+     *     neither {@code tn1} as {@code tn2} are a matrix.
+     * 
+     * Also see {@link ToolNumberAdapter#addTool(ToolNumber, ToolNumber, M)}.
+     */
+    @Override
+    protected <M extends Mat> M addTool(ToolNumber tn1, ToolNumber tn2,
+                                        M result)
+            throws MatrixDimensionException, NumberFormatException {
+        if (tn1 == null || tn2 == null) throw new NullPointerException();
+        boolean isMat1 = tn1 instanceof Mat;
+        boolean isMat2 = tn2 instanceof Mat;
+        ToolNumber[][] newValues;
+        
+        if (isMat1 && isMat2) {
+            Mat matLeft  = (Mat) tn1;
+            Mat matRight = (Mat) tn2;
+            
+            // Check matrix dimensions.
+            if (matRight.getNumRows() != matLeft.getNumRows())
+                throw new MatrixDimensionException
+                    ("The number rows of the matrices are not equal.");
+            if (matRight.getNumCols() != matLeft.getNumCols())
+                throw new MatrixDimensionException
+                    ("The number columns of the matrices are not equal.");
+            
+            ToolNumber[][] left  = matLeft.getValues();
+            ToolNumber[][] right = matRight.getValues();
+            newValues
+                = new ToolNumber[matLeft.getNumRows()][matRight.getNumCols()];
+            
+            // Add the matrices.
+            for (int i = 0; i < matLeft.getNumRows(); i++) {
+                for (int j = 0; j < matRight.getNumCols(); j++) {
+                        newValues[i][j] = left[i][j].add(right[i][j]);
                 }
             }
             
-            text += "]";
-            if (i + 1 != values.length) {
-                text += System.getProperty("line.separator");
+        } else if (isMat1 ^ isMat2) {
+            // Either of them is a matrix.
+            // If the matrix is not an 1x1 matrix,
+            // throw a NumberFormatException.
+            Mat mat = (Mat) (isMat1 ? tn1 : tn2);
+            
+            // Check matrix dimensions.
+            if (mat.getNumRows() != 1 && mat.getNumCols() != 1) {
+                throw new MatrixDimensionException
+                    ("Expected an 1x1 matrix, but found: " + mat.getNumRows()
+                         + "x" + mat.getNumCols());
             }
+            
+            // Update the values.
+            newValues = mat.getValues(true);
+            if (isMat1) {
+                newValues[0][0].addi(tn2);
+                
+            } else {
+                newValues[0][0].addInvi(tn1);
+            }
+            
+        } else {
+            // Neither of them is a matix.
+            throw new NumberFormatException
+                ("Neither of the given numbers is a matrix.");
         }
-        text += "]";
-        return text;
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
     }
     
     /* 
-     * Overrides the clone function from the Cloneable interface.
-     * Used to make a deep copy of this Matrix object.
+     * Subtracts the first number from the second number and outputs
+     * the result via the result matrix.
+     * 
+     * @throws MatrixDimensionException iff
+     *     o either of {@code tn1} or {@code tn2} is a matrix, and the other
+     *       a value and the matrix has not the dimension 1x1
+     *     o both {@code tn1} or {@code tn2} are matrices and their number
+     *       of rows and columns differ from eachother.
+     * @throws NumberFormatException iff
+     *     neither {@code tn1} as {@code tn2} are a matrix.
+     * 
+     * Also see {@link ToolNumberAdapter#subTool(ToolNumber, ToolNumber, M)}.
+     */
+    @Override
+    protected <M extends Mat> M subTool(ToolNumber tn1,
+                                        ToolNumber tn2, M result)
+            throws MatrixDimensionException, NumberFormatException {
+        boolean isMat1 = tn1 instanceof Mat;
+        boolean isMat2 = tn2 instanceof Mat;
+        ToolNumber[][] newValues;
+        
+        if (isMat1 && isMat2) {
+            Mat matLeft  = (Mat) tn1;
+            Mat matRight = (Mat) tn2;
+            
+            // Check matrix dimensions.
+            if (matRight.getNumRows() != matLeft.getNumRows())
+                throw new MatrixDimensionException
+                    ("The number rows of the matrices are not equal.");
+            if (matRight.getNumCols() != matLeft.getNumCols())
+                throw new MatrixDimensionException
+                    ("The number columns of the matrices are not equal.");
+            
+            ToolNumber[][] left  = matLeft.getValues(false);
+            ToolNumber[][] right = matRight.getValues(false);
+            newValues
+                = new ToolNumber[matLeft.getNumRows()][matRight.getNumCols()];
+            
+            // Add the matrices.
+            for (int i = 0; i < matLeft.getNumRows(); i++) {
+                for (int j = 0; j < matRight.getNumCols(); j++) {
+                        newValues[i][j] = left[i][j].sub(right[i][j]);
+                }
+            }
+            
+        } else if (isMat1 ^ isMat2) {
+            // Either of them is a matrix.
+            // If the matrix is not an 1x1 matrix,
+            // throw a NumberFormatException.
+            Mat mat = (Mat) (isMat1 ? tn1 : tn2);
+            
+            // Check matrix dimensions.
+            if (mat.getNumRows() != 1 && mat.getNumCols() != 1){
+                throw new MatrixDimensionException
+                    ("Expected an 1x1 matrix, but found: " + mat.getNumRows()
+                         + "x" + mat.getNumCols());
+                
+            }
+            
+            // Update the values.
+            newValues = mat.getValues(true);
+            if (isMat1) {
+                newValues[0][0].subi(tn2);
+                
+            } else {
+                newValues[0][0].subInvi(tn1);
+            }
+            
+        } else {
+            // Neither of them is a matix.
+            throw new NumberFormatException
+                ("Neither of the given numbers is a matrix.");
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    /* 
+     * Multiplies the first number with the second number and outputs
+     * the result via the result matrix.
+     * 
+     * @throws MatrixDimensionException iff
+     *     both {@code tn1} or {@code tn2} are matrices and the number of
+     *     columns of {@code tn1} is not equal to the number of
+     *     rows of {@code tn2}.
+     * @throws NumberFormatException iff
+     *     neither {@code tn1} as {@code tn2} are a matrix.
+     * 
+     * Also see {@link ToolNumberAdapter#mulTool(ToolNumber, ToolNumber, M)}.
+     */
+    @Override
+    protected <M extends Mat> M mulTool(ToolNumber tn1,
+                                        ToolNumber tn2, M result)
+            throws MatrixDimensionException, NumberFormatException {
+        boolean isMat1 = tn1 instanceof Mat;
+        boolean isMat2 = tn2 instanceof Mat;
+        ToolNumber[][] newValues;
+        
+        if (isMat1 && isMat2) {
+            Mat matLeft  = (Mat) tn1;
+            Mat matRight = (Mat) tn2;
+            
+            // Check matrix dimensions.
+            if (matLeft.getNumCols() != matRight.getNumRows())
+                throw new MatrixDimensionException
+                    ("Number of colums of the left matrix ("
+                         + matLeft.getNumCols()
+                         + ") is not equal to the number of rows of the right "
+                         + "matrix (" + matRight.getNumRows() + ")");
+            
+            ToolNumber[][] left  = matLeft.getValues(false);
+            ToolNumber[][] right = matRight.getValues(false);
+            newValues
+                = new ToolNumber[matLeft.getNumRows()][matRight.getNumCols()];
+            
+            for (int i = 0; i < matLeft.getNumRows(); i++) {
+                for (int j = 0; j < matRight.getNumCols(); j++) {
+                    for (int k = 0; k < matLeft.getNumCols(); k++) {
+                        ToolNumber mul = left[i][k].mul(right[k][j]);
+                        if (newValues[i][j] == null) {
+                            newValues[i][j] = mul;
+                            
+                        } else {
+                            newValues[i][j].addi(mul);
+                        }
+                    }
+                }
+            }
+            
+        } else if (isMat1 ^ isMat2) {
+            // Either of them is a matrix.
+            Mat mat =  (Mat) (isMat1 ? tn1 : tn2);
+            ToolNumber[][] matValues = mat.getValues(false);
+            newValues = new ToolNumber[mat.getNumRows()][mat.getNumCols()];
+            
+            for (int i = 0; i < mat.getNumRows(); i++) {
+                for (int j = 0; j < mat.getNumCols(); j++) {
+                    if (isMat1) {
+                        newValues[i][j] = matValues[i][j].mul(tn2);
+                        
+                    } else {
+                        newValues[i][j] = matValues[i][j].mulInv(tn1);
+                    }
+                }
+            }
+            
+        } else {
+            // Neither of them is a matix.
+            throw new NumberFormatException
+                ("Neither of the given numbers is a matrix.");
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    /* 
+     * Divides the first number by the second number and outputs
+     * the result via the result matrix.
+     * Note that if both are matrices, matrix multiplication is used, 
+     * but now every first number is divided by the second number, so:
+     * {@code tn1 * (tn2)^-1} is what actually happens (every number in
+     * {@code tn2} is inversed)).
+     * 
+     * @throws MatrixDimensionException iff
+     *     both {@code tn1} or {@code tn2} are matrices and the number of
+     *     columns of {@code tn1} is not equal to the number of
+     *     rows of {@code tn2}.
+     * @throws NumberFormatException iff
+     *     neither {@code tn1} as {@code tn2} are a matrix.
+     * 
+     * Also see {@link ToolNumberAdapter#divTool(ToolNumber, ToolNumber, M)}.
+     */
+    @Override
+    protected <M extends Mat> M divTool(ToolNumber tn1,
+                                        ToolNumber tn2, M result)
+            throws MatrixDimensionException, NumberFormatException {
+        boolean isMat1 = tn1 instanceof Mat;
+        boolean isMat2 = tn2 instanceof Mat;
+        ToolNumber[][] newValues;
+        
+        if (isMat1 && isMat2) {
+            Mat matLeft  = (Mat) tn1;
+            Mat matRight = (Mat) tn2;
+            
+            // Check matrix dimensions
+            if (matLeft.getNumCols() != matRight.getNumRows())
+                throw new MatrixDimensionException
+                    ("Number of colums of the left matrix ("
+                         + matLeft.getNumCols()
+                         + ") is not equal to the number of rows of the right "
+                         + "matrix (" + matRight.getNumRows() + ")");
+            
+            ToolNumber[][] left  = matLeft.getValues(false);
+            ToolNumber[][] right = matRight.getValues(false);
+            newValues
+                = new ToolNumber[matLeft.getNumRows()][matRight.getNumCols()];
+            
+            for (int i = 0; i < matLeft.getNumRows(); i++) {
+                for (int j = 0; j < matRight.getNumCols(); j++) {
+                    for (int k = 0; k < matLeft.getNumCols(); k++) {
+                        ToolNumber mul = left[i][k].mul(right[k][j]);
+                        if (newValues[i][j] == null) {
+                            newValues[i][j] = mul;
+                            
+                        } else {
+                            newValues[i][j].addi(mul);
+                        }
+                    }
+                }
+            }
+            
+        } else if (isMat1 ^ isMat2) {
+            // Either of them is a matrix.
+            Mat mat =  (Mat) (isMat1 ? tn1 : tn2);
+            ToolNumber[][] matValues = mat.getValues(false);
+            newValues = new ToolNumber[mat.getNumRows()][mat.getNumCols()];
+            
+            for (int i = 0; i < mat.getNumRows(); i++) {
+                for (int j = 0; j < mat.getNumCols(); j++) {
+                    if (isMat1) {
+                        newValues[i][j] = matValues[i][j].div(tn2);
+                        
+                    } else {
+                        newValues[i][j] = matValues[i][j].divInv(tn1);
+                    }
+                }
+            }
+            
+        } else {
+            // Neither of them is a matix.
+            throw new NumberFormatException
+                ("Neither of the given numbers is a matrix.");
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    /* 
+     * Calculates {@code tn1 % tn2}.
+     * 
+     * @throws MatrixDimensionException iff
+     *     o either of {@code tn1} or {@code tn2} is a matrix, and the other
+     *       a value and the matrix has not the dimension 1x1
+     *     o both {@code tn1} or {@code tn2} are matrices and their number
+     *       of rows and columns differ from eachother.
+     * @throws NumberFormatException iff
+     *     neither {@code tn1} as {@code tn2} are a matrix.
+     * 
+     * Also see {@link ToolNumberAdapter#modTool(ToolNumber, ToolNumber, M)}.
+     */
+    @Override
+    protected <M extends Mat> M modTool(ToolNumber tn1,
+                                        ToolNumber tn2, M result)
+            throws MatrixDimensionException, NumberFormatException {
+        boolean isMat1 = tn1 instanceof Mat;
+        boolean isMat2 = tn2 instanceof Mat;
+        ToolNumber[][] newValues;
+        
+        if (isMat1 && isMat2) {
+            Mat matLeft  = (Mat) tn1;
+            Mat matRight = (Mat) tn2;
+            
+            // Check matrix dimensions.
+            if (matRight.getNumRows() != matLeft.getNumRows())
+                throw new MatrixDimensionException
+                    ("The number rows of the matrices are not equal.");
+            if (matRight.getNumCols() != matLeft.getNumCols())
+                throw new MatrixDimensionException
+                    ("The number columns of the matrices are not equal.");
+            
+            ToolNumber[][] left  = matLeft.getValues();
+            ToolNumber[][] right = matRight.getValues();
+            newValues
+                = new ToolNumber[matLeft.getNumRows()][matRight.getNumCols()];
+            
+            // Add the matrices.
+            for (int i = 0; i < matLeft.getNumRows(); i++) {
+                for (int j = 0; j < matRight.getNumCols(); j++) {
+                    newValues[i][j] = left[i][j].mod(right[i][j]);
+                }
+            }
+            
+        } else if (isMat1 ^ isMat2) {
+            // Either of them is a matrix.
+            // If the matrix is not an 1x1 matrix,
+            // throw a NumberFormatException.
+            Mat mat = (Mat) (isMat1 ? tn1 : tn2);
+            
+            // Check matrix dimensions.
+            if (mat.getNumRows() != 1 && mat.getNumCols() != 1){
+                throw new MatrixDimensionException
+                    ("Expected an 1x1 matrix, but found: " + mat.getNumRows()
+                         + "x" + mat.getNumCols());
+                
+            }
+            
+            // Update the values.
+            newValues = mat.getValues(true);
+            if (isMat1) {
+                newValues[0][0].modi(tn2);
+                
+            } else {
+                newValues[0][0].modInvi(tn1);
+            }
+            
+        } else {
+            // Neither of them is a matix.
+            throw new NumberFormatException
+                ("Neither of the given numbers is a matrix.");
+        }
+        
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = createDefaultInstance();
+        }
+        
+        return result.setMatrix(newValues, false);
+    }
+    
+    @Override
+    public void update(Mat mat) {
+        this.setMatrix(mat.getValues(false));
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Overrides from Number
+     * -------------------------------------------------------------------------
+     */
+    @Override
+    public byte byteValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].byteValue();
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    @Override
+    public short shortValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].shortValue();
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    @Override
+    public int intValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].intValue();
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    @Override
+    public long longValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].longValue();
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    @Override
+    public float floatValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].floatValue();
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    @Override
+    public double doubleValue() {
+        if (getNumRows() == 1 && getNumCols() == 0) {
+            return values[0][0].doubleValue();
+            
+        } else {
+            throw new NumberFormatException
+                ("Expected an 1x1 matrix, but found an " + getNumRows()
+                     + "x" + getNumCols() + " matrix.");
+        }
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Other overrides
+     * -------------------------------------------------------------------------
+     */
+    /* 
+     * @return a String representation of the matrix.
+     */
+    @Override
+    public String toString() {
+        String[] outer = new String[values.length];
+        
+        for (int i = 0; i < values.length; i++) {
+            String[] inner = new String[values[i].length];
+            for (int j = 0; j < values[i].length; j++) {
+                inner[j] = "" + values[i][j];
+            }
+            
+            outer[i] = String.join(", ", inner);
+        }
+        
+        String ls = System.getProperty("line.separator");
+        return "[["+ String.join("]"+ ls + " [", outer) + "]]";
+    }
+    
+    /* 
+     * @return whether {@code this} and {@code obj} are equivalent.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof Mat)) return false;
+        
+        return MultiTool.compareDeepArray(values, ((Mat) obj).values);
+    }
+    
+    /* 
+     * @return a hash code for the current matrix.
+     */
+    @Override
+    public int hashCode() {
+        return MultiTool.calcHashCode((Object) values);
+    }
+    
+    /* 
+     * Clones the current matrix.
+     * 
+     * @return a clone of the matrix.
+     * 
+     * Note that the returned value is a {@code Mat}, and not
+     * a {@code M extends Mat} since this is not allowed due to
+     * the existance of the{@code Object.clone()} method.
+     * However, it is allowed to cast the clone to the desired class.
      */
     @Override
     public Mat clone() {
-        return new Mat(this.values);
+        return createDefaultInstance().setMatrix(values, true);
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Functions that should be overridden by subclasses
+     * -------------------------------------------------------------------------
+     */
+    /* 
+     * This method is called when the matrix is set via
+     * {@link setMatrix(double[][], boolean)} and adds constrains for the
+     * dimension. A MatrixDimensionException should be thrown here if
+     * an unacceptable matrix dimension was given.
+     */
+    public void matrixDimCheck(int rows, int cols) 
+            throws MatrixDimensionException {
+    }
+    
+    /* 
+     * This method provides a default instance for the results used
+     * in the functions. Implement this function to change the returned
+     * type of each of the functions above.
+     * 
+     * @return the default instance.
+     * 
+     * Notes for implementing classes:
+     *  - It is advised to return the basic instance of your class
+     *    (e.g. (M) new MyMat()).
+     *  - This function is used in almost every operation, so keep
+     *    the runtime low, preferable O(1).
+     *  - To prevent infinite recursion, do NOT use any method that might
+     *    depend on this function.
+     *  - For every call, a new instance should be created.
+     *    So do NOT return the same (static) matrix object.
+     */
+    @SuppressWarnings("unchecked") // <Mat> instanceof Mat
+    public static <M extends Mat> M createDefaultInstance() {
+        return (M) new Mat();
     }
     
     public static void main(String[] args) {
-        
+        /*
         Mat mat2 = new Mat(2, 2,
                            1, 2,
                            3, 4);
@@ -596,12 +1615,18 @@ public class Mat {
                            6, 7, 8,
                            33, 5, 12,
                            14, 18, 16);
+        /*
         System.out.println(mat2.det());
         System.out.println(mat3.det());
         System.out.println(mat4.det());
         System.out.println(mat4);
         System.out.println(mat5.det());
-        /*
+        *//*
+        Mat mat1 = new Mat(4, 2,
+                           1, 2,
+                           6, 7,
+                           10, 5,
+                           14, 18);
         System.out.println("Mat 1:");
         System.out.println(mat1);
         
@@ -611,7 +1636,7 @@ public class Mat {
         
         System.out.println("Mat 2:");
         System.out.println(mat2);
-        
+        /*
         Mat mat3 = new Mat(2, 3,
                            3, 3, 3,
                            3, 3, 3);
@@ -622,6 +1647,47 @@ public class Mat {
                             1, mat3);
         
         System.out.println("Mat 23:");
-        System.out.println(mat23);/**/
+        System.out.println(mat23);*/
+        /*
+        System.out.println(((PrimitiveNumber) mat1.getValues(false)[0][0]).type);
+        System.out.println(mat1.muli(mat2));
+        System.out.println(((PrimitiveNumber) mat1.getValues(false)[0][0]).type);
+        /**/
+        
+        
+        
+        /*
+        Mat test = new Mat(2, 2,
+                           15.0, 0.8,
+                           -35.0, 4.2);
+                           */
+        Mat test = new Mat(4, 4,
+                           1.0,   2.0,  7.3,  1.5,
+                           2.0,   1.0,  2.4, -0.3,
+                           1.8,   0.3,  1.0, -20.0,
+                           32.0, -0.1,  0.0,  1.0);
+        
+        Mat invTest = test.inverse();
+        Mat invInvTest = invTest.inverse();
+        System.out.println(test);
+        System.err.println(invTest);
+        System.out.println(invInvTest);
+        System.out.println(test.mul(invTest));
+        System.out.println("-------------");
+        System.out.println(test.det());
+        System.out.println(test.calcTransCoMatrix());
+        System.err.println();
+        
+        /**/
+        /*
+        Mat test = new Mat(3, 3,
+                           11, 12, 14,
+                           21, 22, 23,
+                           31, 32, 31);
+        System.out.println(test.calcTransCoMatrix());
+        System.out.println(test.calcCoMatrix());
+        /**/
     }
+    
+    
 }

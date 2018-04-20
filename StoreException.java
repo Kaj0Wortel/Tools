@@ -10,22 +10,31 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
-package tools.dataStructures;
+
+package tools;
 
 
-// Java imports
-import java.util.List;
-
-
-/*
- * Currently under development.
- * Do not use!
+/* 
+ * This exception is thrown when a value is attempted to be stored
+ * at a location that is not suitable for that value.
  */
-public interface DataStructure {
-    //public abstract static void copy(List<? extends Number> source, List<? super Number> destiny);
+public class StoreException
+        extends RuntimeException {
     
-    //public abstract void 
+    public StoreException() {
+        super();
+    }
     
+    public StoreException(String msg) {
+        super(msg);
+    }
+    
+    public StoreException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+    
+    public StoreException(Throwable cause) {
+        super(cause);
+    }
     
 }

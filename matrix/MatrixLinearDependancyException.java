@@ -10,22 +10,22 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
-package tools.dataStructures;
+
+package tools.matrix;
 
 
-// Java imports
-import java.util.List;
-
-
-/*
- * Currently under development.
- * Do not use!
+/* 
+ * This exception should be thrown when a matrix has an incorrect amount
+ * of linear dependant dimensions.
  */
-public interface DataStructure {
-    //public abstract static void copy(List<? extends Number> source, List<? super Number> destiny);
+public class MatrixLinearDependancyException extends RuntimeException {
     
-    //public abstract void 
+    public MatrixLinearDependancyException() {
+        super("Cannot create an nxn inverse matrix of a matrix that has "
+                  + "less then n linearly independant dimensions.");
+    }
     
-    
+    public MatrixLinearDependancyException(String id) {
+        super(id);
+    }
 }
