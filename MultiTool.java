@@ -654,7 +654,8 @@ public class MultiTool {
             if (isArrayA && isArrayB) {
                 // If both are an array, recursivly determine whether
                 // they are equal.
-                if (!compareDeepArray((Object[]) a[i], (Object[]) b[i])) {
+                if (!compareDeepArray(safeObjArrCast(a[i]),
+                                      safeObjArrCast(b[i]))) {
                     return false;
                 }
                 
@@ -695,10 +696,12 @@ public class MultiTool {
      *     the provided value does not contain one of the supported types.
      */
     @SuppressWarnings("unchecked")
-    public static <V> V deepArrayClone(V value)
+    public static <V> V deepClone(V value)
             throws IllegalStateException, UnsupportedOperationException {
+        if (value == null) return null;
+        
         if (value.getClass().isArray()) {
-            return (V) deepArrayCloneArr((Object[]) value);
+            return (V) deepArrayClone(safeObjArrCast(value));
             
         } else {
             if (value instanceof tools.Cloneable) {
@@ -775,18 +778,16 @@ public class MultiTool {
     }
     
     @SuppressWarnings("unchecked")
-    private static <T> T[] deepArrayCloneArr(T[] objArr)
+    public static <T> T[] deepArrayClone(T[] objArr)
             throws IllegalStateException, IllegalArgumentException {
         T[] newObjArr = (T[]) Array.newInstance(objArr
                                                     .getClass()
                                                     .getComponentType(),
                                                 objArr.length);
         for (int i = 0; i < objArr.length; i++) {
-            newObjArr[i] = (T) deepArrayClone(objArr[i]);
+            newObjArr[i] = (T) deepClone(objArr[i]);
         }
         
-        System.out.println(objArr.getClass().toString());
-        System.out.println(objArr.getClass().toString());
         return (T[]) newObjArr;
     }
     
@@ -832,7 +833,7 @@ public class MultiTool {
                 c = (int) Math.pow(value, value >>> 32);
                 
             } else if (isArray(obj)) {
-                c = calcHashCode((Object[]) obj);
+                c = calcHashCode(safeObjArrCast(obj));
                 
             } else {
                 c = obj.hashCode();
@@ -842,6 +843,115 @@ public class MultiTool {
         }
         
         return result;
+    }
+    
+    /* 
+     * Calculates the dimensions of the array.
+     * 
+     * @param obj array to calculate the dimensions of.
+     * @param isEqual whether each sub-level of the array as the same dimension.
+     *     (So new {@code int[5][5]} yields true, but
+     *      {@code int[][] {int[4], int[5]}} yields false).
+     * @return an array containing the dimensions of the array, where the
+     *     lowest index denotes the topmost level. When the array is unequal,
+     *     the maximum value for each level is taken.
+     *     (so {@code int[][] {int[4], int[5]}} yields {@code int[] {2, 5}}).
+     */
+    public static int[] calcDimArray(Object obj) {
+        return calcDimArray(obj, false);
+    }
+    
+    public static int[] calcDimArray(Object obj, boolean isEqual) {
+        return calcDimArray(obj, isEqual, calcDepthArray(obj) - 1);
+    }
+    
+    private static int[] calcDimArray(Object obj, boolean isEqual, int depth) {
+        if (obj == null || depth < 0) return new int[0];
+        
+        if (obj.getClass().isArray()) {
+            int[] dim = new int[depth + 1];
+            dim[0] = Array.getLength(obj);
+            
+            if (Array.getLength(obj) == 0) {
+                return dim;
+            }
+            
+            if (isEqual) {
+                int[] oldDim = calcDimArray(Array.get(obj, 0),
+                                            isEqual, depth - 1);
+                for (int i = 0; i < oldDim.length; i++) {
+                    dim[i + 1] = oldDim[i];
+                }
+                
+                return dim;
+                
+            } else {
+                for (int i = 0; i < Array.getLength(obj); i++) {
+                    int[] oldDim = calcDimArray(Array.get(obj, i),
+                                                isEqual, depth - 1);
+                    for (int j = 0; j < oldDim.length; j++) {
+                        if (oldDim[j] > dim[j + 1]) {
+                            dim[j + 1] = oldDim[j];
+                        }
+                    }
+                }
+                
+                return dim;
+                
+            }
+            
+        } else {
+            return new int[0];
+        }
+    }
+    
+    /* 
+     * Calculates the depth of the given array.
+     * 
+     * @param obj the array to calculate the depth of.
+     * @return the depth of the given array.
+     */
+    public static int calcDepthArray(Object obj) {
+        if (obj == null) return -1;
+        String name = obj.getClass().getName();
+        
+        int depth = -1;
+        while (depth < name.length() && name.charAt(++depth) == '[') {}
+        
+        return depth;
+    }
+    
+    /* 
+     * Safely casts an Object to an Object[].
+     * 
+     * @param obj object to be casted.
+     * @return a safly casted version of obj.
+     * @throws IllegalArgumentException iff obj is not an array.
+     * 
+     * Note: if obj is a 1D array of a primative type (e.g. int[]),
+     * then a new Object[] is created that contains the same values.
+     */
+    public static Object[] safeObjArrCast(Object obj) {
+        if (!obj.getClass().isArray()) {
+            throw new IllegalArgumentException
+                ("Expected an array, but found: " + obj.getClass().getName());
+        }
+        
+        try {
+            // Try to cast to Object[]
+            return (Object[]) obj;
+            
+        } catch (ClassCastException e) {
+            // If it fails (only in case of a 1D primative array),
+            // Create a new Object[] and copy the values of obj.
+            int length = Array.getLength(obj);
+            Object[] objArr = new Object[length];
+            for (int i = 0; i < length; i++) {
+                objArr[i] = Array.get(obj, i);
+            }
+            
+            return objArr;
+        }
     }
     
 }
