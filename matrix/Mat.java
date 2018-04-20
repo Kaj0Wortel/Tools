@@ -30,7 +30,7 @@ public class Mat
         extends ToolNumberAdapter<Mat>
         implements tools.Cloneable, ObservableInterface {
     
-    private ToolNumber[][] values;
+    protected ToolNumber[][] values;
     
     /* -------------------------------------------------------------------------
      * Constructors
@@ -51,29 +51,26 @@ public class Mat
      *     {@code num} is not a primative number data type class.
      */
     public Mat(Number num) {
-        this((PrimitiveNumber<?>) PrimitiveNumber.toPrimNumber(num));
+        this((PrimitiveNumber<?>) PrimitiveNumber.toPrimNumber(num), false);
     }
     
     /* 
      * Creates a 1x1 matrix only containing the given ToolNumber.
      * 
      * @param value the sole value in the matrix.
+     * @param cloneMat whether to clone the value.
+     *     Default is true.
      */
     public Mat(ToolNumber value) {
-        setMatrix(new ToolNumber[][] {
-            new ToolNumber[] {
-                value.clone()
-            }
-        }, false);
+        this(value, true);
     }
     
-    /* 
-     * Creates a matrix object from another matrix.
-     * 
-     * @param mat the matrix to copy.
-     */
-    public Mat(Mat mat) {
-        this(true, mat.values);
+    public Mat(ToolNumber value, boolean cloneMat) {
+        setMatrix(new ToolNumber[][] {
+            new ToolNumber[] {
+                value
+            }
+        }, cloneMat);
     }
     
     /* 
@@ -106,14 +103,28 @@ public class Mat
      * 
      * @param row the number of rows.
      * @param col the number of columns.
+     * @param cloneMat whether to clone the matrix.
      * @param values the contents of the matrix.
      */
-    public Mat(int row, int col, Number... values) {
-        this(row, col,
+    public Mat(int row, int col, Number... values)
+            throws MatrixDimensionException {
+        this(row, col, true,
+             (PrimitiveNumber[]) PrimitiveNumber.toPrimNumber(values));
+    }
+    
+    public Mat(int row, int col, boolean cloneMat, Number... values)
+            throws MatrixDimensionException {
+        this(row, col, cloneMat,
              (PrimitiveNumber[]) PrimitiveNumber.toPrimNumber(values));
     }
     
     public Mat(int row, int col, ToolNumber... values)
+            throws MatrixDimensionException {
+        this(row, col, true,
+             (PrimitiveNumber[]) PrimitiveNumber.toPrimNumber(values));
+    }
+    
+    public Mat(int row, int col, boolean cloneMat, ToolNumber... values)
             throws MatrixDimensionException {
         if (values.length != row * col)
             throw new MatrixDimensionException
@@ -123,7 +134,9 @@ public class Mat
         
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                newValues[i][j] = values[i*col + j].clone();
+                newValues[i][j] = (cloneMat
+                                       ? values[i*col + j].clone()
+                                       : values[i*col + j]);
             }
         }
         
@@ -198,21 +211,38 @@ public class Mat
         setMatrix(newValues, false);
     }
     
+    /* 
+     * Creates a matrix object from another matrix.
+     * 
+     * @param mat the matrix to clone.
+     */
+    public Mat(Mat mat) {
+        this(true, mat.values);
+    }
+    
     
     /* -------------------------------------------------------------------------
      * Public static methods
      * -------------------------------------------------------------------------
      */
     /* 
-     * Creates an identity matrix of size (width x height).
+     * Creates an identity matrix with the dimensions (rows x cols).
      * 
-     * @param width the width of the new matrix.
-     * @param height the height of the new matrix.
+     * @param rows the number of rows of the new I matrix.
+     * @param cols the number of columns of the new I matrix.
+     * @param result the matrix in which the result will be stored.
+     *     Default is {@code null}.
+     * @return {@code result}.
      */
-    protected static <M extends Mat> M getIMat(int width, int height) {
-        ToolNumber[][] matIValues = new ToolNumber[width][height];
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
+    public static <M extends Mat> M createIMat(int rows, int cols) {
+        return createIMat(rows, cols, null);
+    }
+    
+    public static <M extends Mat> M createIMat(int rows, int cols, M result) {
+        ToolNumber[][] matIValues = new ToolNumber[rows][cols];
+        
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 if (i == j) {
                     matIValues[i][j] = new PrimitiveNumber<Double>(1.0);
                     
@@ -222,19 +252,24 @@ public class Mat
             }
         }
         
-        return createDefaultInstance().setMatrix(matIValues, false);
+        // Set the matrix to the result and return.
+        if (result == null) {
+            result = M.createDefaultInstance();
+        }
+        
+        return result.setMatrix(matIValues, false);
     }
     
     /* 
      * Multiplies all matrices, assuming the order left to right.
      * (so mat[begin] * mat[begin+1] * ... * mat[end-1]).
      * 
-     * @param result matrix that will contain the result of the operation.
-     *     Default is {@code null}.
      * @param begin the first index of {@code mats} that will be used in
      *     the multiplication (inclusive). Default is 0.
      * @param end the last index of {@code mats} that will be used in the
      *     multiplication (exclusive). default is mats.length.
+     * @param result matrix that will contain the result of the operation.
+     *     Default is {@code null}.
      * @param mats the matrices to be multiplied.
      * 
      * @return {@code result}.
@@ -245,23 +280,23 @@ public class Mat
      * @throws MatrixDimensionException iff any of the matrix multiplications
      *     is not allowed due to incorrect matrix dimensions.
      */
-    public static <M extends Mat> M multiplyAll(Mat... mats)
+    public static <M extends Mat> M multiplyAll(Mat[] mats)
             throws IllegalArgumentException, MatrixDimensionException {
         return multiplyAll(null, mats);
     }
     
-    public static <M extends Mat> M multiplyAll(int begin, int end, Mat... mats)
+    public static <M extends Mat> M multiplyAll(int begin, int end, Mat[] mats)
             throws IllegalArgumentException, MatrixDimensionException {
-        return multiplyAll(null, begin, end, mats);
+        return multiplyAll(begin, end, null, mats);
     }
     
-    public static <M extends Mat> M multiplyAll(M result, Mat... mats)
+    public static <M extends Mat> M multiplyAll(M result, Mat[] mats)
             throws IllegalArgumentException, MatrixDimensionException {
-        return multiplyAll(result, 0, mats.length, mats);
+        return multiplyAll(0, mats.length, result, mats);
     }
     
-    public static <M extends Mat> M multiplyAll(M result, int begin,
-                                                int end, Mat... mats)
+    public static <M extends Mat> M multiplyAll(int begin, int end,
+                                                M result, Mat[] mats)
             throws IllegalArgumentException, MatrixDimensionException {
         if (mats == null) throw new NullPointerException
                 ("mats is not allowed to be null!");
@@ -469,15 +504,15 @@ public class Mat
      * - det(x) = calculate the determinant of x.
      * - M_[m, i, j] = the minor of matrix m at (i, j).
      */
-    public Mat calcCoMatrix() {
+    public <M extends Mat> M calcCoMatrix() {
         return calcCoMatrix(null);
     }
     
-    public Mat calcCoMatrix(Mat result) {
+    public <M extends Mat> M calcCoMatrix(M result) {
         if (!isSquare()) {
             throw new MatrixDimensionException
                 ("Cofactor matrix is undefined for non-square matrices. "
-                     + "Expected: nxn with n >= 1, "
+                     + "Expected: nxn with n > 1, "
                      + "but found: " + getNumRows() + "x" + getNumCols() + ".");
         }
         
@@ -519,7 +554,7 @@ public class Mat
         if (!isSquare()) {
             throw new MatrixDimensionException
                 ("Cofactor matrix is undefined for non-square matrices. "
-                     + "Expected: nxn with n >= 1, "
+                     + "Expected: nxn with n > 1, "
                      + "but found: " + getNumRows() + "x" + getNumCols() + ".");
         }
         
@@ -552,19 +587,20 @@ public class Mat
      * @param clone whether to clone the values.
      * @return the minor of the current matrix at (row, col).
      */
-    public Mat calcMinor(int row, int col) {
+    public <M extends Mat> M calcMinor(int row, int col) {
         return calcMinor(row, col, null, true);
     }
     
-    public Mat calcMinor(int row, int col, Mat result) {
+    public <M extends Mat> M calcMinor(int row, int col, M result) {
         return calcMinor(row, col, result, true);
     }
     
-    public Mat calcMinor(int row, int col, boolean clone) {
+    public <M extends Mat> M calcMinor(int row, int col, boolean clone) {
         return calcMinor(row, col, null, clone);
     }
     
-    public Mat calcMinor(int row, int col, Mat result, boolean clone) {
+    public <M extends Mat> M calcMinor(int row, int col, M result,
+                                       boolean clone) {
         ToolNumber[][] newValues
             = new ToolNumber[getNumRows() - 1][getNumCols() - 1];
         
@@ -665,18 +701,28 @@ public class Mat
     }
     
     /* 
-     * @return the identity matrix that has
-     *     the same size as the current matrix.
+     * @param result the result of the operation.
+     *     Default is null.
+     * @return the identity matrix that has the same dimension as this matrix.
      */
-    public <M extends Mat> M getIMat() {
-        return getIMat(values.length, values[0].length);
+    public <M extends Mat> M createIMat() {
+        return createIMat(values.length, values[0].length);
+    }
+    
+    public <M extends Mat> M createIMat(M result) {
+        return createIMat(values.length, values[0].length, result);
     }
     
     /* 
-     * Resets the matrix to the identity matrix.
+     * Resets the matrix to to all 0 values.
+     * Obtains the result by subtracting all values from eachother.
      */
     public void clear() {
-        setMatrix(getIMat().values, false);
+        for (int row = 0; row < getNumRows(); row++) {
+            for (int col = 0; col < getNumCols(); col++) {
+                values[row][col].subi(values[row][col]);
+            }
+        }
     }
     
     /* 
@@ -737,8 +783,8 @@ public class Mat
      * Note that {@code rowFrom} and {@code rowTo} denote the indeces
      * of the matrix.
      */
-    protected Mat addRowToRow(int rowFrom, int rowTo, Number scalar,
-                              boolean clone) {
+    protected <M extends Mat> M addRowToRow(int rowFrom, int rowTo,
+                                            Number scalar, boolean clone) {
         if (rowFrom < 0 || rowFrom >= getNumRows())
             throw new IllegalArgumentException
             ("From-row exceeds matrix boundries!");
@@ -758,11 +804,13 @@ public class Mat
             : this;
     }
     
-    public Mat addRowToRow(int rowFrom, int rowTo, Number scalar) {
+    public <M extends Mat> M addRowToRow(int rowFrom, int rowTo,
+                                         Number scalar) {
         return addRowToRow(rowFrom, rowTo, scalar, true);
     }
     
-    public Mat addRowToRowi(int rowFrom, int rowTo, Number scalar) {
+    public <M extends Mat> M addRowToRowi(int rowFrom, int rowTo,
+                                          Number scalar) {
         return addRowToRow(rowFrom, rowTo, scalar, false);
     }
     
@@ -783,8 +831,8 @@ public class Mat
      * Note that {@code colFrom} and {@code colTo} denote the indeces
      * of the matrix.
      */
-    protected Mat addColToCol(int colFrom, int colTo, Number scalar,
-                              boolean clone) {
+    protected <M extends Mat> M addColToCol(int colFrom, int colTo,
+                                            Number scalar, boolean clone) {
         if (colFrom < 0 || colFrom >= getNumCols())
             throw new IllegalArgumentException
             ("From-col exceeds matrix boundries!");
@@ -803,11 +851,13 @@ public class Mat
             : this;
     }
     
-    public Mat addColToCol(int colFrom, int colTo, Number scalar) {
+    public <M extends Mat> M addColToCol(int colFrom, int colTo,
+                                         Number scalar) {
         return addColToCol(colFrom, colTo, scalar, true);
     }
     
-    public Mat addColToColi(int colFrom, int colTo, Number scalar) {
+    public <M extends Mat> M addColToColi(int colFrom, int colTo,'
+                                              Number scalar) {
         return addColToCol(colFrom, colTo, scalar, false);
     }
     
@@ -822,7 +872,15 @@ public class Mat
      *     the given scalar.
      * @throws IllegalArgumentException iff {@code row < 0 || row >= #rows}.
      */
-    protected Mat mulRow(int row, Number scalar, boolean clone) {
+    public <M extends Mat> M mulRow(int row, Number scalar) {
+        return mulRow(row, scalar, true);
+    }
+    
+    public <M extends Mat> M mulRowi(int row, Number scalar) {
+        return mulRow(row, scalar, false);
+    }
+    
+    protected <M extends Mat> M mulRow(int row, Number scalar, boolean clone) {
         if (row < 0 || row >= getNumRows())
             throw new IllegalArgumentException
             ("Row exceeds matrix boundries!");
@@ -837,14 +895,6 @@ public class Mat
             : this;
     }
     
-    public Mat mulRow(int row, Number scalar) {
-        return mulRow(row, scalar, true);
-    }
-    
-    public Mat mulRowi(int row, Number scalar) {
-        return mulRow(row, scalar, false);
-    }
-    
     /* 
      * Multiplies the given col with a scalar.
      * 
@@ -856,7 +906,15 @@ public class Mat
      *     the given scalar.
      * @throws IllegalArgumentException iff {@code col < 0 || col >= #cols}.
      */
-    protected Mat mulCol(int col, Number scalar, boolean clone) {
+    public <M extends Mat> M mulCol(int col,  Number scalar) {
+        return mulCol(col, scalar, true);
+    }
+    
+    public <M extends Mat> M mulColi(int col, Number scalar) {
+        return mulCol(col, scalar, false);
+    }
+    
+    protected <M extends Mat> M mulCol(int col, Number scalar, boolean clone) {
         if (col < 0 || col >= getNumCols())
             throw new IllegalArgumentException
             ("Col exceeds matrix boundries!");
@@ -870,14 +928,6 @@ public class Mat
         return clone
             ? createDefaultInstance().setMatrix(result)
             : this;
-    }
-    
-    public Mat mulCol(int col,  Number scalar) {
-        return mulCol(col, scalar, true);
-    }
-    
-    public Mat mulColi(int col, Number scalar) {
-        return mulCol(col, scalar, false);
     }
     
     
@@ -911,7 +961,7 @@ public class Mat
      * ~2.4 times faster!
      */
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // <Mat> instanceof ToolNumber.
     public  <T extends ToolNumber> T inverse() {
         if (!isSquare()) {
             throw new MatrixDimensionException
@@ -922,17 +972,16 @@ public class Mat
         
         Mat cloneMat = this.clone();
         ToolNumber[][] cloneValues = cloneMat.getValues(false);
-        Mat resultMat = this.getIMat();
+        Mat resultMat = this.createIMat();
         ToolNumber[][] result  = resultMat.getValues(false);
         
         for (int i = 0; i < getNumRows(); i++) {
-            ToolNumber addValue = cloneValues[i][i];
-            if (addValue.doubleValue() == 0.0) {
+            if (cloneValues[i][i].doubleValue() == 0.0) {
                 /* If the value on the center line equals 0, find
                    another row where there is a value on that column and
                    add that row to the current row.
                    Note that j starts with {@code i+1} since the values above
-                   already have a 1 on the columns on the left.*/
+                   already have a number != 0 on the columns on the left.*/
                 boolean found = false;
                 for (int j = i+1; j < getNumRows(); j++) {
                     if (cloneValues[j][i].doubleValue() != 0.0) {
@@ -945,19 +994,24 @@ public class Mat
                     }
                 }
                 
-                if (!found)
-                    throw new MatrixLinearDependancyException();
+                if (!found) throw new MatrixLinearDependancyException();
                 
             } else {
-                addValue = addValue.divInv(1.0);
-                resultMat.mulRowi(i, addValue);
-                cloneMat.mulRowi(i, addValue);
+                // If the value on the center line does not equal zero,
+                // multiply the row with the inverse of that value.
+                ToolNumber mulValue = cloneValues[i][i].inverse();
+                resultMat.mulRowi(i, mulValue);
+                cloneMat.mulRowi(i, mulValue);
             }
             
+            // For every row, subtract the current row n times such that in
+            // the end all values in the current column except that one of
+            // the current row equal 0.
             for (int j = 0; j < getNumRows(); j++) {
                 if (i == j) continue;
-                resultMat.addRowToRowi(i, j, cloneValues[j][i].mul(-1.0));
-                cloneMat.addRowToRowi(i, j, cloneValues[j][i].mul(-1.0));
+                ToolNumber mulValue = cloneValues[j][i].mul(-1.0);
+                resultMat.addRowToRowi(i, j, mulValue);
+                cloneMat.addRowToRowi(i, j, mulValue);
             }
         }
         
@@ -968,7 +1022,7 @@ public class Mat
      * @return the inverse of this matrix.
      * 
      * Calculation notes:
-     * CM_[mat]^T / det(mat)
+     * inverse(mat) = CM_[mat]^T / det(mat)
      * where:
      *  - CM_[m] = the cofactor matrix of m.
      *  - m^T = transpose matrix of m.
@@ -978,7 +1032,7 @@ public class Mat
      * the same. To convert the default type to Double,
      * use {@link inverse()}. Also note that this method is ~2.4 times slower!
      */
-    public Mat inverseKeepType() {
+    public <M extends Mat> M inverseKeepType() {
         if (!isSquare()) {
             throw new MatrixDimensionException
                 ("Cofactor matrix is undefined for non-square matrices. "
@@ -1559,7 +1613,7 @@ public class Mat
     
     
     /* -------------------------------------------------------------------------
-     * Functions that should be overridden by subclasses
+     * Functions that should be overridden/hidden by subclasses
      * -------------------------------------------------------------------------
      */
     /* 
@@ -1594,6 +1648,8 @@ public class Mat
         return (M) new Mat();
     }
     
+    
+    // tmp
     public static void main(String[] args) {
         /*
         Mat mat2 = new Mat(2, 2,
