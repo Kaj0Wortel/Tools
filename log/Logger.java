@@ -32,10 +32,6 @@ import java.util.concurrent.locks.Lock;
  */
 public abstract class Logger {
     /* Constants */
-    // The default log file.
-    final protected static File DEFAULT_LOG_FILE
-        = new File(System.getProperty("user.dir") + "\\tools\\log\\log.log");
-    
     // The default date format
     final protected static DateFormat DEFAULT_DATE_FORMAT
         = new SimpleDateFormat("HH:mm:ss.SSS");
@@ -64,17 +60,10 @@ public abstract class Logger {
     // The lock of the writer.
     protected Lock lock;
     
-    // The log file to write to.
-    protected File logFile = DEFAULT_LOG_FILE;
-    
     // Enum denoting the severity type of a log action.
     public enum Type {
         NONE, INFO, WARNING, ERROR, DEBUG;
     }
-    
-    
-    // Default constructor.
-    protected Logger() { }
     
     
     /* 
@@ -110,7 +99,7 @@ public abstract class Logger {
     
     
     /* -------------------------------------------------------------------------
-     * Log function to be implement
+     * Log function to be implemented
      * -------------------------------------------------------------------------
      */
     /* 
@@ -125,7 +114,7 @@ public abstract class Logger {
         writeE(e, Type.ERROR, new Date());
     }
     
-    abstract protected void writeE(Exception e, Type type, Date timeStamp);
+    protected abstract void writeE(Exception e, Type type, Date timeStamp);
     
     /* 
      * Writes the object to a log file.
@@ -139,7 +128,7 @@ public abstract class Logger {
         writeO(obj, Type.DEBUG, timeStamp);
     }
     
-    abstract protected void writeO(Object obj, Type type, Date timeStamp);
+    protected abstract void writeO(Object obj, Type type, Date timeStamp);
     
     /* 
      * Writes an object array to a log file.
@@ -181,33 +170,14 @@ public abstract class Logger {
     }
     
     /* 
-     * Sets the log file.
-     * 
-     * @param file the new log file to be used.
-     * @param append whether to append to the new file.
-     *     If false, then the file is cleared and the header is printed.
-     */
-    abstract protected void setFile(File file, boolean append);
-    
-    /* 
-     * Clears the current log file.
-     */
-    abstract protected void clear();
-    
-    /* 
      * Closees the log file and releases system resources.
      */
-    abstract protected void close();
-    
-    /* 
-     * @return whether the log file is closed.
-     */
-    abstract protected boolean isClosed();
+    protected abstract void close();
     
     /* 
      * Flushes the writer.
      */
-    abstract protected void flush();
+    protected abstract void flush();
     
     
     /* -------------------------------------------------------------------------
@@ -282,34 +252,6 @@ public abstract class Logger {
     }
     
     /* 
-     * Sets the log file.
-     * 
-     * @param fileName the name of the new log file.
-     * @param file the name of the log file.
-     * @param append whether to append to the new log file.
-     * 
-     * See {@link setFile()}.
-     */
-    public static void setLogFile(String fileName, boolean append) {
-        setLogFile(new File(fileName), append);
-    }
-    
-    public static void setLogFile(File file, boolean append) {
-        checkDef();
-        defLog.setFile(file, append);
-    }
-    
-    /* 
-     * Clears the log file.
-     * 
-     * See {@link clear()}.
-     */
-    public static void clearLog() {
-        checkDef();
-        defLog.clear();
-    }
-    
-    /* 
      * Closes the log file and releases system resources.
      * Note that no default log is created here if none existed yet.
      * 
@@ -317,14 +259,6 @@ public abstract class Logger {
      */
     public static void closeLog() {
         if (defLog != null) defLog.close();
-    }
-    
-    /* 
-     * @return checks if the log is closed.
-     * Note that no default log is created here if none existed yet.
-     */
-    public static boolean isLogClosed() {
-        return defLog == null || defLog.isClosed();
     }
     
     /* 
@@ -341,7 +275,6 @@ public abstract class Logger {
      * @param useTS whether to use the time stamp or not.
      */
     public static void setUsagetimeStamp(boolean useTS) {
-        flushLog();
         useTimeStamp = useTS;
     }
     
@@ -351,7 +284,6 @@ public abstract class Logger {
      * @param useFull whether to use the full notation or not.
      */
     public static void setUsageFull(boolean useFull) {
-        flushLog();
         Logger.useFull = useFull;
     }
     
@@ -429,7 +361,7 @@ public abstract class Logger {
             public void run() {
                 if (defLog != null) {
                     // Write the terminal message (if any) to the default log.
-                    if (terminateMsg != null && !defLog.isClosed()) {
+                    if (terminateMsg != null) {
                         write(terminateMsg, terminateType);
                     }
                     
