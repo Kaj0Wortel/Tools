@@ -58,18 +58,7 @@ public class NullLog extends Logger {
     protected void writeOA(Object[] objArr, Type type, Date timeStamp) { }
     
     @Override
-    protected void setFile(File file, boolean append) { }
-    
-    @Override
-    protected void clear() { }
-    
-    @Override
     protected void close() { }
-    
-    @Override
-    protected boolean isClosed() {
-        return true;
-    }
     
     @Override
     protected void flush() { }
