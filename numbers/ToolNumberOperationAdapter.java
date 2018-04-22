@@ -35,7 +35,7 @@ public abstract class ToolNumberOperationAdapter
      * 
      * Note that either {@code num1} OR {@code num2} will be {@code this}.
      */
-    abstract protected <T extends ToolNumber> T doOperation
+    protected abstract <T extends ToolNumber> T doOperation
             (Number num1, Number num2, Operation op, boolean update);
     
     
