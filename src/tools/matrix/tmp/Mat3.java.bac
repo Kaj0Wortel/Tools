@@ -1,0 +1,88 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright (C) 2018 by Kaj Wortel - all rights reserved                    *
+ * Contact: kaj.wortel@gmail.com                                             *
+ *                                                                           *
+ * This file is part of the tools project, which can be found on github:     *
+ * https://github.com/Kaj0Wortel/tools                                       *
+ *                                                                           *
+ * It is allowed to use, (partially) copy and modify this file               *
+ * in any way for private use only by using this header.                     *
+ * It is not allowed to redistribute any (modifed) versions of this file     *
+ * without my permission.                                                    *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//todo
+package tools.matrix.tmp;
+
+
+// Tools imports.
+import tools.matrix.Mat;
+import tools.matrix.MatrixDimensionException;
+
+
+/* 
+ * Under development.
+ * Use with care!
+ */
+/* 
+ * Represents a 3x3 matrix.
+ */
+public class Mat3
+        extends Mat{
+    /* ----------------------------------------------------------------------------------------------------------------
+     * Constructors
+     * ----------------------------------------------------------------------------------------------------------------
+     */
+    public Mat3(Double[]... mat) {
+        super(mat);
+    }
+    
+    /* 
+     * Returns a matrix for a counter-clockwise rotation
+     * around the x-axis.
+     */
+    public static Mat3 rotateMat3X(Double rad) {
+        return new Mat3(new Double[][] {
+            {1d, 0d           ,  0d           },
+            {0d, Math.cos(rad), -Math.sin(rad)},
+            {0d, Math.sin(rad),  Math.cos(rad)}}
+        );
+    }
+    
+    /* 
+     * Returns a matrix for a counter-clockwise rotation
+     * around the y-axis.
+     */
+    public static Mat3 rotateMat3Y(double rad) {
+        return new Mat3(new Double[][] {
+            { Math.cos(rad), 0d, Math.sin(rad)},
+            { 0d           , 1d, 0d           },
+            {-Math.sin(rad), 0d, Math.cos(rad)}}
+        );
+    }
+    
+    /* 
+     * Returns a matrix for a counter-clockwise rotation
+     * around the z-axis.
+     */
+    public static Mat3 rotateMat3Z(double rad) {
+        return new Mat3(new Double[][] {
+            {Math.cos(rad), -Math.sin(rad), 0d},
+            {Math.sin(rad),  Math.cos(rad), 0d},
+            {0d           , 0d            , 1d}}
+        );
+    }
+    /* ----------------------------------------------------------------------------------------------------------------
+     * Overridden functions
+     * ----------------------------------------------------------------------------------------------------------------
+     */
+    /* 
+     * Overrides the matrix dimension check.
+     * See the Matrix class for more info.
+     */
+    @Override
+    public void matrixDimCheck(int row, int col) {
+        if (row != 3 || col != 3)
+            throw new MatrixDimensionException("Illegal change of matrix size. Found: " + row + "x" + col
+                    + "Expected: 3x3.");
+    }
+}
