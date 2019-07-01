@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -25,25 +25,44 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 
-/**
- * TODO: private constructor + comments.
+/**DONE (maybe add more)
+ * Tool class for all kinds of file-io operations.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
-public class FileIO {
+public final class FileIO {
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /** 
+     * This is a static singleton class. No instances should be made.
+     * 
+     * @deprecated No instances should be made.
+     */
+    @Deprecated
+    private FileIO() { }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Reads a file and parses it into an array.
+     * The data in the file is split on new line character in the array.
      * 
-     * @param file the file to read from.
-     * @return an array representing the file.
-     * @throws IOException if there occured an exception during the
-     *     IO operations.
+     * @param file The file to read from.
+     * @return An array representing the file.
+     * 
+     * @throws IOException if there occured an exception during the IO operations.
      */
     public static String[] readFile(File file)
             throws IOException {
@@ -60,11 +79,10 @@ public class FileIO {
     /**
      * Passes each line of a file to a consumer.
      * 
-     * @param file the file to read from.
-     * @param action the consumer to give the lines to.
+     * @param file The file to read from.
+     * @param action The consumer to give the lines to.
      * 
-     * @throws IOException if there occured an exception during the
-     *     IO operations.
+     * @throws IOException Iif there occured an exception during the IO operations.
      */
     public static void forEach(File file, Consumer<String> action)
             throws IOException {
@@ -80,11 +98,10 @@ public class FileIO {
      * Parses the data and writes it into a file.
      * Each element in {@code data} is written on a separate line.
      * 
-     * @param file the file to write to.
-     * @param data the data to parse.
+     * @param file The file to write to.
+     * @param data The data to parse.
      * 
-     * @throws IOException if there occured an exception during the
-     *     IO operations.
+     * @throws IOException Iif there occured an exception during the IO operations.
      */
     public static void writeFile(File file, String[] data, boolean append)
             throws IOException {

@@ -42,7 +42,7 @@ import java.util.concurrent.locks.Condition;
  * <br>
  * Has support for easy scheduler creation.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class SchedulerSet<S extends Scheduler>
         extends Scheduler {

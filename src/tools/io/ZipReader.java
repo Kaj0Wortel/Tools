@@ -33,7 +33,7 @@ import tools.log.Logger;
 /**
  * 
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class ZipReader
         extends InputStream {

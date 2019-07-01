@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -19,32 +19,37 @@ import java.io.File;
 import java.util.Random;
 
 
-/**
- * TODO: add comments.
- * 
+/**DONE
  * Interface for storing the constants used in the tools package.
  * 
  * @author Kaj Wortel (0991586)
  */
 public interface Var {
-    final public static String LS = System.getProperty("line.separator");
-    final public static String FS = System.getProperty("file.separator");
-    final public static String LS_REGEX = "\n\r|\r\n|\n|\r";
+    /** The OS dependent line separator. */
+    public static final String LS = System.getProperty("line.separator");
+    /** The OS dependent file separator. */
+    public static final String FS = System.getProperty("file.separator");
+    /** Regex for detecting a line separator of any OS. */
+    public static final String LS_REGEX = "\n\r|\r\n|\n|\r";
     
-    final public static String WORKING_DIR = System.getProperty("user.dir")
-            + FS + "src" + FS;
-    final public static String TOOL_DIR = WORKING_DIR + "tools" + FS;
-    final public static String FONT_DIR = TOOL_DIR + "font" + FS;
-    final public static String IMG_DIR = WORKING_DIR + "img" + FS;
-    final public static String DATA_DIR = WORKING_DIR + "data" + FS;
-    final public static String TEST_DIR = WORKING_DIR + "test" + FS;
-    final public static File LOG_FILE = new File(WORKING_DIR + "log.log");
+    /** The global project working directory. */
+    public static final String WORKING_DIR = System.getProperty("user.dir") + FS + "src" + FS;
+    /** The global project test directory. */
+    public static final String TEST_DIR = System.getProperty("user.dir") + FS + "test" + FS;
     
-    final public static String PROJECT_DIR = DATA_DIR + "projects" + FS;
-    final public static String CACHE_DIR = DATA_DIR + ".cache" + FS;
-    final public static String BACKUP_DIR = DATA_DIR + "backup" + FS;
+    /** The directory of the tool package. */
+    public static final String TOOL_DIR = WORKING_DIR + "tools" + FS;
+    /** The font directory. */
+    public static final String FONT_DIR = TOOL_DIR + "font" + FS;
+    /** The image directory. */
+    public static final String IMG_DIR = WORKING_DIR + "img" + FS;
+    /** The data direcotry. */
+    public static final String DATA_DIR = WORKING_DIR + "data" + FS;
+    /** The default log file. */
+    public static final File LOG_FILE = new File(WORKING_DIR + "log.log");
     
-    final public static Random RAN = new Random();
+    /** Random number generator. */
+    public static final Random RAN = new Random();
     
     
 }

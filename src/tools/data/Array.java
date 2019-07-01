@@ -19,7 +19,7 @@ import java.util.Arrays;
 
 
 /**
- * TODO:
+ * TODO.
  * - binarySearch(byte[] a, byte key) (all types)
  * - binarySearch(byte[] a, int fromIndex, int toIndex, byte key) (all types)
  * - copyOf(boolean[] original, int newLength)
@@ -46,7 +46,7 @@ import java.util.Arrays;
  * operation, but throws an {@code ClassCastException} if a narrowing
  * conversion would occur.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  * 
  * @see java.lang.reflect.Array
  */

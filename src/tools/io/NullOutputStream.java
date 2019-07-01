@@ -20,6 +20,8 @@ import java.io.OutputStream;
 
 /**
  * This is an output stream class that ignores all data written to it.
+ * 
+ * @author Kaj Wortel
  */
 public class NullOutputStream extends OutputStream {
     

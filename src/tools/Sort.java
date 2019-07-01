@@ -10,17 +10,19 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+// TODO
 package tools;
 
 
-/* 
+/**
  * Provides various sorting algorithms.
  * 
  * Todo:
  * - Add sorting algorithms:
  *   o Radix sort
  *   o Coctail sort
+ * 
+ * @author Kaj Wortel
  */
 public class Sort {
     final public static int TYPE_LETTERS_Aa_Zz = 0;

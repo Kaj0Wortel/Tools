@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,12 +14,12 @@
 package tools;
 
 
-/**
+/**DONE
  * Class for coupling two objects together.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
-final public class Pair<V1, V2> {
+public final class Pair<V1, V2> {
     
     /* -------------------------------------------------------------------------
      * Variables.
@@ -30,7 +30,7 @@ final public class Pair<V1, V2> {
     /** Second value of the pair. */
     private V2 v2;
     /** Whether the pair is modifiable. */
-    final private boolean mod;
+    private final boolean mod;
     
     
     /* -------------------------------------------------------------------------

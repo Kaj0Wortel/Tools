@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -16,7 +16,6 @@ package tools.img;
 
 // Tools imports
 import tools.Var;
-import tools.MultiTool;
 import tools.io.LoadImages2;
 import tools.log.Logger;
 
@@ -24,248 +23,54 @@ import tools.log.Logger;
 // Java imports
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 
-/**
- * Function class for easier handeling of images.
- * Applies dynamic loading of requested image sheets and
- * unloads images sheets that were not used within the time limit.
- * Allows pausing the timer.
+/**DONE
+ * Function class for easier handeling of images. <br>
+ * Applies dynamic loading of requested image sheets and unloads images sheets
+ * that were not used within the time limit.
  * 
  * Uses the static singleton design pattern.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class ImageManager {
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The map containing all registered tokens. */
     final private static Map<String, Token> tokenMap = new HashMap<>();
+    /** The queue containing all entries which should be removed at some point. */
     final private static DelayQueue<Delay> queue = new DelayQueue<>();
     
-    // By default, wait 1 minute before deleting sheets.
+    /** Default delay for removing an entry from the cache. */
     private static long removeDelay = 60;
+    /** The time unit used for removing an entry from the cache. */
     private static TimeUnit timeUnit = TimeUnit.SECONDS;
     
-    /**
-     * Token class for the active images.
+    
+    /* -------------------------------------------------------------------------
+     * Constructor.
+     * -------------------------------------------------------------------------
      */
-    private abstract static class Token {
-        final private String fileName;
-        final private String idName;
-        
-        /**
-         * Constructor.
-         * 
-         * @param shortFileName the short file name location of the sheet.
-         * @param idName the id name of the sheet.
-         * 
-         * For more info, see {@link LoadImages2#loadImage(String, String,
-         * int, int, int, int, int, int)}
-         */
-        private Token(String shortFileName, String idName) {
-            this.fileName = Var.IMG_DIR + shortFileName;
-            this.idName = idName;
-        }
-        
-        
-        public String getFileName() {
-            return fileName;
-        }
-        
-        /**
-         * @return the id name of this token.
-         */
-        public String getIDName() {
-            return idName;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Token)) return false;
-            Token token = (Token) obj;
-            return fileName.equals(token.fileName) &&
-                    idName.equals(token.idName);
-        }
-        
-        @Override
-        public int hashCode() {
-            return MultiTool.calcHashCode(fileName, idName);
-        }
-        
-        /**
-         * @return the image sheet represented by this token.
-         */
-        public abstract BufferedImage[][] getSheet();
-        
-        
-    }
-    
-    
     /**
-     * Token class for unequally divided images on a sheet.
-     * Uses {@link LoadImages2#loadImage(String, String, Rectangle[][])}
-     * for reading the images.
+     * Private constructor due to the static single design pattern.
      */
-    private static class UnequalToken
-            extends Token {
-        final private Rectangle[][] recs;
-        
-        private UnequalToken(String shortFileName, String idName,
-                Rectangle[][] recs) {
-            super(shortFileName, idName);
-            
-            this.recs = recs;
-        }
-
-        @Override
-        public BufferedImage[][] getSheet() {
-            try {
-                return LoadImages2.ensureLoadedAndGetImage(
-                        getFileName(), getIDName(), recs
-                );
-                
-            } catch (IOException | IllegalArgumentException e) {
-                Logger.write(e);
-                return null;
-            }
-        }
-        
-        
-    }
-    
-    
-    /**
-     * Token class for equally divided images on a sheet.
-     * Uses {@link LoadImages2#loadImage(String, String, int, int, int,
-     * int, int, int)} for reading the images.
-     */
-    private static class EqualToken
-            extends Token {
-        final private int startX;
-        final private int startY;
-        final private int endX;
-        final private int endY;
-        final private int width;
-        final private int height;
-        
-        final private int numImgWidth;
-        final private int numImgHeight;
-        
-        
-        /**
-         * Constructor.
-         * 
-         * For more info, see {@link LoadImages2#loadImage(String, String,
-         * int, int, int, int, int, int)}
-         */
-        private EqualToken(String shortFileName, String idName,
-                int startX, int startY,
-                int endX, int endY,
-                int width, int height) {
-            super(shortFileName, idName);
-            
-            this.startX = startX;
-            this.startY = startY;
-            this.endX = endX;
-            this.endY = endY;
-            this.width = width;
-            this.height = height;
-            
-            this.numImgWidth = (endX - startX) / width;
-            this.numImgHeight = (endY - startY) / height;
-        }
-        
-        @Override
-        public BufferedImage[][] getSheet() {
-            try {
-                return LoadImages2.ensureLoadedAndGetImage(
-                        getFileName(), getIDName(),
-                        startX, startY,
-                        endX, endY,
-                        width, height);
-                
-            } catch (IOException | IllegalArgumentException e) {
-                Logger.write(e);
-                return null;
-            }
-        }
-        
-        /**
-         * Determines the width, counted as the number of images.
-         * 
-         * @return the width of the sheet, counted as the number of images.
-         */
-        public int getNumImgWidth() {
-            return numImgWidth;
-        }
-        
-        /**
-         * Determines the height, counted as the number of images.
-         * 
-         * @return the height of the sheet, counted as the number of images.
-         */
-        public int getNumImgHeight() {
-            return numImgHeight;
-        }
-        
-        
-    }
-    
-    /**
-     * Class for keeping track of the delays.
-     */
-    private static class Delay
-            implements Delayed {
-        final private long delayMillis;
-        final private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
-        final private Token token;
-        final private long startTimeMillis = System.currentTimeMillis();
-        
-        private Delay(long delay, TimeUnit timeUnit, Token token) {
-            this.delayMillis = this.timeUnit.convert(delay, timeUnit);
-            this.token = token;
-        }
-        
-        @Override
-        public long getDelay(TimeUnit timeUnit) {
-            return timeUnit.convert(delayMillis
-                    - (System.currentTimeMillis() - startTimeMillis),
-                    this.timeUnit);
-        }
-        
-        @Override
-        public int compareTo(Delayed delayed) {
-            return (int) (this.getDelay(TimeUnit.MILLISECONDS)
-                    - delayed.getDelay(TimeUnit.MILLISECONDS));
-        }
-        
-        /**
-         * @return the token represented by this delay class.
-         */
-        public Token getToken() {
-            return token;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Delay)) return false;
-            Delay delay = (Delay) obj;
-            return token.equals(delay.token);
-        }
-        
-        
-    }
-    
-    
-    // Private constructor due to the static single design pattern.
     private ImageManager() { }
     
     
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Sets the delay after which an inactive image sheet will be deleted.
      * Note that requesting the image sheet will reset the timer.
@@ -286,33 +91,43 @@ public class ImageManager {
     /**
      * Registers a image sheet for later use.
      * 
-     * @param shortFileName the short file name of the image sheet
-     *     (e.g. starting at the {@code img} directory).
-     * @param idName the name that can be used for later refference.
-     * @param startX the pixel x-coordinate of the start location in the image.
-     *     (incl.) Default is 0.
-     * @param startY the pixel y-coordinate of the start location in the image.
-     *     (incl.) Default is 0.
-     * @param endX the pixel x-coordinate of the end location of the image.
-     *     (excl.) Default is -1.
-     * @param endY the pixel y-coordinate of the end location of the image.
-     *     (excl.) Default is -1.
-     * @param width the width of each subimage.
-     * @param height the height of each subimage.
-     * 
      * Note: when there already exists an id with the same name,
-     * but a different token, the previous token WILL BE OVERWRITTEN!
+     * but a different token, the previous token <b>WILL BE OVERWRITTEN</b>!
      * Choose your ID's with caution!
+     * 
+     * @param shortFileName The short file name of the image sheet
+     *     (e.g. starting at the {@code img} directory).
+     * @param idName The name that can be used for later refference.
+     * @param width  The width of each subimage.
+     * @param height The height of each subimage.
+     * 
+     * @see Var#IMG_DIR
      */
     public static void registerSheet(String shortFileName, String idName,
             int width, int height) {
         registerSheet(shortFileName, idName, 0, 0, -1, -1, width, height);
     }
     
+    /**
+     * Registers a image sheet for later use.
+     * 
+     * Note: when there already exists an id with the same name,
+     * but a different token, the previous token <b>WILL BE OVERWRITTEN</b>!
+     * Choose your ID's with caution!
+     * 
+     * @param shortFileName The local image file name.
+     * @param idName The name that can be used for later refference.
+     * @param startX The pixel x-coordinate of the start location in the image. (incl.)
+     * @param startY The pixel y-coordinate of the start location in the image. (incl.)
+     * @param endX The pixel x-coordinate of the end location of the image. (excl.)
+     * @param endY The pixel y-coordinate of the end location of the image. (excl.)
+     * @param width The width of each sub-image.
+     * @param height The height of each sub-image.
+     * 
+     * @see Var#IMG_DIR
+     */
     public static void registerSheet(String shortFileName, String idName,
-            int startX, int startY,
-            int endX, int endY,
-            int width, int height) {
+            int startX, int startY, int endX, int endY, int width, int height) {
         tokenMap.put(idName,
                 new EqualToken(shortFileName, idName,
                         startX, startY,
@@ -323,24 +138,25 @@ public class ImageManager {
     /**
      * Registers a image sheet for later use.
      * 
-     * @param shortFileName the short file name of the image sheet
-     *     (e.g. starting at the {@code img} directory).
-     * @param idName the name that can be used for later refference.
-     * @param recs the locations and sizes of the images to load.
-     * 
      * Note: when there already exists an id with the same name,
-     * but a different token, the previous token WILL BE OVERWRITTEN!
+     * but a different token, the previous token <b>WILL BE OVERWRITTEN</b>!
      * Choose your ID's with caution!
+     * 
+     * @param shortFileName The local image file name.
+     * @param idName The name that can be used for later refference.
+     * @param recs The locations and sizes of the images to load.
+     * 
+     * @see Var#IMG_DIR
      */
-    public static void registerSheet(String shortFileName, String idName,
-            Rectangle[][] recs) {
+    public static void registerSheet(String shortFileName, String idName, Rectangle[][] recs) {
         tokenMap.put(idName, new UnequalToken(shortFileName, idName, recs));
     }
     
     /**
-     * @param idName the id name the sheet was registered with.
-     * @return the sheet that was registered with the given id name.
-     * @throws NoSuchElementException iff the sheet was not yet registered.
+     * @param idName The id name the sheet was registered with.
+     * @return The sheet that was registered with the given id name.
+     * 
+     * @throws NoSuchElementException Iff the sheet was not yet registered.
      */
     public static BufferedImage[][] getSheet(String idName)
             throws NoSuchElementException {
@@ -360,11 +176,10 @@ public class ImageManager {
     }
     
     /**
-     * @param idName the id name of the sheet.
-     * @param x the x-coord of the image to be returned.
-     * @param y the y-coord of the image to be returned.
-     * @return the image at the sheet denoted by {@code idName} at
-     *     the coords {@code (x, y)}.
+     * @param idName The id name of the sheet.
+     * @param x The x-coord of the image to be returned.
+     * @param y The y-coord of the image to be returned.
+     * @return The image at the sheet denoted by {@code idName} at the coords {@code (x, y)}.
      */
     public static BufferedImage getImage(String idName, int x, int y) {
         if (idName == null) return null;
@@ -376,16 +191,13 @@ public class ImageManager {
     }
     
     /**
-     * @param idName the id name of the sheet.
-     * @param i the index for horizontal retrieval of the image.
-     * @return the image at the sheet denoted by {@code idName} at index
-     *     {@code i}, where the 2D array is checked left to right, then
-     *     up to down.
+     * @param idName The id name of the sheet.
+     * @param i The index for horizontal retrieval of the image.
+     * @return The image at the sheet denoted by {@code idName} at index
+     *     {@code i}, where the 2D array is checked left to right, then up to down.
      * 
-     * See {@link #getVertImage(String, int)} for getting an image
-     * the other way around.
-     * See {@link getImage(String, int, int)} for getting an image
-     * by direct x- and y-coords.
+     * @see #getVertImage(String, int) &nbsp for getting an image the other way around.
+     * @see #getImage(String, int, int) &nbsp for getting an image by direct x- and y-coords.
      */
     public static BufferedImage getHoriImage(String idName, int i) {
         if (idName == null) return null;
@@ -398,16 +210,13 @@ public class ImageManager {
     }
     
     /**
-     * @param idName the id name of the sheet.
-     * @param i the index for vertical retrieval of the image.
-     * @return the image at the sheet denoted by {@code idName} at index
-     *     {@code i}, where the 2D array is checked left to up to down, then
-     *     left to right.
+     * @param idName The id name of the sheet.
+     * @param i The index for vertical retrieval of the image.
+     * @return The image at the sheet denoted by {@code idName} at index
+     *     {@code i}, where the 2D array is checked left to up to down, then left to right.
      * 
-     * See {@link #getHoriImage(String, int)} for getting an image
-     * the other way around.
-     * See {@link getImage(String, int, int)} for getting an image
-     * by direct x- and y-coords.
+     * @see #getVertImage(String, int) &nbsp for getting an image the other way around.
+     * @see #getImage(String, int, int) &nbsp for getting an image by direct x- and y-coords.
      */
     public static BufferedImage getVertImage(String idName, int i) {
         if (idName == null) return null;
@@ -423,9 +232,9 @@ public class ImageManager {
      * Checks whether the given index {@code i} is a vallid for
      * the given sheet {@code sheet}.
      * 
-     * @param idName the id name of the image. Only for debugging purposes.
-     * @param sheet the sheet to check the index of.
-     * @param i the value representing the index.
+     * @param idName The id name of the image. Only for debugging purposes.
+     * @param sheet The sheet to check the index of.
+     * @param i The value representing the index.
      */
     private static void imgCoordBoundCheck(String idName,
             BufferedImage[][] sheet, int i) {
@@ -451,51 +260,55 @@ public class ImageManager {
                             + (width * height) + ", but found index " + i
                             + ". idName=" + idName);
     }
+    
     /**
      * Checks whether the given coords {@code x} and {@code y} are vallid
      * indices for the given sheet {@code sheet}.
      * 
-     * @param idName the id name of the image. Only for debugging purposes.
-     * @param sheet the sheet to check the index of.
-     * @param x the x-coord of the image.
-     * @param y the y-coord of the image.
+     * @param idName The id name of the image sheet.
+     * @param sheet The sheet to check the index of.
+     * @param x The x-coord of the image.
+     * @param y The y-coord of the image.
      */
-    private static void imgCoordBoundCheck(String idName,
-            BufferedImage[][] sheet, int x, int y) {
-        
-        if (sheet == null)
+    private static void imgCoordBoundCheck(String idName, BufferedImage[][] sheet, int x, int y) {
+        if (sheet == null) {
             throw new NullPointerException(
                     "Sheet found was null. idName=" + idName);
+        }
         
         int width = sheet.length;
-        if (width == 0)
+        if (width == 0) {
             throw new IllegalStateException(
                     "Empty image array found (width == 0), idName=" + idName);
+        }
         
         int height = sheet[0].length;
-        if (height == 0)
+        if (height == 0) {
             throw new IllegalStateException(
                     "Empty image array found (height == 0), idName=" + idName);
+        }
         
-        if (x < 0)
+        if (x < 0) {
             throw new IllegalArgumentException(
                     "Expected an x-coord larger equal then 0, but found: " + x
                             + ". idName=" + idName);
-        if (y < 0)
+        }
+        if (y < 0) {
             throw new IllegalArgumentException(
                     "Expected an y-coord larger equal then 0, but found: " + y
                             + ". idName=" + idName);
+        }
         
-        if (x > width)
+        if (x > width) {
             throw new IllegalArgumentException(
                     "Expected an x-coord less or equal to the width(" + width
-                            + "), but found x-coord " + x
-                            + ". idName=" + idName);
-        if (y > height)
+                            + "), but found x-coord " + x + ". idName=" + idName);
+        }
+        if (y > height) {
             throw new IllegalArgumentException(
                     "Expected an y-coord less or equal to the height(" + height
-                            + "), but found y-coord " + y
-                            + ". idName=" + idName);
+                            + "), but found y-coord " + y + ". idName=" + idName);
+        }
     }
     
     /**
@@ -508,10 +321,10 @@ public class ImageManager {
     }
     
     /**
-     * @param idName the id name of the sheet.
-     * @return the width of the sheet, counted as the number of images.
-     * @throws UnsupportedOperationException iff corresponding image
-     *     is unequal.
+     * @param idName The id name of the sheet.
+     * @return The width of the sheet, counted as the number of images.
+     * 
+     * @throws UnsupportedOperationException Iff corresponding image is unequal.
      */
     public static int getNumImgWidth(String idName) {
         Token token = tokenMap.get(idName);
@@ -520,16 +333,15 @@ public class ImageManager {
             
         } else {
             throw new UnsupportedOperationException(
-                    "Operation is not supported for unequal"
-                            + "distributed images.");
+                    "Operation is not supported for unequal distributed images.");
         }
     }
     
     /**
-     * @param idName the id name of the sheet.
-     * @return the height of the sheet, counted as the number of images.
-     * @throws UnsupportedOperationException iff corresponding image
-     *     is unequal.
+     * @param idName The id name of the sheet.
+     * @return The height of the sheet, counted as the number of images.
+     * 
+     * @throws UnsupportedOperationException Iff corresponding image is unequal.
      */
     public static int getNumImgHeight(String idName) {
         Token token = tokenMap.get(idName);
@@ -537,51 +349,29 @@ public class ImageManager {
             return ((EqualToken) token).getNumImgHeight();
         } else {
             throw new UnsupportedOperationException(
-                    "Operation is not supported for unequal "
-                            + "distributed images.");
+                    "Operation is not supported for unequal distributed images.");
         }
     }
     
     /**
-     * @param idName the id name of the sheet.
-     * @return the total number of images in the sheet.
+     * @param idName The id name of the sheet.
+     * @return The total number of images in the sheet.
      */
     public static int getNumImg(String idName) {
         return getNumImgWidth(idName) * getNumImgHeight(idName);
     }
     
-    /*
-    public static void main(String[] args) {
-        registerSheet("items.png", "ITEMS", 0, 0, -1, -1, 32, 32);
-        
-        JFrame frame = new JFrame("test");
-        frame.setLayout(null);
-        JPanel panel = new JPanel(null) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                g.drawImage(ImageManager.getVertImage("ITEMS", 15), 0, 0, null);
-            }
-        };
-        frame.add(panel);
-        
-        frame.setSize(500, 500);
-        frame.setLocation(0, 0);
-        panel.setSize(450, 450);
-        panel.setLocation(25, 25);
-        
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }*/
-    
-    
     /**
      * Upon static class initialisation, create an inactive thread that
-     * waits until an image becomes invallid and removes this image from RAM.
+     * waits until an image becomes invalid and removes this image from RAM. <br>
+     * The thread is scheduled with the lowest priority to prevent disrupting
+     * time-sensitive threads.
      */
     static {
         new Thread(ImageManager.class.getName() + " Thread") {
             @Override
             public void run() {
+                Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
                 while (true) {
                     try {
                         Delay delay = queue.poll(1, TimeUnit.DAYS);

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -24,71 +24,83 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JFrame;
 
 
-/**
- * TODO: documentation.
+/**DONE
+ * Provides an easy way for getting and setting cursors used in a GUI application.
  * 
- * Provides an easy way for retrieving
- * cursors used in a GUI application.
- * 
- * Is thread safe.
+ * @author Kaj Wortel
  */
 public class ModCursors {
+    
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
     private JFrame frame;
     
-    // Map where the cursors will be stored.
-    final public static ConcurrentHashMap<String, Cursor> cursors
+    /** Map where the cursors will be stored. */
+    public static final ConcurrentHashMap<String, Cursor> cursors
         = new ConcurrentHashMap<String, Cursor>();
     
-    /**
+    /*
      * Provided cursors.
      */
-    final public static Cursor CROSSHAIR_CURSOR
-        = new Cursor(Cursor.CROSSHAIR_CURSOR);
+    /** The crosshair cursor. */
+   
+    public static final Cursor CROSSHAIR_CURSOR = new Cursor(Cursor.CROSSHAIR_CURSOR);
     
-    final public static Cursor DEFAULT_CURSOR
+    /** The default cursor. */
+    public static final Cursor DEFAULT_CURSOR
         = new Cursor(Cursor.DEFAULT_CURSOR);
     
-    final public static Cursor HAND_CURSOR
+    /** The hand cursor */
+    public static final Cursor HAND_CURSOR
         = new Cursor(Cursor.HAND_CURSOR);
     
-    final public static Cursor MOVE_CURSOR
+    /** The move cursor. */
+    public static final Cursor MOVE_CURSOR
         = new Cursor(Cursor.MOVE_CURSOR);
     
-    final public static Cursor TEXT_CURSOR
+    /** The text select cursor. */
+    public static final Cursor TEXT_CURSOR
         = new Cursor(Cursor.TEXT_CURSOR);
     
-    final public static Cursor WAIT_CURSOR
+    /** The wait cursor. */
+    public static final Cursor WAIT_CURSOR
         = new Cursor(Cursor.WAIT_CURSOR);
     
-    /**
+    /*
      * Provided resize cursors.
      */
-    final public static Cursor N_RESIZE_CURSOR
+    /** The north-resize cursor. */
+    public static final Cursor N_RESIZE_CURSOR
         = new Cursor(Cursor.N_RESIZE_CURSOR);
     
-    final public static Cursor NE_RESIZE_CURSOR
+    /** The north-east-resize cursor. */
+    public static final Cursor NE_RESIZE_CURSOR
         = new Cursor(Cursor.NE_RESIZE_CURSOR);
     
-    final public static Cursor E_RESIZE_CURSOR
+    /** The east-resize cursor. */
+    public static final Cursor E_RESIZE_CURSOR
         = new Cursor(Cursor.E_RESIZE_CURSOR);
     
-    final public static Cursor SE_RESIZE_CURSOR
+    /** The south-east-resize cursor. */
+    public static final Cursor SE_RESIZE_CURSOR
         = new Cursor(Cursor.SE_RESIZE_CURSOR);
     
-    final public static Cursor S_RESIZE_CURSOR
+    /** The south-resize cursor. */
+    public static final Cursor S_RESIZE_CURSOR
         = new Cursor(Cursor.S_RESIZE_CURSOR);
     
-    final public static Cursor SW_RESIZE_CURSOR
+    /** The south-west-resize cursor. */
+    public static final Cursor SW_RESIZE_CURSOR
         = new Cursor(Cursor.SW_RESIZE_CURSOR);
     
-    final public static Cursor W_RESIZE_CURSOR
+    /** The west-resize cursor. */
+    public static final Cursor W_RESIZE_CURSOR
         = new Cursor(Cursor.W_RESIZE_CURSOR);
     
-    final public static Cursor NW_RESIZE_CURSOR
+    /** The north-west-resize cursor. */
+    public static final Cursor NW_RESIZE_CURSOR
         = new Cursor(Cursor.NW_RESIZE_CURSOR);
     
     
@@ -120,7 +132,7 @@ public class ModCursors {
     }
     
     /**
-     * Sets the active frame.
+     * Sets the active frame to change the cursor of.
      * 
      * @param frame the new active frame.
      */

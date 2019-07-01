@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// TODO
 package tools;
 
 
@@ -27,11 +27,15 @@ import javax.swing.JPanel;
 import java.io.IOException;
 
 
-/* 
+/**
  * Creates a terminal error message.
  * Gives a message to the user about the error.
  * Kills the program after the user presses the ok button.
+ * 
+ * @author Kaj Wortel
+ * @deprecated Crashes most of the time...?
  */
+@Deprecated
 public class TerminalErrorMessage extends RuntimeException {
     private static Boolean terminalMessageStarted = false;
     

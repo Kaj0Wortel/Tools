@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -16,9 +16,12 @@ package tools;
 
 /**
  * A usefull interface that forces the implementer to have a public
- * clone method.
+ * clone method instead of the private clone method from {@link Object}.
+ * 
+ * @author Kaj Wortel
  */
-public interface Cloneable extends java.lang.Cloneable {
+public interface Cloneable
+        extends java.lang.Cloneable {
     
     /**
      * @return a clone of {@code this}.

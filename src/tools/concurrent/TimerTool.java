@@ -51,9 +51,9 @@ import java.util.concurrent.locks.ReentrantLock;
  *  o Pausing a timer which is already paused or canceled does nothing.
  *  o Canceling a timer which is already canceled does nothing.
  * 
- * This class is suitable for concurrent use.
+ * This class is suitable for concurrent access.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class TimerTool {
     /**

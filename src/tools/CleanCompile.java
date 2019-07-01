@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) 2018 by Kaj Wortel - all rights reserved                    *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,12 +14,7 @@
 package tools;
 
 
-// Tools import
-import tools.MultiTool;
-
-
 // Java import
-import java.io.IOException;
 import java.io.File;
 
 import java.util.ArrayList;
@@ -28,13 +23,15 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
 
-/* 
+/**
  * Contains a method to clean and compile an entire folder or file.
  * 
  * Notes:
  * - Only works when it uses JDK and NOT JRE!
  * - Ignores the files from CleanCompile and MultiTool.
  * So use with caution!
+ * 
+ * @author Kaj Wortel
  */
 public class CleanCompile {
     public static void cleanCompile(File dir) {
@@ -66,7 +63,7 @@ public class CleanCompile {
         compiler.run(null, null, null, filesToCompile);
     }
     
-    /* 
+    /**
      * Cleans and compiles all given files/directorys.
      */
     public static void main(String[] args) {
@@ -78,4 +75,6 @@ public class CleanCompile {
             System.out.println("done");
         }
     }
+    
+    
 }

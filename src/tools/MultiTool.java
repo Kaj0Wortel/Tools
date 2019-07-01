@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -64,11 +64,35 @@ import javax.swing.text.JTextComponent;
  * TODO: documentation + refactoring + remove old functions.
  * 
  * This class contains multiple handy methods.
+ * 
+ * @author Kaj Wortel
  */
 public class MultiTool {
-    final public static String HTML_SPACE = "" + ((char) 0x00A0);
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    public static final String HTML_SPACE = "" + ((char) 0x00A0);
     
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * This is a static singleton class. No instances should be made.
+     * 
+     * @deprecated No instances should be made.
+     */
+    @Deprecated
+    private MultiTool() { }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Converts a decimal integer to a 32 based number String.
      * 

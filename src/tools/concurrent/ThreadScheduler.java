@@ -33,6 +33,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * 
  * Updating thread.
  * Use {@link #scheduleTask(Runnable)} to schedule a task.
+ * 
+ * @author Kaj Wortel
  */
 public class ThreadScheduler
         extends Scheduler {

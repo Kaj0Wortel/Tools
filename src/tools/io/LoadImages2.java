@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -30,58 +30,41 @@ import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 
 
-/**
+/**TODO
  * Provides an easy, time efficient and storage efficient way for retrieving
  * image sheets that are used at multiple threads at the same time.
  * 
  * Is thread safe.
+ * 
+ * @author Kaj Wortel
  */
 public class LoadImages2 {
-    // Map where the images will be stored.
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The map the images will be stored in. */
     final public static ConcurrentHashMap<String, BufferedImage[][]> images
         = new ConcurrentHashMap<>();
     
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
     /**
      * This is a static singleton class. No instances should be made.
+     * 
+     * @deprecated No instances should be made.
      */
     @Deprecated
     private LoadImages2() { }
     
     
-    /**
-     * Loads an image from a given file(-name) and converts it into
-     * separate pieces. The images are created from {@code startX, startY}
-     * (inclusive) till {@code endX, endY} (exclusive).
-     * Each image in this range has size (width, height).
-     * 
-     * @param fileName the path of the image file.
-     * @param file image file.
-     * @param name the name of the image for later retrieval.
-     * @param startX the pixel x-coordinate of the start location in the image.
-     *     (incl.)
-     * @param startY the pixel y-coordinate of the start location in the image.
-     *     (incl.)
-     * @param endX the pixel x-coordinate of the end location of the image.
-     *     (excl.)
-     * @param endY the pixel y-coordinate of the end location of the image.
-     *     (excl.)
-     * @param width the width of each subimage.
-     * @param height the height of each subimage.
-     * 
-     * @return a 2D BufferedImage array, with the images loaded such
-     *     that bi[x][y] will retrieve the image part at (x, y) from
-     *     the selected part (starting at (0, 0)).
-     * 
-     * @throws IOException iff the file does not exist or is not accessable.
-     * @throws IllegalArgumentException iff: {@code
-     *     - startX >= endX  OR  startY >= endY
-     *     - (endX - startX) % width != 0  OR  (endY - startY) % height != 0
-     *     - endX < the width of the image  OR  endY < the height of the image
-     * }
-     * If any endX or endY equals -1 (e.g. endX == -1), then this coord will
-     * be changed to the max size of the image (width for endX, height for endY).
-     * If the width or height equals -1, then this will be changed
-     * to resp. endX - startX and endY - startY.
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
      */
     // Wrapper functions
     
@@ -193,6 +176,40 @@ public class LoadImages2 {
     }
     
     // Full function
+    /**
+     * Loads an image from a given file(-name) and converts it into
+     * separate pieces. The images are created from {@code startX, startY}
+     * (inclusive) till {@code endX, endY} (exclusive).<br>
+     * Each image in this range has size (width, height).<br>
+     * <br>
+     * If any of {@code endX} or {@code endY} equals {@code -1},
+     * then this coordinate will be changed to the maximum size of the image
+     * ({@code width} for {@code endX}, {@code height} for {@code endY}).
+     * If {@code width} or {@code height} equals {@code -1}, then these will be changed
+     * to {@code endX - startX} and {@code endY - startY} respectively.
+     * 
+     * @param fileName The path of the image file.
+     * @param file Image file.
+     * @param name The name of the image for later retrieval.
+     * @param startX The pixel x-coordinate of the start location in the image (incl.).
+     * @param startY The pixel y-coordinate of the start location in the image (incl.).
+     * @param endX The pixel x-coordinate of the end location of the image (excl.).
+     * @param endY The pixel y-coordinate of the end location of the image (excl.).
+     * @param width The width of each sub-image.
+     * @param height The height of each sub-image.
+     * 
+     * @return A 2D BufferedImage array, with the images loaded such that
+     *     {@code bi[x][y]} will retrieve the image part at {@code (x, y)}
+     *     from the selected part (starting at {@code (0, 0)}).
+     * 
+     * @throws IOException Iff the file does not exist or is not accessable.
+     * @throws IllegalArgumentException Iff:
+     *     <ul>
+     *       <li> {@code startX >= endX} or {@code startY >= endY}</li>
+     *       <li> {@code (endX - startX) % width != 0} or {@code (endY - startY) % height != 0}</li>
+     *       <li> {@code endX < the width of the image} or {@code endY < the height of the image}</li>
+     *     </ul>
+     */
     public static BufferedImage[][] loadImage(File file, String name,
             int startX, int startY,
             int endX, int endY,
@@ -279,23 +296,6 @@ public class LoadImages2 {
         images.put(name, newImg);
         return newImg;
     }
-    
-    /**
-     * Loads an image from a given file(-name) and converts it into
-     * separate pieces.
-     * 
-     * @param fileName the path of the image file.
-     * @param file image file.
-     * @param name the name of the image for later retrieval.
-     * @param locs the locations and sizes of the images to load.
-     *     The image stored at the indices of the returned image 2D array
-     *     match the corresponding indices of this array.
-     * @return a 2D BufferedImage array, with the images loaded such that
-     *     they match the indices of {@code locs}.
-     * @throws IOException iff the file does not exist or is not accessable.
-     * @throws IllegalArgumentException iff at least one of the provided
-     *     rectangles is outside the main image.
-     */
     public static BufferedImage[][] loadImage(File file, Rectangle[][] locs)
             throws IllegalArgumentException, IOException {
         return loadImage(file, file.getName(), locs);
@@ -313,6 +313,24 @@ public class LoadImages2 {
         return loadImage(new File(fileName), name, locs);
     }
     
+    
+    /**
+     * Loads an image from a given file(-name) and converts it into
+     * separate pieces.
+     * 
+     * @param fileName The path of the image file.
+     * @param file Image file.
+     * @param name The name of the image for later retrieval.
+     * @param locs The locations and sizes of the images to load.
+     *     The image stored at the indices of the returned image 2D array
+     *     match the corresponding indices of this array.
+     * @return a 2D BufferedImage array, with the images loaded such that
+     *     they match the indices of {@code locs}.
+     * 
+     * @throws IOException iff the file does not exist or is not accessable.
+     * @throws IllegalArgumentException iff at least one of the provided
+     *     rectangles is outside the main image.
+     */
     public static BufferedImage[][] loadImage(File file, String name,
             Rectangle[][] locs)
             throws IllegalArgumentException, IOException {
@@ -365,16 +383,6 @@ public class LoadImages2 {
         return newImg;
     }
     
-    /**
-     * Check if the current entry already exists. If it doesn't,
-     * create it with the given settings.
-     * 
-     * For more info, see {@link #loadImage(File, String, int, int, int,
-     * int, int, int)}.
-     * parameters.
-     * 
-     * @return the image array described by the parameters.
-     */
     // (0) Using {@code new File(fileName)} as file
     //     (1) Using {@code filename} as name
     public static BufferedImage[][] ensureLoadedAndGetImage(String fileName)
@@ -493,6 +501,16 @@ public class LoadImages2 {
     }
     
     // Full function
+    /**
+     * Check if the current entry already exists. If it doesn't,
+     * create it with the given settings.
+     * 
+     * For more info, see {@link #loadImage(File, String, int, int, int,
+     * int, int, int)}.
+     * parameters.
+     * 
+     * @return the image array described by the parameters.
+     */
     public static BufferedImage[][] ensureLoadedAndGetImage(
             File file, String name,
             int startX, int startY,
@@ -510,14 +528,6 @@ public class LoadImages2 {
         }
     }
     
-    /**
-     * Check if the current entry already exists. If it doesn't,
-     * create it with the given settings.
-     * 
-     * For more info, see {@link #loadImage(File, String, Rectangle[][])}.
-     * 
-     * @return the image array described by the parameters.
-     */
     public static BufferedImage[][] ensureLoadedAndGetImage(File file,
             Rectangle[][] locs)
             throws IllegalArgumentException, IOException {
@@ -536,6 +546,14 @@ public class LoadImages2 {
         return ensureLoadedAndGetImage(new File(fileName), name, locs);
     }
     
+    /**
+     * Check if the current entry already exists. If it doesn't,
+     * create it with the given settings.
+     * 
+     * For more info, see {@link #loadImage(File, String, Rectangle[][])}.
+     * 
+     * @return the image array described by the parameters.
+     */
     public static BufferedImage[][] ensureLoadedAndGetImage(
             File file, String name, Rectangle[][] locs)
             throws IllegalArgumentException, IOException {

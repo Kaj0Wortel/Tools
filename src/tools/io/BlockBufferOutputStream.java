@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -24,9 +24,10 @@ import java.io.OutputStream;
 
 
 /**
+ * Abstract class for making an {@link OutputStream} which accepts only chunks of
+ * data instead of a stream.
  * 
- * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public abstract class BlockBufferOutputStream
         extends OutputStream {
@@ -35,10 +36,10 @@ public abstract class BlockBufferOutputStream
      * Variables.
      * -------------------------------------------------------------------------
      */
-    final private BlockByteBuffer buffer;
-    
+    /** The buffer used for storing the data. */
+    private final BlockByteBuffer buffer;
+    /** The block size to use. */
     private int blockSize = -1;
-    private boolean blockSizeRequested = false;
     
     
     /* -------------------------------------------------------------------------
@@ -46,11 +47,15 @@ public abstract class BlockBufferOutputStream
      * -------------------------------------------------------------------------
      */
     /**
+     * Creates a fresh output stream.
      * 
      * @param out the outputstream to write the data to.
      */
     public BlockBufferOutputStream() {
+        // Initialize the buffer.
         buffer = new BlockByteBuffer();
+        // Initialize the first block size.
+        blockSize = getNextBlockSize();
     }
     
     
@@ -62,15 +67,11 @@ public abstract class BlockBufferOutputStream
      * Checks if the buffer is large enough to process the next block.
      * If so, process it.
      * 
-     * @throws IOException if the outputstream threw an {@link IOException}.
+     * @throws IOException If the underlying {@link OutputStream}
+     *         threw an {@link IOException}.
      */
     private void checkBuffer()
             throws IOException {
-        if (!blockSizeRequested) {
-            blockSizeRequested = true;
-            blockSize = getNextBlockSize();
-        }
-        
         while (buffer.size() >= blockSize) {
             byte[] data = buffer.get(blockSize);
             processBlock(data);
@@ -86,23 +87,27 @@ public abstract class BlockBufferOutputStream
     }
     
     /**
+     * Writes the given byte to the buffer.
+     * 
+     * @param data The byte to write to the buffer.
+     * 
      * @see write(int)
      */
-    final public void write(byte data)
+    public final void write(byte data)
             throws IOException {
         buffer.add(data);
         checkBuffer();
     }
     
     @Override
-    final public void write(byte[] data)
+    public final void write(byte[] data)
             throws IOException {
         buffer.add(data);
         checkBuffer();
     }
     
     @Override
-    final public void write(byte[] data, int off, int len)
+    public final void write(byte[] data, int off, int len)
             throws IOException {
         buffer.add(data, off, len);
         checkBuffer();

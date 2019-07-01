@@ -28,7 +28,7 @@ import java.util.concurrent.locks.Condition;
  * Most basic implementation of {@link Scheduler}. Simply executes the task
  * directly on the same thread.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class SelfScheduler
         extends Scheduler {

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -23,115 +23,238 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
-/**
- * Provides an easy way of processing a data file.
- * Has the following functionality:
- *  - Keeps track of a line counter.
- *  - Supports custom comment (single line and multiple line).
- *  - Supports csv file handeling:
- *    - Format: data;data;data; (etc.)
- *    - Read single cell.
- *    - Read line of cells.
- *  - Supports conf/config file handeling:
- *    - Format: name=data,data,data (etc.)
- *    - Read name field.
- *    - Read data field.
- *    - Changeable delimiters for name and data fields.
- *  - Supports stream marking.
- *  - Supports easy pre and post line processing for extended classes.
- *  - Can be used as a wrapper for readers.
+/**DONE (maybe 2nd check for constructors)
+ * Provides an easy way of processing a data file. Has the following
+ * functionality:
+ * <ul>
+ *   <li> Keeps track of a line counter.</li>
+ *   <li> Supports custom comment (single line and multiple line).</li>
+ *   <li> Supports CSV file handling:</li><ul>
+ *     <li> Format: data;data;data; (etc.)</li>
+ *     <li> Read single cell.</li>
+ *     <li> Read line of cells.</li>
+ *   </ul>
+ *   <li> Supports config file handling:</li><ul>
+ *     <li> Format: name=data,data,data (etc.)</li>
+ *     <li> Read name field.</li>
+ *     <li> Read data field.</li>
+ *     <li> Changeable delimiters for name and data fields.</li>
+ *   </ul>
+ *   <li> Supports stream marking.</li>
+ *   <li> Supports easy pre and post line processing for extended classes.</li>
+ *   <li> Can be used as a wrapper for readers.</li>
+ * </ul>
+ * 
+ * @author Kaj Wortel
  */
 public class BufferedReaderPlus
         extends BufferedReader
         implements Closeable {
     
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
     // Types of supported comments.
-    final public static int NO_COMMENT = -1;
-    final public static int HASHTAG_COMMENT = 0;
-    final public static int JAVA_SINGLE_LINE_COMMENT = 1;
-    final public static int JAVA_COMMENT = 2;
-    final public static int DOCUMENT_WITH_LINKS_COMMENT = 3;
-    final public static int HTML_COMMENT = 4;
+    /** No comments. */
+    public static final int NO_COMMENT = -1;
+    /** Comment lines with {@code #}. */
+    public static final int HASHTAG_COMMENT = 0;
+    /** Comment lines with {@code //}. */
+    public static final int JAVA_SINGLE_LINE_COMMENT = 1;
+    /** Comment lines with {@code //} and multiline with {@code /*  * /}. */
+    public static final int JAVA_COMMENT = 2;
+    /** Comment lines with a {@code /:\}. */
+    public static final int DOCUMENT_WITH_LINKS_COMMENT = 3;
+    /** Comment multiline with a {@code <!--  -->}. */
+    public static final int HTML_COMMENT = 4;
     
     // Types of supported readers.
-    final public static int TYPE_ALL = -1;
-    final public static int TYPE_DEFAULT = 0;
-    final public static int TYPE_CSV = 1;
-    final public static int TYPE_CONFIG = 2;
+    /** Support all available file types. */
+    public static final int TYPE_ALL = -1;
+    /** Support CSV file types. */
+    public static final int TYPE_NONE = 0;
+    /** Support CSV file types. */
+    public static final int TYPE_CSV = 1;
+    /** Support CONFIG file types. */
+    public static final int TYPE_CONFIG = 2;
     
-    // Current linecounter in the file.
-    protected int lineCounter = 0;
+    /** Current lineCounter in the file. */
+    private int lineCounter = 0;
     
-    // true iff in a multipleLineComment block.
-    protected boolean multipleLineCommentActive = false;
+    /** {@code true} iff in a multipleLineComment block. */
+    private boolean multipleLineCommentActive = false;
     
     // Temporary storage for the mark option.
-    protected int markedLineCounter = 0;
-    protected boolean markedMultipleLineCommentActive = false;
-    protected String markedBufferedLine = "";
-    
-    // Stores the current line when reading cells (csv filetypes only).
-    protected String bufferedLine = "";
-    
+    /** Variable for marking the stream. */
+    private int markedLineCounter = 0;
+    /** Variable for determining whether the multiline comment was active before the mark. */
+    private boolean markedMultipleLineCommentActive = false;
+    /** Variable for storing the buffer at the marked position. */
+    private String markedBufferedLine = "";
+
+    /** Stores the current line when reading cells (CSV fileTypes only). */
+    private String bufferedLine = "";
+
     // Stores the current comment String.
+    /** The string used for making a single comment line. */
     private String singleCommentString;
+    /** The string used for starting a multi comment line. */
     private String multipleCommentStartString;
+    /** The string used for ending a multi comment line. */
     private String multipleCommentEndString;
-    
+
     // Field and data storage of the conf file type.
+    /** The name of entry. */
     private String confFieldName = null;
+    /** The values of the entry. */
     private String[] confData = null;
-    String confNameSeparator = "=";
-    String confDataSeparator = ",";
-    
-    // The type of reader.
+    /** The separator used to separate the entry name from the entry data. */
+    private String confNameSeparator = "=";
+    /** The separator used to separate the data entries. */
+    private String confDataSeparator = ",";
+
+    /** The type of reader. */
     private int type;
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Constructors.
      * -------------------------------------------------------------------------
      */
+    // Constructors for a file.
     /**
-     * Constructors with String to file location.
-     * These constructors only convert the given String to a FileReader
-     *     and let the other constructor handle the rest.
+     * Creates a new Reader for the file.
+     * 
+     * @param file The file to read.
+     * 
+     * @throws FileNotFoundException Iff the file could not be accessed.
      */
-    // For the constructors with supported comments.
     public BufferedReaderPlus(String file)
             throws FileNotFoundException {
         this(new FileReader(file));
     }
     
+    // - Constructors with a comment type.
+    /**
+     * Creates a new Reader for the file with the given comment type.
+     * 
+     * @param file The file to read.
+     * @param commentType The supported type of comment used. Must be one of:
+     *     <ul>
+     *       <li> {@link #NO_COMMENT}</li>
+     *       <li> {@link #HASHTAG_COMMENT}</li>
+     *       <li> {@link #JAVA_SINGLE_LINE_COMMENT}</li>
+     *       <li> {@link #JAVA_COMMENT}</li>
+     *       <li> {@link #DOCUMENT_WITH_LINKS_COMMENT}</li>
+     *       <li> {@link #HTML_COMMENT}</li>
+     *     </ul>
+     * 
+     * @throws FileNotFoundException Iff the file could not be accessed.
+     */
     public BufferedReaderPlus(String file, int commentType)
             throws FileNotFoundException {
         this(new FileReader(file), commentType);
     }
     
+    /**
+     * Creates a new Reader for the file of the given file type
+     * with the given comment type.
+     * 
+     * @param file The file to read.
+     * @param commentType The supported type of comment used. Must be one of:
+     *     <ul>
+     *       <li> {@link #NO_COMMENT}</li>
+     *       <li> {@link #HASHTAG_COMMENT}</li>
+     *       <li> {@link #JAVA_SINGLE_LINE_COMMENT}</li>
+     *       <li> {@link #JAVA_COMMENT}</li>
+     *       <li> {@link #DOCUMENT_WITH_LINKS_COMMENT}</li>
+     *       <li> {@link #HTML_COMMENT}</li>
+     *     </ul>
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     * 
+     * @throws FileNotFoundException Iff the file could not be accessed.
+     */
     public BufferedReaderPlus(String file, int commentType, int type)
             throws FileNotFoundException {
         this(new FileReader(file), commentType, type);
     }
     
-    // For constructors with custom comments.
+    // - Constructors with single line comments.
+    /**
+     * Creates a new Reader for the file which has single line comments.
+     * 
+     * @param file The file to read.
+     * @param singleComment The String used to indicate a single line comment.
+     *     Default is {@code null}.
+     */
     public BufferedReaderPlus(String file, String singleComment)
             throws FileNotFoundException {
         this(new FileReader(file), singleComment);
     }
     
+    /**
+     * Creates a new Reader for the file of the given file type
+     * which has single line comments.
+     * 
+     * @param file The file to read.
+     * @param singleComment The String used to indicate a single line comment.
+     *     Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(String file, String singleComment, int type)
             throws FileNotFoundException {
         this(new FileReader(file), singleComment, type);
     }
     
+    // - Constructors with multiple line comments.
+    /**
+     * Creates a new Reader for the file which has multiple line comments.
+     * 
+     * @param file The file to read.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     */
     public BufferedReaderPlus(String file, String multipleCommentStart,
                               String multipleCommentEnd)
             throws FileNotFoundException {
         this(new FileReader(file), multipleCommentStart, multipleCommentEnd);
     }
     
+    /**
+     * Creates a new Reader for the file of the given file type
+     * which has multiple line comments.
+     * 
+     * @param file The file to read.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(String file, String multipleCommentStart,
                               String multipleCommentEnd, int type)
             throws FileNotFoundException {
@@ -139,6 +262,20 @@ public class BufferedReaderPlus
                 type);
     }
     
+    // - Constructors with both single and multiple line comments.
+    /**
+     * Creates a new Reader for the file of the given file type
+     * which has single and multiple line comments.
+     * 
+     * @param file The file to read.
+     * @param singleComment The String used to indicate a single line comment.
+     *     Default is {@code null}.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     */
     public BufferedReaderPlus(String file, String singleComment,
                               String multipleCommentStart,
                               String multipleCommentEnd)
@@ -147,6 +284,24 @@ public class BufferedReaderPlus
                 multipleCommentEnd);
     }
     
+    /**
+     * Creates a new Reader for the file which has single and multiple line comments.
+     * 
+     * @param file The used reader object.
+     * @param singleComment The String used to indicate a single line comment.
+     *     Default is {@code null}.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(String file, String singleComment,
                               String multipleCommentStart,
                               String multipleCommentEnd, int type)
@@ -155,27 +310,56 @@ public class BufferedReaderPlus
                 multipleCommentEnd, type);
     }
     
-    
+    // Constructors with a reader.
     /**
-     * Constructors with supported comments.
+     * Constructor for a reader of a file.
      * 
-     * @param reader the used reader object.
-     * @param commentType the supported type of comment used.
-     *     Must be one of {@link #NO_COMMENT}, {@link #HASHTAG_COMMENT},
-     *     {@link #JAVA_SINGLE_LINE_COMMENT}, {@link #JAVA_COMMENT},
-     *     {@link #DOCUMENT_WITH_LINKS_COMMENT} or {@link #HTML_COMMENT}.
-     * @param type the type of file that will be read. Must be one of
-     *     {@link #TYPE_ALL}, {@link #TYPE_DEFAULT}, {@link #TYPE_CSV},
-     *     or {@link #TYPE_CONFIG}.
+     * @param reader The used reader object.
      */
     public BufferedReaderPlus(Reader reader) {
-        this(reader, NO_COMMENT);
+        this(reader, TYPE_NONE);
     }
     
+    // - Constructors with a comment type.
+    /**
+     * Constructor for a reader of a file with the given comment type.
+     * 
+     * @param reader The used reader object.
+     * @param commentType The supported type of comment used. Must be one of:
+     *     <ul>
+     *       <li> {@link #NO_COMMENT}</li>
+     *       <li> {@link #HASHTAG_COMMENT}</li>
+     *       <li> {@link #JAVA_SINGLE_LINE_COMMENT}</li>
+     *       <li> {@link #JAVA_COMMENT}</li>
+     *       <li> {@link #DOCUMENT_WITH_LINKS_COMMENT}</li>
+     *       <li> {@link #HTML_COMMENT}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(Reader reader, int commentType) {
-        this(reader, commentType, TYPE_DEFAULT);
+        this(reader, commentType, TYPE_NONE);
     }
     
+    /**
+     * Constructor for a of the given file type with the given comment type.
+     * 
+     * @param reader The used reader object.
+     * @param commentType The supported type of comment used. Must be one of:
+     *     <ul>
+     *       <li> {@link #NO_COMMENT}</li>
+     *       <li> {@link #HASHTAG_COMMENT}</li>
+     *       <li> {@link #JAVA_SINGLE_LINE_COMMENT}</li>
+     *       <li> {@link #JAVA_COMMENT}</li>
+     *       <li> {@link #DOCUMENT_WITH_LINKS_COMMENT}</li>
+     *       <li> {@link #HTML_COMMENT}</li>
+     *     </ul>
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(Reader reader, int commentType, int type) {
         super(reader);
         this.type = type;
@@ -200,52 +384,114 @@ public class BufferedReaderPlus
         }
     }
     
+    // - Constructors with single line comments.
     /**
-     * Constructors with custom comments.
+     * Constructor for a reader of a file which has single line comments.
      * 
-     * @param reader the used reader object.
-     * @param singleComment the String used to indicate a single line comment.
-     *     Default is "".
-     * @param multipleCommentStart the String used to indicate the start of
-     *     a multiple line comment. Default is "".
-     * @param multipleCommentEnd the String used to indicate the end of
-     *     a multiple line comment. Default is "".
-     * @param type the type of the reader.
+     * @param reader The used reader object.
+     * @param singleComment The String used to indicate a single line comments.
+     *     Default is {@code null}.
      */
-    // Single line only
     public BufferedReaderPlus(Reader reader, String singleComment) {
-        this(reader, singleComment, null, null, TYPE_DEFAULT);
+        this(reader, singleComment, null, null, TYPE_NONE);
     }
     
-    public BufferedReaderPlus(Reader reader, String singleComment,
-                              int type) {
-        this(reader, singleComment, null, null, TYPE_DEFAULT);
+    /**
+     * Constructor for a reader of a file of the given file type
+     * which has single line comments.
+     * 
+     * @param reader The used reader object.
+     * @param singleComment The String used to indicate a single line comment.
+     *     Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
+    public BufferedReaderPlus(Reader reader, String singleComment, int type) {
+        this(reader, singleComment, null, null, type);
     }
     
-    // Multiple line only
+    // - Constructors with multiple line comments.
+    /**
+     * Constructor for a reader of a file which has multiple line comments.
+     * 
+     * @param reader The used reader object.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     */
     public BufferedReaderPlus(Reader reader, String multipleCommentStart,
-                              String multipleCommentEnd) {
-        this(reader, null, multipleCommentStart, multipleCommentEnd,
-                TYPE_DEFAULT);
+            String multipleCommentEnd) {
+        this(reader, null, multipleCommentStart, multipleCommentEnd, TYPE_NONE);
     }
     
+    /**
+     * Constructor for a reader of a file of the given file type
+     * which has custom multiple line comments.
+     * 
+     * @param reader The used reader object.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(Reader reader, String multipleCommentStart,
-                              String multipleCommentEnd, int type) {
+            String multipleCommentEnd, int type) {
         this(reader, null, multipleCommentStart, multipleCommentEnd, type);
     }
     
-    // Both comment types
+    // - Constructors with both single and multiple line comments.
+    /**
+     * Constructor for a reader of a file which has custom single
+     * and multiple line comments.
+     * 
+     * @param reader the used reader object.
+     * @param singleComment The String used to indicate a single line comment.
+     *     Default is {@code null}.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     */
     public BufferedReaderPlus(Reader reader, String singleComment,
-                              String multipleCommentStart,
-                              String multipleCommentEnd) {
-        this(reader, singleComment, multipleCommentStart, multipleCommentEnd,
-             TYPE_DEFAULT);
+            String multipleCommentStart, String multipleCommentEnd) {
+        this(reader, singleComment, multipleCommentStart, multipleCommentEnd, TYPE_NONE);
     }
     
     // Full constructor
+    /**
+     * Constructor for a reader of a file of the given file type
+     * which has custom single and multiple line comments.
+     * 
+     * @param reader the used reader object.
+     * @param singleComment the String used to indicate a single line comment.
+     *     Default is {@code null}.
+     * @param multipleCommentStart The String used to indicate the start of
+     *     a multiple line comment. Default is {@code null}.
+     * @param multipleCommentEnd The String used to indicate the end of
+     *     a multiple line comment. Default is {@code null}.
+     * @param type The type of file that will be read. Must be one of:
+     *     <ul>
+     *       <li> {@link #TYPE_ALL}</li>
+     *       <li> {@link #TYPE_NONE}</li>
+     *       <li> {@link #TYPE_CSV}</li>
+     *       <li> {@link #TYPE_CONFIG}</li>
+     *     </ul>
+     */
     public BufferedReaderPlus(Reader reader, String singleComment,
-                              String multipleCommentStart,
-                              String multipleCommentEnd, int type) {
+            String multipleCommentStart, String multipleCommentEnd, int type) {
         super(reader);
         this.type = type;
         
@@ -255,14 +501,14 @@ public class BufferedReaderPlus
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Read line fuctions.
      * -------------------------------------------------------------------------
      */
     /**
      * Reads a single line.
      * 
-     * @returns the next line of the file.
+     * @returns The next line of the file.
      * @throws IOException when no read actions are allowed from the file.
      */
     @Override
@@ -275,7 +521,7 @@ public class BufferedReaderPlus
     /**
      * Reads a line while skipping empty lines comments.
      * 
-     * @returns the next processed line of the file.
+     * @returns The next processed line of the file.
      * @throws IOException when no read actions are allowed from the file.
      */
     public String readProcessedLine()
@@ -306,10 +552,9 @@ public class BufferedReaderPlus
     
     /**
      * Pre-processes the given line.
-     * Is supposed to be overridden to do operations before
-     *     processing the line.
+     * Is supposed to be overridden to do operations before processing the line.
      * 
-     * @param line text to be processed.
+     * @param line The text to be processed.
      * @return processed line.
      */
     protected String preProcessLine(String line) {
@@ -320,175 +565,254 @@ public class BufferedReaderPlus
      * Post-processes the given line.
      * Is supposed to be overriden to do operations after processing the line.
      * 
-     * @param lien text to be processed.
-     * @return processed line.
+     * @param line The text to be processed.
+     * @return The Processed line.
      */
     protected String postProcessLine(String line) {
         return line;
     }
     
     /**
-     * Processes the given line.
-     * Used for ignoring single and multiple line comments.
-     * 
-     * @param line text to be processed
-     * @return processed line.
+     * @return {@code true} if the reader supports single line comments.
      */
-    private String processLine(String line) {
+    public final boolean hasSingleLineComment() {
+        return !(singleCommentString == null
+            || singleCommentString.equals(""));
+    }
+    
+    /**
+     * @return {@code true} if the reader supports multi line comments.
+     */
+    public final boolean hasMultiLineComment() {
+        return !(multipleCommentStartString == null
+            || multipleCommentStartString.equals("")
+            || multipleCommentEndString == null
+            || multipleCommentEndString.equals(""));
+    }
+    
+    /**
+     * Processes the given line. Used for ignoring single and multiple line
+     * comments.
+     *
+     * @param line text to be processed
+     * @return The processed line.
+     *
+     * @see #processLineMulti(String)
+     * @see #processLineSingleMulti(String)
+     */
+    private String processLine(final String line) {
         // If the input is null, nothing can be processed.
-        if (line == null) return null;
+        if (line == null) {
+            return null;
+        }
         
-        boolean hasSingleLineComment
-            = !(singleCommentString == null ||
-                singleCommentString.equals(""));
-        boolean hasMultipleLineComment
-            = !(multipleCommentStartString == null ||
-                multipleCommentStartString.equals("") ||
-                multipleCommentEndString == null ||
-                multipleCommentEndString.equals(""));
-        
+        boolean hasSingleLineComment = hasSingleLineComment();
+        boolean hasMultiLineComment = hasMultiLineComment();
+
         // If there are no processing actions, simply return the line.
-        if (!hasSingleLineComment && !hasMultipleLineComment) return line;
+        if (!hasSingleLineComment && !hasMultiLineComment) {
+            return line;
+        }
         
-        // Marks the begin of a multiple line comment.
-        int beginMLC = 0;
+        if (hasSingleLineComment && hasMultiLineComment) {
+            return processLineSingleMulti(line);
+        }
         
-        for (int pointer = 0; pointer < line.length(); pointer++) {
+        if (hasMultiLineComment) { // {@code hasSingleLine == false}.
+            return processLineMulti(line);
+        }
+        
+        // {@code hasSingleLine == true && hasMultiLine == false}.
+        int index = line.indexOf(singleCommentString);
+        return (index == -1 ? line : line.substring(0, index));
+    }
+    
+    /**
+     * Processes the given line for single line and multiple line comments.
+     * Should only be invoked via {@link #processLine(String)}
+     *
+     * @param line The line to process.
+     * @return The processed line.
+     *
+     * @see #processLine(String)
+     */
+    private String processLineSingleMulti(final String line) {
+        StringBuilder sb = new StringBuilder();
+        int pointer = 0;
+        while (true) {
+            int index;
             if (multipleLineCommentActive) {
-                // Should not occur.
-                if (!hasMultipleLineComment) {
-                    multipleLineCommentActive = false;
-                    pointer--;
-                    continue;
-                }
-                
-                // Checks if there could be a multiple line comment ending.
-                if (line.length() - pointer
-                        - multipleCommentEndString.length() >= 0) {
-                    // Checks for multiple line comment ending.
-                    if (line.startsWith(multipleCommentEndString, pointer)) {
-                        String preCommentLine = beginMLC == 0
-                                ? ""
-                                : line.substring(0, beginMLC);
-                        String postCommentLine = pointer == line.length()
-                                ? ""
-                                : line.substring(pointer
-                                        + multipleCommentEndString.length());
-                        pointer = preCommentLine.length();
-                        line = preCommentLine + postCommentLine;
-                        multipleLineCommentActive = false;
-                    }
-                    
-                } else {
-                    // If not, ignore the rest of the line.
-                    return (beginMLC == 0 ? "" : line.substring(0, beginMLC));
+                index = line.indexOf(multipleCommentEndString, pointer);
+                if (index == -1) {
+                    return sb.toString();
                 }
                 
             } else {
-                // No multiple line comment is active.
-                
-                if (hasSingleLineComment) {
-                    // Checks if there could be a single line comment.
-                    if (line.length() - pointer
-                            - singleCommentString.length() >= 0) {
-                        // Checks for single line comment.
-                        if (line.startsWith(singleCommentString, pointer)) {
-                            return line.substring(0, pointer);
-                        }
-                    }
+                index = line.indexOf(multipleCommentStartString, pointer);
+                int singleCommentIndex = line.indexOf(singleCommentString,
+                    pointer);
+                if (singleCommentIndex != -1
+                    && (index == -1 || singleCommentIndex < index)) {
+                    sb.append(line, pointer, singleCommentIndex);
+                    return sb.toString();
                 }
-                
-                if (hasMultipleLineComment) {
-                    // Checks if there could be a multiple line comment start.
-                    if (line.length() - pointer
-                            - multipleCommentStartString.length() >= 0) {
-                        // Checks for multiple line comment start.
-                        if (line.startsWith(multipleCommentStartString,
-                                pointer)) {
-                            beginMLC = pointer;
-                            multipleLineCommentActive = true;
-                            pointer += multipleCommentStartString.length() - 1;
-                        }
-                    }
+                if (index == -1) {
+                    sb.append(line.substring(pointer));
+                    return sb.toString();
                 }
+                sb.append(line, pointer, index);
             }
+            
+            multipleLineCommentActive = !multipleLineCommentActive;
+            pointer = index + multipleCommentEndString.length();
         }
-        
-        return line;
+    }
+    
+    /**
+     * Processes the gien line for multiple line comments.
+     * Should only be invoked via {@link #processLine(String)}
+     *
+     * @param line The line to process.
+     * @return The processed line.
+     *
+     * @see #processLine(String)
+     */
+    private String processLineMulti(final String line) {
+        StringBuilder sb = new StringBuilder();
+        int pointer = 0;
+        while (true) {
+            int index;
+            if (multipleLineCommentActive) {
+                index = line.indexOf(multipleCommentEndString, pointer);
+                if (index == -1) {
+                    return sb.toString();
+                }
+                
+            } else {
+                index = line.indexOf(multipleCommentStartString, pointer);
+                if (index == -1) {
+                    sb.append(line.substring(pointer));
+                    return sb.toString();
+                }
+                sb.append(line, pointer, index);
+            }
+            
+            multipleLineCommentActive = !multipleLineCommentActive;
+            pointer = index + multipleCommentEndString.length();
+        }
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * CSV file functions.
      * -------------------------------------------------------------------------
      */
     /**
-     * @return whether the reader supports the csv file type series.
+     * Returns {@code true} if reader supports CSV file type.
+     * {@code false} otherwise.
+     *
+     * @return Whether the reader supports the csv file type series.
      */
     public boolean supportsCSV() {
         return type == TYPE_ALL || type == TYPE_CSV;
     }
     
     /**
-     * Removes trailing semi-colons from csv-files
-     * 
-     * @param line the line to remove the trainling semi-colons from.
-     * @return a line without trailing semi-colons.
+     * Removes trailing semi-colons from csv-files.
+     *
+     * @param line The line to remove the trainling semi-colons from.
+     * @return The line without trailing semi-colons.
      */
-    @SuppressWarnings("empty-statement")
-    public static String removeCSVTrailings(String line) {
+    public static String removeCSVTrailings(final String line) {
         if (line == null) return null;
         if (line.length() == 0) return "";
         
-        // iterate backwards
+        // Iterate backwards
         int i = line.length() - 1;
-        for (; i >= 0 && line.charAt(i) == ';'; i--);
+        while (i >= 0 && line.charAt(i) == ';') {
+            i--;
+        }
         return (i == -1 ? "" : line.substring(0, i + 1));
     }
     
     /**
      * Reads a processed cell from a csv file.
+     * <br>
+     * Note:<br>
+     * If no line was buffered, pick the next one iff {@code lineBlock == false}.
+     * Otherwise return {@code null}.
+     *
+     * @return The data of a single cell from the file. Returns {@code null} iff
+     *     EOF reached or if {@code lineBlock == true} and EOL reached.
+     *
+     * @throws IOException Iff the data could not be retrieved from the file.
      * 
-     * @param processed whether to use processed lines as input or not.
-     *     Default is true.
-     * @param lineBlock whether to return null if the end of the line has been
-     *     reached (true), or to take the next line (false).
-     * @return the data of a single cell from the file. Returns null iff
-     *     EOF reached or if lineBlock == true and EOL reached.
-     * @throws IllegalStateException iff the reader was not configured
-     *     as a csv file type.
-     * @throws IOException iff the data could not be retrieved from the file.
-     * 
-     * If no line was buffered, pick the next one iff lineBlock == false.
-     *     Otherwise return null.
+     * @see #readCSVCell(boolean)
+     * @see #readCSVCell(boolean, boolean)
      */
     public String readCSVCell()
-            throws IllegalStateException, IOException {
+        throws IOException {
         return readCSVCell(true);
     }
     
-    public String readCSVCell(boolean processed)
-            throws IllegalStateException, IOException {
+    /**
+     * Reads a processed cell from a csv file.
+     * <br>
+     * Note:<br>
+     * If no line was buffered, pick the next one iff {@code lineBlock == false}.
+     * Otherwise return {@code null}.
+     *
+     * @param processed Whether to use processed lines as input or not.
+     *     Default is {@code true}.
+     * @return The data of a single cell from the file. Returns {@code null} iff
+     *     EOF reached or if {@code lineBlock == true} and EOL reached.
+     *
+     * @throws IOException Iff the data could not be retrieved from the file.
+     *                               
+     * @see BufferedReaderPlus#readCSVCell(boolean, boolean)
+     */
+    public String readCSVCell(final boolean processed)
+        throws IOException {
         return readCSVCell(processed, false);
     }
     
-    public String readCSVCell(boolean processed, boolean lineBlock)
-            throws IllegalStateException, IOException {
-        if (!supportsCSV())
+    /**
+     * Reads a processed cell from a csv file.
+     * <br>
+     * Note:<br>
+     * If no line was buffered, pick the next one iff {@code lineBlock == false}.
+     * Otherwise return {@code null}.
+     *
+     * @param processed Whether to use processed lines as input or not. Default is {@code true}.
+     * @param lineBlock Whether to return null if the end of a line has been
+     *     reached ({@code true}), or to take the next line ({@code false}).
+     * @return The data of a single cell from the file. Returns {@code null} iff
+     *     EOF reached or if {@code lineBlock == true} and EOL reached.
+     *
+     * @throws IOException Iff the data could not be retrieved from the file.
+     */
+    public String readCSVCell(final boolean processed, final boolean lineBlock)
+        throws IOException {
+        if (!supportsCSV()) {
             throw new IllegalStateException(
-                    "Reader is not configured to read \".csv\" file types.");
+                "Reader is not configured to read \".csv\" file types.");
+        }
         
-        // Update the buffer if nessecary
+        // Update the buffer if necessary
         if (bufferedLine == null || bufferedLine.length() == 0) {
-            // If the bufferlength == 0, read new line if allowed.
+            // If the {@code bufferLength == 0}, read new line, if allowed.
             // Otherwise return null.
-            if (lineBlock) return null;
+            if (lineBlock) {
+                return null;
+            }
             
             // Reads the next line
             bufferedLine = (processed ? readProcessedLine() : readLine());
             
             // Check for EOF
-            if (bufferedLine == null) return null;
+            if (bufferedLine == null) {
+                return null;
+            }
         }
         
         // Read the buffer
@@ -511,32 +835,48 @@ public class BufferedReaderPlus
     
     /**
      * Reads either all remaining processed cells on the buffered line or all
-     *     cells on a new line from a csv file.
-     * 
-     * @param processed whether to use processed lines as input or not.
-     * @param lineBlock whether to return null if the end of the line has
-     *     been reached (true),
-     *     or to take the next line (false).
-     * @return the data of each cell in an array in increasing order.
-     *     Returns null iff EOF reached or if lineBlock == true and EOL reached.
-     * @throws IllegalStateException iff the reader was not configured
-     *     as a csv file type.
+     * cells on a new line from a csv file.
+     * <br>
+     * Note:<br>
+     * If no line was buffered, pick the next one iff {@code lineBlock == false}.
+     * Otherwise return {@code null}.
+     *
+     * @param processed Whether to use processed lines as input or not.
+     * @return The data of each cell in an array in increasing order. Returns {@code null}
+     *     iff EOF reached or if {@code lineBlock == true} and EOL reached.
+     *
      * @throws IOException iff the data could not be retrieved from the file.
-     * 
-     * Note:
-     * If no line was buffered, pick the next one iff lineBlock == false.
-     * Otherwise return null.
+     *                               <p>
+     * @see BufferedReaderPlus#readCSVLine(boolean, boolean)
      */
-    public List<String> readCSVLine(boolean processed)
-            throws IllegalStateException, IOException {
+    public List<String> readCSVLine(final boolean processed)
+        throws  IOException {
         return readCSVLine(processed, false);
     }
     
-    public List<String> readCSVLine(boolean processed, boolean lineBlock)
-            throws IllegalStateException, IOException {
-        if (!supportsCSV())
+    /**
+     * Reads either all remaining processed cells on the buffered line or all
+     * cells on a new line from a csv file.
+     * <br>
+     * Note:<br>
+     * If no line was buffered, pick the next one iff {@code lineBlock == false}.
+     * Otherwise return {@code null}.
+     *
+     * @param processed Whether to use processed lines as input or not.
+     * @param lineBlock Whether to return null if the end of the line has been
+     *     reached (true), or to take the next line (false).
+     * @return The data of each cell in an array in increasing order. Returns {@code null}
+     *     iff EOF reached or if {@code lineBlock == true} and EOL reached.
+     *
+     * @throws IOException Iff the data could not be retrieved from the file.
+     */
+    public List<String> readCSVLine(final boolean processed,
+                                    final boolean lineBlock)
+        throws IOException {
+        if (!supportsCSV()) {
             throw new IllegalStateException(
-                    "Reader is not configured to read \".csv\" file types.");
+                "Reader is not configured to read \".csv\" file types.");
+        }
         
         // Read and clear the buffer
         String line = bufferedLine;
@@ -544,85 +884,107 @@ public class BufferedReaderPlus
         
         // Checks the buffer length.
         if (line.length() == 0) {
-            // If the bufferlength == 0, read new line iff allowed.
+            // If the {@code bufferLength == 0}, read new line iff allowed.
             // Otherwise return null.
-            if (lineBlock) return null;
+            if (lineBlock) {
+                return null;
+            }
             
             // Reads the next line
             line = (processed ? readProcessedLine() : readLine());
-            
+
             // Check for the null-value
-            if (line == null) return null;
+            if (line == null) {
+                return null;
+            }
         }
         
-        List<String> cells = new ArrayList<String>();
+        List<String> cells = new ArrayList<>();
         int prevColon = 0;
         
         // Puts all Strings separated by a semi-colon in the ArrayList.
         // If no semi-colon is present, return the full line as
         // one element in the ArrayList
         for (int i = 0; i <= line.length(); i++) {
-            if (i == line.length() || 
-                line.charAt(i) == ';') {
-                
-                if (processed) {
-                    cells.add(line.substring(prevColon, i).trim());
-                    
-                } else {
-                    cells.add(line.substring(prevColon, i));
-                }
-                
-                prevColon = i + 1;
+            if (i != line.length() && line.charAt(i) != ';') {
+                continue;
             }
+            if (processed) {
+                cells.add(line.substring(prevColon, i).trim());
+
+            } else {
+                cells.add(line.substring(prevColon, i));
+            }
+            
+            prevColon = i + 1;
         }
         
         return cells;
     }
     
-    
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * CONFIG file functions.
      * -------------------------------------------------------------------------
      */
     /**
-     * @return whether the reader supports the conf file type series.
+     * Returns {@code true} if the reader supports configuration files, {@code
+     * false} otherwise.
+     *
+     * @return Whether the reader supports the conf file type series.
      */
     public boolean supportsConf() {
         return type == TYPE_ALL || type == TYPE_CONFIG;
     }
     
     /**
-     * @param sep the new conf file type name separator.
+     * Setter for name separator.
+     *
+     * @param sep The new conf file type name separator.
      */
-    public void setConfNameSeparator(String sep) {
+    public void setConfNameSeparator(final String sep) {
         confNameSeparator = sep;
     }
     
     /**
-     * @param sep the new conf file type data separator.
+     * Setter for data separator.
+     *
+     * @param sep The new conf file type data separator.
      */
-    public void setConfDataSeparator(String sep) {
+    public void setConfDataSeparator(final String sep) {
         confDataSeparator = sep;
     }
     
     /**
      * Reads the next field.
-     * The field name can be retrieved via {@link #getField()} and 
-     * the data can be retrieved via {@link #getData()}.
-     * 
-     * @param processed whether to use processed lines as input or not.
-     *     Default is {@code true}.
+     *
      * @return {@code true} if EOF was not yet reached.
+     *     {@code false} if EOF was reached.
+     *
+     * @throws IOException iff the data could not be retrieved from the file.
+     * @see BufferedReaderPlus#readNextConfLine(boolean)
      */
     public boolean readNextConfLine()
-            throws IOException {
+        throws IOException {
         return readNextConfLine(true);
     }
     
-    public boolean readNextConfLine(boolean processed)
-            throws IllegalStateException, IOException {
-        if (!supportsConf()) throw new IllegalStateException(
+    /**
+     * Reads the next field. The field name can be retrieved via {@link
+     * #getField()} and the data can be retrieved via {@link #getData()}.
+     *
+     * @param processed Whether to use processed lines as input or not.
+     *     Default is {@code true}.
+     * @return {@code true} If EOF was not yet reached.
+     *
+     * @throws IOException Iff the data could not be retrieved from
+     *                               the file.
+     */
+    public boolean readNextConfLine(final boolean processed)
+        throws IOException {
+        if (!supportsConf()) {
+            throw new IllegalStateException(
                 "Reader is not configured to read \".conf\" file types.");
+        }
         
         String line = (processed ? readProcessedLine() : readLine());
         if (line == null) {
@@ -648,103 +1010,115 @@ public class BufferedReaderPlus
             confFieldName = split[0];
             confData = split[1].split(confDataSeparator);
             
-        } else if (split.length > 2) {
+        } else { // split.length > 2
             // Field with data containing the field name separator.
             confFieldName = split[0];
             confData = line.substring(confFieldName.length() + 1)
-                    .split(confDataSeparator);
+                .split(confDataSeparator);
         }
         
         return true;
     }
     
     /**
-     * @return the name of the field.
-     *     {@code null} if no previous field available
-     *     (not yet started or EOF).
+     * Getter for a data field.
+     *
+     * @return The name of the field, or {@code null} if no previous field
+     *     was available (not yet started or EOF).
      */
     public String getField() {
         return confFieldName;
     }
     
     /**
-     * @param name the name of the field to check for.
-     * @return {@code true} iff the given name equals the current field.
-     *     {@code false} otherwise.
-     * 
+     * Helper function for testing if fields are equal. <br>
      * More specifically, {@code true} is returned if, and only if,
      * {@code name == null ? field == null : name.equals(field)}.
+     *
+     * @param name The name of the field to check for.
+     * @return {@code true} iff the given name equals the current field.
+     *     {@code false} otherwise.
      */
-    public boolean fieldEquals(String name) {
-        return (name == null
-                ? confFieldName == null
-                : name.equals(confFieldName));
+    public boolean fieldEquals(final String name) {
+        return (Objects.equals(name, confFieldName));
     }
     
     /**
-     * @return array containing the values of the field.
-     *     {@code null} if no values available, and an empty array
-     *     if no previous data available (not yet started or EOF).
+     * Getter for confData.
+     *
+     * @return Array containing the values of the field. {@code null} if no
+     *     values available, and an empty array if no previous data available
+     *     (not yet started or EOF).
      */
     public String[] getData() {
         return confData;
     }
     
     /**
-     * @param i the index of the element to be returned.
-     * @return the element of the values of the field at the provided
-     *     index. {@code null} if no values available or if the index
-     *     is not within the range of the values array.
+     * Getter for ith item of the data.
+     *
+     * @param i The index of the element to be returned.
+     * @return The element of the values of the field at the provided index.
+     *     {@code null} if no values available or if the index is not within
+     *     the range of the values array.
      */
-    public String getData(int i) {
-        if (confData == null) return null;
-        else if (i < 0 || i > confData.length) return null;
-        else return confData[i];
+    public String getData(final int i) {
+        if (confData == null) {
+            return null;
+        } else if (i < 0 || i > confData.length) {
+            return null;
+        } else {
+            return confData[i];
+        }
     }
     
-    
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Other functions.
      * -------------------------------------------------------------------------
      */
     /**
-     * Marks the present location in the steam.
-     * After reading 'readAheadLimit' characters, attempting to reset
-     *     the stream may fail. See {@link BufferedReader#mark(int)}.
-     * 
+     * Marks the present location in the steam. After reading
+     * <it>readAheadLimit</it> characters, attempting to reset the stream may
+     * fail.
+     *
      * @param readAheadLimit number of characters that will be at most read
-     *     before reset() is called.
-     * @throws IOException if the current reader is not initialized
-     *     for stream marking.
+     *     before {@link #reset()} is called.
+     * 
+     * @throws IOException if the current reader is not initialized for stream marking.
+     * 
+     * @see #reset()
      */
     @Override
-    public void mark(int readAheadLimit)
-            throws IOException {
+    public void mark(final int readAheadLimit)
+        throws IOException {
         markedLineCounter = lineCounter;
         markedMultipleLineCommentActive = multipleLineCommentActive;
         markedBufferedLine = bufferedLine;
-        
+
         super.mark(readAheadLimit);
     }
     
     /**
      * Resets to the last marked point in the stream.
-     * See {@link BufferedReader#mark(int)}.
-     * 
+     *
      * @throws IOException if the current reader is not initialized for stream marking.
+     * 
+     * @see #mark(int)
      */
     @Override
     public void reset()
-            throws IOException {
+        throws IOException {
         lineCounter = markedLineCounter;
         multipleLineCommentActive = markedMultipleLineCommentActive;
         bufferedLine = markedBufferedLine;
-        
+
         super.reset();
     }
     
     /**
-     * @return the current linecounter.
+     * Getter for linecounter.
+     *
+     * @return The current linecounter.
      */
     public int getLineCounter() {
         return lineCounter;
@@ -752,30 +1126,26 @@ public class BufferedReaderPlus
     
     /**
      * Not supported function.
-     * 
-     * @throws UnsupportedOperationException
+     *
+     * @throws UnsupportedOperationException when called
+     * @deprecated Function cannot and shouldn't be implemented.
      */
     @Override
-    @Deprecated
-    public int read()
-            throws UnsupportedOperationException {
+    @Deprecated(forRemoval = false)
+    public int read() {
         throw new UnsupportedOperationException("Operation was not supported");
     }
     
     /**
      * Not supported function.
-     * 
-     * @throws UnsupportedOperationException
+     *
+     * @throws UnsupportedOperationException when called
+     * @deprecated Function cannot and shouldn't be implemented.
      */
     @Override
-    @Deprecated
-    public int read(char[] cbuf, int off, int len)
-            throws UnsupportedOperationException {
+    @Deprecated(forRemoval = false)
+    public int read(final char[] cbuf, final int off, final int len) {
         throw new UnsupportedOperationException("Operation was not supported");
     }
     
-    
 }
-
-
-

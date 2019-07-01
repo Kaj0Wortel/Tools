@@ -27,7 +27,7 @@ import java.awt.Insets;
  * 
  * Default border for the {@link tools.swing.EditField}.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class EditFieldDefaultBorder
         extends IOBorder {

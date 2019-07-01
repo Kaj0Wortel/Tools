@@ -57,9 +57,9 @@ import java.util.concurrent.locks.ReentrantLock;
  *   <li> Canceling a timer which is already canceled does nothing.</li>
  * </ul>
  * 
- * This class is suitable for concurrent use.
+ * This class is suitable for concurrent access.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class ThreadTimer {
     /** The current state of the timer. */

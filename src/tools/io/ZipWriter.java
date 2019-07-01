@@ -34,7 +34,7 @@ import java.util.zip.ZipOutputStream;
  * Added functionality:<br>
  * - Supports file splitting.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class ZipWriter
         extends OutputStream {

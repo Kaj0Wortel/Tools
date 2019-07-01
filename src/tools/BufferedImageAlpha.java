@@ -38,11 +38,15 @@ import javax.imageio.ImageIO;
  * 
  * todo: reviving old artefact class.
  */
-/* 
+/**
  * Provides easy alpha handeling for a {@link BufferedImage}.
+ * 
+ * @author Kaj Wortel
+ * @deprecated needs to be reviewed before being used anywhere.
  */
+@Deprecated
 public class BufferedImageAlpha {
-    final private BufferedImage baseImage;
+    private final BufferedImage baseImage;
     private Color backgroundColor = new Color(255, 255, 255);
     private BufferedImage alphaImage;
     private int alpha = 0xFF;

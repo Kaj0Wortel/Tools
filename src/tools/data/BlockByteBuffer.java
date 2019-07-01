@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -16,16 +16,18 @@ package tools.data;
 
 // Java imports
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 
-/**
+/**DONE
  * Creates a buffer for bytes.
  * This buffer can be used to create equally sized blocks from a stream.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
-public class BlockByteBuffer {
+public class BlockByteBuffer
+        implements Iterable<Byte> {
     
     /* -------------------------------------------------------------------------
      * Variables.
@@ -55,6 +57,7 @@ public class BlockByteBuffer {
      * @param values the values to be added to the buffer.
      * 
      * @see #add(byte[], int, int)
+     * @see #add(Byte[])
      */
     public void add(byte[] values) {
         add(values, 0, values.length);
@@ -86,9 +89,9 @@ public class BlockByteBuffer {
      * them in the given array from the index {@code off} onwards.
      * The elements are returned according to the FIFO policy.
      * 
-     * @param dest the destination array of the operation.
-     * @param off the index to start adding from.
-     * @param len the amount of values to add.
+     * @param dest The destination array of the operation.
+     * @param off  The index to start adding from.
+     * @param len  The amount of values to add.
      * @return {@code dest} filled with the elements from the buffer.
      */
     public byte[] get(byte[] dest, int off, int len) {
@@ -103,7 +106,7 @@ public class BlockByteBuffer {
      * them in the given array. The elements are returned according to
      * the FIFO policy.
      * 
-     * @param dest the destination array of the operation.
+     * @param dest The destination array of the operation.
      * @return {@code dest} filled with the elements from the buffer.
      */
     public byte[] get(byte[] dest) {
@@ -149,6 +152,11 @@ public class BlockByteBuffer {
      */
     public byte[] getRemaining(byte[] dest, int off) {
         return get(dest, off, buffer.size());
+    }
+    
+    @Override
+    public Iterator<Byte> iterator() {
+        return buffer.iterator();
     }
     
     

@@ -20,6 +20,8 @@ import java.io.Writer;
 
 /**
  * This is a writer class that ignores all data written to it.
+ * 
+ * @author Kaj Wortel
  */
 public class NullWriter extends Writer {
     

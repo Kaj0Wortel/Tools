@@ -27,7 +27,7 @@ import java.io.OutputStream;
  * Wrapper class for attaching a listener for detecting
  * the closing of a stream.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class OutputStreamClosedNotifier
         extends OutputStream {

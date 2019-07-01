@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modified) versions of this file    *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// TODO
 package tools;
 
 
@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
  * Currently under development.
  * Use with care and check runtimes!
  * 
+ * @author Kaj Wortel
  * @deprecated old class. Implementations are slow and might be broken.
  */
 @Deprecated

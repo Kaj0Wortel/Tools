@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,12 +14,7 @@
 package tools.data;
 
 
-// Tools imports
-
-
 // Java imports
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,8 +29,9 @@ public class Wrapper<V> {
      * Variables.
      * -------------------------------------------------------------------------
      */
+    /** The data to be wrapped */
     private V data;
-    
+    /*
     final private static Map<Class, Function> TO_STRING = new HashMap<>();
     static {
         TO_STRING.put(Byte.TYPE     , (Function<byte[]   , String>) Arrays::toString);
@@ -47,7 +43,7 @@ public class Wrapper<V> {
         TO_STRING.put(Boolean.TYPE  , (Function<boolean[], String>) Arrays::toString);
         TO_STRING.put(Character.TYPE, (Function<char[]   , String>) Arrays::toString);
         TO_STRING.put(Object.class  , (Function<Object[] , String>) Arrays::toString);
-    }
+    }*/
     
     
     /* -------------------------------------------------------------------------
@@ -127,13 +123,11 @@ public class Wrapper<V> {
     public String toString() {
         if (data == null) return "null";
         Class<?> c = ((Object) data).getClass();
-        System.out.println(c.getComponentType().isPrimitive());
         if (c.isArray()) {
-            Class<?> comp = c.getComponentType();
-            comp = (comp.isPrimitive() ? comp : Object.class);
-            return (String) TO_STRING.get(comp).run(data);
+            return Array.toString(data);
+        } else {
+            return ((Object) data).toString();
         }
-        else return ((Object) data).toString();
     }
     
     

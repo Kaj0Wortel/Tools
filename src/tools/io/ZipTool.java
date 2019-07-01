@@ -29,7 +29,11 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-
+/**
+ * 
+ * 
+ * @author Kaj Wortel
+ */
 public class ZipTool {
     final static int BLOCK_SIZE = 1024;
     

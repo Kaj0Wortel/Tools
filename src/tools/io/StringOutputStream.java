@@ -26,7 +26,7 @@ import java.io.OutputStream;
 /**
  * Wrapper class to allow strings to be written to an {@link OutputStream}.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class StringOutputStream
         extends OutputStream {

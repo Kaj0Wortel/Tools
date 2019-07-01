@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,10 +14,10 @@
 package tools.concurrent;
 
 
-/**
+/**DONE
  * Enum for how to handle the frame rate for timers.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public enum FPSState {
     

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) 2018 by Kaj Wortel - all rights reserved                    *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,27 +14,49 @@
 package tools;
 
 
-/* 
+/**DONE
  * This exception is thrown when a value is attempted to be stored
  * at a location that is not suitable for that value.
+ * 
+ * @author Kaj Wortel
  */
 public class StoreException
         extends RuntimeException {
     
+    /**
+     * Creates a fresh store exception.
+     */
     public StoreException() {
         super();
     }
     
+    
+    /**
+     * Creates a fresh store exception with a message.
+     * 
+     * @param msg The message of the exception.
+     */
     public StoreException(String msg) {
         super(msg);
     }
     
-    public StoreException(String msg, Throwable cause) {
-        super(msg, cause);
-    }
-    
+    /**
+     * Creates a fresh store exception with a cause.
+     * 
+     * @param cause The cause of the exception.
+     */
     public StoreException(Throwable cause) {
         super(cause);
+    }
+    
+    /**
+     * Creates a fresh store exception with a message and a cause.
+     * 
+     * @param msg The message of the exception.
+     * @param cause The cause of the exception.
+     */
+    public StoreException(String msg, Throwable cause) {
+        super(msg, cause);
     }
     
 }

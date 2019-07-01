@@ -29,7 +29,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * TODO: comments
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public abstract class Scheduler
         implements ObsInterface {
