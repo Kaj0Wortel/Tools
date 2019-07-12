@@ -47,7 +47,6 @@ public class BlockByteBuffer
      * @param value the value to be added to the buffer.
      */
     public void add(byte value) {
-        System.out.println("Added value: " + value);
         buffer.addLast(value);
     }
     

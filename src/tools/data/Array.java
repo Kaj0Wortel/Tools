@@ -16,6 +16,7 @@ package tools.data;
 
 // Java imports.
 import java.util.Arrays;
+import tools.MultiTool;
 
 
 /**
@@ -49,9 +50,14 @@ import java.util.Arrays;
  * @author Kaj Wortel
  * 
  * @see java.lang.reflect.Array
+ * @see java.lang.reflect.Arrays
  */
 public final class Array {
 
+    /* -------------------------------------------------------------------------
+     * Constructor.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Constructor.
      * Class Array is not instantiable.
@@ -59,6 +65,10 @@ public final class Array {
     private Array() { }
     
     
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Entrypoint of the {@code Arrays.toString} function.
      * 
@@ -77,8 +87,8 @@ public final class Array {
      * @see Arrays#toString(float[])
      * @see Arrays#toString(double[])
      */
-    public static final String toString(Object array)
-        throws IllegalArgumentException {
+    public static String toString(Object array)
+            throws IllegalArgumentException {
         if (array instanceof Object[]) {
             return Arrays.toString((Object[]) array);
             
@@ -116,6 +126,138 @@ public final class Array {
     }
     
     /**
+     * Converts the given integer typed number array to a string representation
+     * in base {@code radix}. <br>
+     * This means that the types {@code byte}, {@code short}, {@code char},
+     * {@code int}, {@code long}, their class equivalents, and custom types
+     * extending {@link Number} are allowed. <br>
+     * Floating point numbers ({@code float} and {@code double} are INVALID,
+     * as well as classes not extending {@link Number}.
+     * 
+     * @param array The integer typed array to print.
+     * @param radix The radix of the values.
+     * @return the String representation as specified by {@link Arrays#toString(Object[])}.
+     * 
+     * @throws IllegalArgumentException if the given object is not an array,
+     *     or has the wrong type.
+     * 
+     * @see Integer#toString(int, int)
+     * @see Long#toString(long, int)
+     */
+    public static String toString(Object array, int radix)
+            throws IllegalArgumentException {
+        if (array instanceof Object[]) {
+            if (!(array instanceof Number[])) {
+                throw new IllegalArgumentException("Argument was not a number array!");
+                
+            } else if (array instanceof Float[]) {
+                throw new IllegalArgumentException(
+                        "Expected an integer typed number array, "
+                                + "but found a floating point array (Float[]).");
+                
+            } else if (array instanceof Double[]) {
+                throw new IllegalArgumentException(
+                        "Expected an integer typed number array, "
+                                + "but found a floating point array (Double[]).");
+                
+            } else {
+                StringBuilder sb = new StringBuilder("[");
+                Number[] arr = (Number[]) array;
+                boolean first = true;
+                for (int i = 0; i < arr.length; i++) {
+                    if (first) first = false;
+                    else sb.append(", ");
+                    sb.append(Long.toString((arr[i].longValue()), radix));
+                }
+                sb.append("]");
+                return sb.toString();
+            }
+            
+        } else if (array instanceof byte[]) {
+            StringBuilder sb = new StringBuilder("[");
+            byte[] arr = (byte[]) array;
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                sb.append(MultiTool.fillZero(arr[i] & 0xFF, 8, radix));
+            }
+            sb.append("]");
+            return sb.toString();
+            
+        } else if (array instanceof char[]) {
+            StringBuilder sb = new StringBuilder("[");
+            byte[] arr = (byte[]) array;
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                sb.append(MultiTool.fillZero(arr[i] & 0xFFFF, 16, radix));
+            }
+            sb.append("]");
+            return sb.toString();
+            
+        } else if (array instanceof short[]) {
+            StringBuilder sb = new StringBuilder("[");
+            byte[] arr = (byte[]) array;
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                sb.append(MultiTool.fillZero(arr[i] & 0xFFFF, 16, radix));
+            }
+            sb.append("]");
+            return sb.toString();
+            
+        } else if (array instanceof int[]) {
+            StringBuilder sb = new StringBuilder("[");
+            byte[] arr = (byte[]) array;
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                sb.append(Integer.toString(arr[i], radix));
+            }
+            sb.append("]");
+            return sb.toString();
+            
+        } else if (array instanceof long[]) {
+            StringBuilder sb = new StringBuilder("[");
+            byte[] arr = (byte[]) array;
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                sb.append(Long.toString(arr[i], radix));
+            }
+            sb.append("]");
+            return sb.toString();
+            
+        } else if (array instanceof float[]) {
+            throw new IllegalArgumentException(
+                    "Expected an integer typed number array, "
+                            + "but found a floating point array (float[]).");
+            
+        } else if (array instanceof double[]) {
+            throw new IllegalArgumentException(
+                    "Expected an integer typed number array, "
+                            + "but found a floating point array (double[]).");
+            
+        } else if (array instanceof boolean[]) {
+            throw new IllegalArgumentException(
+                    "Expected an integer typed number array, "
+                            + "but found a boolean array (boolean[]).");
+            
+        } else if (array == null) {
+            throw new NullPointerException("Array was null!");
+            
+        } else if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("Argument was not an array!");
+        }
+        throw new IllegalStateException();
+    }
+    
+    /**
      * Returns the length of the specified array object, as an {@code int}.
      *
      * @param array the array
@@ -125,7 +267,7 @@ public final class Array {
      * @see java.lang.reflect.Array#getLength(Object) &nbsp reflect entry point.
      */
     public static int getLength(Object array)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         if (array instanceof Object[]) {
             return ((Object[]) array).length;
             
@@ -187,7 +329,7 @@ public final class Array {
      * @see #getDouble(Object, int)
      */
     public static Object get(Object array, int index)
-        throws IllegalArgumentException {
+            throws IllegalArgumentException {
         if (array instanceof Object[]) {
             return ((Object[]) array)[index];
             
@@ -245,7 +387,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static boolean getBoolean(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((boolean[]) array)[index];
     }
     
@@ -268,7 +410,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static byte getByte(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((byte[]) array)[index];
     }
 
@@ -291,7 +433,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static char getChar(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((char[]) array)[index];
     }
 
@@ -314,7 +456,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static short getShort(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((short[]) array)[index];
     }
 
@@ -337,7 +479,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static int getInt(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((int[]) array)[index];
     }
 
@@ -360,7 +502,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static long getLong(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((long[]) array)[index];
     }
 
@@ -383,7 +525,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static float getFloat(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((float[]) array)[index];
     }
 
@@ -406,7 +548,7 @@ public final class Array {
      * @see #get(Object, int)
      */
     public static double getDouble(Object array, int index)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
         return ((double[]) array)[index];
     }
 
@@ -437,7 +579,8 @@ public final class Array {
      * @see #setDouble(Object, int, double)
      */
     public static void set(Object array, int index, Object value)
-        throws IllegalArgumentException, ArrayIndexOutOfBoundsException, ClassCastException {
+            throws IllegalArgumentException, ArrayIndexOutOfBoundsException,
+            ClassCastException {
         if (array instanceof Object[]) {
             ((Object[]) array)[index] = value;
             
@@ -494,8 +637,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setBoolean(Object array, int index, boolean z)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((boolean[]) array)[index] = z;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((boolean[]) array)[index] = z;
     }
 
     /**
@@ -516,8 +659,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setByte(Object array, int index, byte b)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((byte[]) array)[index] = b;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((byte[]) array)[index] = b;
     }
 
     /**
@@ -538,8 +681,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setChar(Object array, int index, char c)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((char[]) array)[index] = c;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((char[]) array)[index] = c;
     }
 
     /**
@@ -560,8 +703,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setShort(Object array, int index, short s)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((short[]) array)[index] = s;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((short[]) array)[index] = s;
     }
 
     /**
@@ -582,8 +725,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setInt(Object array, int index, int i)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((int[]) array)[index] = i;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((int[]) array)[index] = i;
     }
 
     /**
@@ -604,8 +747,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setLong(Object array, int index, long l)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((long[]) array)[index] = l;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((long[]) array)[index] = l;
     }
 
     /**
@@ -626,8 +769,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setFloat(Object array, int index, float f)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((float[]) array)[index] = f;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((float[]) array)[index] = f;
     }
 
     /**
@@ -648,8 +791,8 @@ public final class Array {
      * @see #set(Object, int, Object)
      */
     public static void setDouble(Object array, int index, double d)
-        throws ArrayIndexOutOfBoundsException, ClassCastException {
-            ((double[]) array)[index] = d;
+            throws ArrayIndexOutOfBoundsException, ClassCastException {
+        ((double[]) array)[index] = d;
     }
     
     

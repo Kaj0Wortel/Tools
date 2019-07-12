@@ -14,7 +14,7 @@
 package tools;
 
 
-/**
+/**DONE
  * A usefull interface that forces the implementer to have a public
  * clone method instead of the private clone method from {@link Object}.
  * 

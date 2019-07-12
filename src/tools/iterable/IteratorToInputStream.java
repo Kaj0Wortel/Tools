@@ -68,7 +68,7 @@ public class IteratorToInputStream
     @Override
     public int read()
             throws IOException {
-        if (it.hasNext()) return it.next();
+        if (it.hasNext()) return it.next() & 0xFF;
         else return -1;
     }
     

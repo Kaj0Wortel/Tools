@@ -24,8 +24,8 @@ import java.io.OutputStream;
 
 
 /**
- * Abstract class for making an {@link OutputStream} which accepts only chunks of
- * data instead of a stream.
+ * Abstract class for making an {@link OutputStream} which accepts only
+ * (dynamic) chunks of data instead of a stream.
  * 
  * @author Kaj Wortel
  */
@@ -37,26 +37,9 @@ public abstract class BlockBufferOutputStream
      * -------------------------------------------------------------------------
      */
     /** The buffer used for storing the data. */
-    private final BlockByteBuffer buffer;
+    private final BlockByteBuffer buffer = new BlockByteBuffer();
     /** The block size to use. */
-    private int blockSize = -1;
-    
-    
-    /* -------------------------------------------------------------------------
-     * Constructors.
-     * -------------------------------------------------------------------------
-     */
-    /**
-     * Creates a fresh output stream.
-     * 
-     * @param out the outputstream to write the data to.
-     */
-    public BlockBufferOutputStream() {
-        // Initialize the buffer.
-        buffer = new BlockByteBuffer();
-        // Initialize the first block size.
-        blockSize = getNextBlockSize();
-    }
+    private int blockSize = 0;
     
     
     /* -------------------------------------------------------------------------
@@ -68,19 +51,21 @@ public abstract class BlockBufferOutputStream
      * If so, process it.
      * 
      * @throws IOException If the underlying {@link OutputStream}
-     *         threw an {@link IOException}.
+     *     threw an {@link IOException}.
      */
     private void checkBuffer()
             throws IOException {
         while (buffer.size() >= blockSize) {
-            byte[] data = buffer.get(blockSize);
-            processBlock(data);
+            if (blockSize > 0)  {
+                byte[] data = buffer.get(blockSize);
+                processBlock(data);
+            }
             blockSize = getNextBlockSize();
         }
     }
     
     @Override
-    final public void write(int data)
+    public void write(int data)
             throws IOException {
         buffer.add((byte) data);
         checkBuffer();
@@ -91,23 +76,23 @@ public abstract class BlockBufferOutputStream
      * 
      * @param data The byte to write to the buffer.
      * 
-     * @see write(int)
+     * @see #write(int)
      */
-    public final void write(byte data)
+    public void write(byte data)
             throws IOException {
         buffer.add(data);
         checkBuffer();
     }
     
     @Override
-    public final void write(byte[] data)
+    public void write(byte[] data)
             throws IOException {
         buffer.add(data);
         checkBuffer();
     }
     
     @Override
-    public final void write(byte[] data, int off, int len)
+    public void write(byte[] data, int off, int len)
             throws IOException {
         buffer.add(data, off, len);
         checkBuffer();
@@ -148,7 +133,7 @@ public abstract class BlockBufferOutputStream
      * after the {@link #processBlock(byte[])} function has been invoked for the
      * previous block (if such a block exists).
      * 
-     * @return the next block size.
+     * @return The next block size.
      */
     protected abstract int getNextBlockSize();
     
@@ -158,20 +143,20 @@ public abstract class BlockBufferOutputStream
      * value previously returned by {@link #getNextBlockSize()} if,
      * and only if {@link #fillEnd()} returned {@code true}.
      * 
-     * @param data the data to be encrypted.
+     * @param data The data to be encrypted.
      * 
-     * @throws IOException if the block could not be processed.
+     * @throws IOException If the block could not be processed.
      */
     protected abstract void processBlock(byte[] data)
             throws IOException;
     
     /**
      * Fills the given array {@code dest} from index {@link off} onwards
-     * with (random) data. Can only be invoked when the stream is being closed
+     * with (random) data. Can only be invoked when the stream is being flushed
      * and will never be invoked if {@link #fillEnd()} returned {@code false}.
      * 
-     * @param dest the array to modify.
-     * @param off the index to start the modification of (inclusive).
+     * @param dest The array to modify.
+     * @param off The index to start the modification of (inclusive).
      */
     protected abstract void getFillBlocks(byte[] dest, int off);
     

@@ -1843,8 +1843,8 @@ public class MultiTool {
     /**
      * Converts a {@code long} to an byte array.
      * 
-     * @param data the input long.
-     * @return a byte array representing the given {@code data}.
+     * @param data The input long.
+     * @return A byte array representing the given {@code data}.
      */
     public static byte[] toBytes(long data) {
         byte[] rtn = new byte[8];
@@ -1855,29 +1855,43 @@ public class MultiTool {
         rtn[4] = (byte) (data >>> 24);
         rtn[5] = (byte) (data >>> 16);
         rtn[6] = (byte) (data >>> 8);
-        rtn[7] = (byte) data;
+        rtn[7] = (byte) (data & 0xFF);
         return rtn;
     }
     
     /**
-     * Converts a {@code int} to an byte array.
+     * Converts an {@code int} to an byte array.
      * 
-     * @param data the input int.
-     * @return a byte array representing the given {@code data}.
+     * @param data The input int.
+     * @return A byte array representing the given {@code data}.
      */
     public static byte[] toBytes(int data) {
         byte[] rtn = new byte[4];
         rtn[0] = (byte) (data >>> 24);
         rtn[1] = (byte) (data >>> 16);
         rtn[2] = (byte) (data >>> 8);
+        rtn[3] = (byte) (data & 0xFF);
+        return rtn;
+    }
+    
+    /**
+     * Converts a {@code short} to an byte array.
+     * 
+     * @param data The input short.
+     * @return A byte array representing the given {@code data}.
+     */
+    public static byte[] toBytes(short data) {
+        byte[] rtn = new byte[4];
+        rtn[0] = (byte) (data >>> 8);
+        rtn[1] = (byte) (data & 0xFF);
         return rtn;
     }
     
     /**
      * Converts an array of bytes to a {@code long}.
      * 
-     * @param data the input data. Must have a length of 8.
-     * @return an {@code long} from the bytes.
+     * @param data The input data. Must have a length of 8.
+     * @return An {@code long} from the bytes.
      */
     public static long longFromBytes(byte[] data) {
         if (data.length != 8) {
@@ -1897,18 +1911,33 @@ public class MultiTool {
     /**
      * Converts an array of bytes to an {@code int}.
      * 
-     * @param data the input data. Must have a length of 4.
-     * @return an {@code int} from the bytes.
+     * @param data The input data. Must have a length of 4.
+     * @return An {@code int} from the bytes.
      */
     public static int intFromBytes(byte[] data) {
-        if (data.length != 8) {
+        if (data.length != 4) {
             throw new IllegalArgumentException(
                     "Expected an array of length 4, but found: " + data.length);
         }
-        return (((int) data[4]) << 24)
-                | (((int) data[5]) << 16)
-                | (((int) data[6]) << 8)
-                | ((int) data[7]);
+        return (((int) data[0]) << 24)
+                | (((int) data[1]) << 16)
+                | (((int) data[2]) << 8)
+                | ((int) data[3]);
+    }
+    
+    /**
+     * Converts an array of bytes to a {@code short}.
+     * 
+     * @param data The input data. Must have a length of 2.
+     * @return A {@code short} from the bytes.
+     */
+    public static int shortFromBytes(byte[] data) {
+        if (data.length != 2) {
+            throw new IllegalArgumentException(
+                    "Expected an array of length 2, but found: " + data.length);
+        }
+        return (((int) data[0]) << 8)
+                | ((int) data[1]);
     }
     
     

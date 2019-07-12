@@ -43,7 +43,7 @@ public class ZipWriter
      * Variables.
      * -------------------------------------------------------------------------
      */
-    final private String filePrefix;
+    final private String targetFile;
     private ZipOutputStream zos;
     final private boolean parted;
     final private long maxSize;
@@ -59,10 +59,14 @@ public class ZipWriter
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * TODO
+     * @param targetFile
+     * @param parted
+     * @param maxSize 
      */
-    public ZipWriter(String filePrefix, boolean parted, long maxSize) {
-        this.filePrefix = filePrefix;
+    public ZipWriter(final String targetFile, final boolean parted,
+            final long maxSize) {
+        this.targetFile = targetFile;
         this.parted = parted;
         this.maxSize = maxSize;
     }
@@ -72,7 +76,14 @@ public class ZipWriter
      * Functions.
      * -------------------------------------------------------------------------
      */
-    public void setEntry(ZipEntry entry)
+    /**
+     * TODO
+     * 
+     * @param entry
+     * @throws FileNotFoundException
+     * @throws IOException 
+     */
+    public void setEntry(final ZipEntry entry)
             throws FileNotFoundException, IOException {
         this.entry = entry;
         if (zos == null) {
@@ -84,9 +95,9 @@ public class ZipWriter
     }
     
     /**
-     * @return the current {@link ZipEntry}.
+     * @return The current {@link ZipEntry}.
      */
-    public ZipEntry nextEntry() {
+    public ZipEntry getEntry() {
         return entry;
     }
     
@@ -100,10 +111,8 @@ public class ZipWriter
             throws FileNotFoundException, IOException {
         if (zos != null) zos.close();
         String fileName = (!parted
-                ? filePrefix + ".zip"
-                : filePrefix +
-                ".part" + MultiTool.fillZero(fileCounter++, 4) +
-                ".zip");
+                ? targetFile
+                : targetFile + ".part" + MultiTool.fillZero(fileCounter++, 4));
         zos = new ZipOutputStream(new FileOutputStream(new File(fileName)));
         zos.putNextEntry(cloneEntry(entry));
     }
@@ -114,7 +123,7 @@ public class ZipWriter
      * @param source
      * @return 
      */
-    private ZipEntry cloneEntry(ZipEntry source) {
+    private ZipEntry cloneEntry(final ZipEntry source) {
         ZipEntry clone = new ZipEntry(source.getName());
         clone.setComment(source.getComment());
         clone.setExtra(source.getExtra());
@@ -140,19 +149,19 @@ public class ZipWriter
         }
         return clone;
     }
-
+    
     @Override
-    public void write(int i)
+    public void write(final int i)
             throws IOException {
         write(new byte[] {(byte) i});
     }
-
+    
     @Override
-    public void write(byte[] data)
+    public void write(final byte[] data)
             throws IOException {
         write(data, 0, data.length);
     }
-
+    
     @Override
     public void write(final byte[] data, final int off, final int len)
             throws IOException {
