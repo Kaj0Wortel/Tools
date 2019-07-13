@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * TODO: everything
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class Wrapper<V> {
     /* -------------------------------------------------------------------------
