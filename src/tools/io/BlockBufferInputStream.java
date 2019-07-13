@@ -53,8 +53,7 @@ public abstract class BlockBufferInputStream
      * @return The amount of bytes which can be removed from the buffer
      *     for the request (i.e. a value {@code 0 <= n <= amt}.
      * 
-     * @throws IOException If the underlying {@link InputStream}
-     *     threw an {@link IOException}.
+     * @throws IOException If an IO error occurs.
      */
     private int checkBuffer(int amt)
             throws IOException {
@@ -102,8 +101,11 @@ public abstract class BlockBufferInputStream
      * previous block (if such a block exists).
      * 
      * @return The next block size.
+     * 
+     * @throws IOException If an IO error occurs.
      */
-    protected abstract int getNextBlockSize();
+    protected abstract int getNextBlockSize()
+            throws IOException;
     
     /**
      * Reads a block from the underlying input stream. <br>
@@ -113,9 +115,13 @@ public abstract class BlockBufferInputStream
      * part of the array is filled and the second part remains unchanged.
      * 
      * @param b The array to write the data to. It is filled from low to high index.
+     * 
      * @return The number of bytes written to {@code b}.
+     * 
+     * @throws IOException If an IO error occurs.
      */
-    public abstract int readBlock(byte[] b);
+    public abstract int readBlock(byte[] b)
+            throws IOException;
     
     
 }

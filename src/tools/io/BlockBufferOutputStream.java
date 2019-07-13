@@ -50,8 +50,7 @@ public abstract class BlockBufferOutputStream
      * Checks if the buffer is large enough to process the next block.
      * If so, process it.
      * 
-     * @throws IOException If the underlying {@link OutputStream}
-     *     threw an {@link IOException}.
+     * @throws IOException If an IO error occurs.
      */
     private void checkBuffer()
             throws IOException {
@@ -75,6 +74,8 @@ public abstract class BlockBufferOutputStream
      * Writes the given byte to the buffer.
      * 
      * @param data The byte to write to the buffer.
+     * 
+     * @throws IOException If an IO error occurs.
      * 
      * @see #write(int)
      */
@@ -103,28 +104,10 @@ public abstract class BlockBufferOutputStream
             throws IOException {
         checkBuffer();
         if (buffer.size() != 0) {
-            if (fillEnd()) {
-                int remaining = buffer.size();
-                byte[] data = new byte[blockSize];
-                buffer.getRemaining(data, 0);
-                getFillBlocks(data, remaining);
-                processBlock(data);
-                
-            } else {
-                byte[] data = buffer.getRemaining();
-                processBlock(data);
-            }
+            byte[] data = buffer.getRemaining();
+            processBlock(data);
         }
     }
-    
-    /**
-     * Whether the block size must be equal to the value returned by
-     * {@link #getNextBlockSize()} when the stream is being closed.
-     * 
-     * @return {@code true} if the size of the blocks must be exactly
-     *     equal to the block size.
-     */
-    protected abstract boolean fillEnd();
     
     /**
      * Returns the next block size for the {@link #processBlock(byte[])} function. <br>
@@ -134,8 +117,11 @@ public abstract class BlockBufferOutputStream
      * previous block (if such a block exists).
      * 
      * @return The next block size.
+     * 
+     * @throws IOException If an IO error occurs.
      */
-    protected abstract int getNextBlockSize();
+    protected abstract int getNextBlockSize()
+            throws IOException;
     
     /**
      * The data block to process. <br>
@@ -145,20 +131,10 @@ public abstract class BlockBufferOutputStream
      * 
      * @param data The data to be encrypted.
      * 
-     * @throws IOException If the block could not be processed.
+     * @throws IOException If an IO error occurs.
      */
     protected abstract void processBlock(byte[] data)
             throws IOException;
-    
-    /**
-     * Fills the given array {@code dest} from index {@link off} onwards
-     * with (random) data. Can only be invoked when the stream is being flushed
-     * and will never be invoked if {@link #fillEnd()} returned {@code false}.
-     * 
-     * @param dest The array to modify.
-     * @param off The index to start the modification of (inclusive).
-     */
-    protected abstract void getFillBlocks(byte[] dest, int off);
     
     
 }
