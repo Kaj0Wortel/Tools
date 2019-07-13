@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,20 +14,27 @@
 package tools.data;
 
 
+// Tools Imports
+import tools.MultiTool;
+
+
+// Java imports
+import java.util.Objects;
+
+
 /**
  * Array data class for preventing an {@link IndexOutOfBoundsException}
  * when requesting non-existing elements from an array.
  * 
  * @author Kaj Wortel
  */
-public class DefaultValueArray<V> {
+public class DefaultValueArray<V>
+        extends ReadOnlyArray<V> {
     
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
-    /** The backening array. */
-    private final Wrapper<V[]> arr;
     /** The default value. */
     private final Wrapper<V> def;
     
@@ -73,7 +80,7 @@ public class DefaultValueArray<V> {
      * @param def The default value in a wrapper.
      */
     public DefaultValueArray(Wrapper<V[]> arr, Wrapper<V> def) {
-        this.arr = arr;
+        super(arr);
         this.def = def;
     }
     
@@ -83,16 +90,38 @@ public class DefaultValueArray<V> {
      * -------------------------------------------------------------------------
      */
     /**
-     * @param i The index of the element to return.
+     * @param index The index of the element to return.
      * 
-     * @return {@code data[i]} if the index is in range. The default value otherwise.
+     * @return he element at the given index if the index is in range.
+     *     The default value otherwise.
      */
-    public V get(int i) {
-        if (i < arr.length() && i >= 0) {
-            return (V) arr.get(i);
+    @Override
+    public V get(int index) {
+        if (index < arr.length() && index >= 0) {
+            return (V) arr.get(index);
         } else {
             return def.get();
         }
+    }
+    
+    @Override
+    public int hashCode() {
+        return MultiTool.calcHashCode(arr, def);
+    }
+    
+    @Override
+    public String toString() {
+        return getClass().getName()
+                + "[def=" + def.toString()
+                + ",arr=" + arr.toString() + "]";
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof DefaultValueArray)) return false;
+        DefaultValueArray dva = (DefaultValueArray) obj;
+        return this.def == dva.def && Objects.equals(this.arr, dva.arr);
     }
     
     

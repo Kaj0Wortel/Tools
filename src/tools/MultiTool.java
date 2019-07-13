@@ -1125,7 +1125,11 @@ public class MultiTool {
      * @param b array to compare.
      * @return whether the two given arrays {@code a} and {@code b} are
      *     fully identical.
+     * 
+     * @deprecated Is obsoleted by {@link java.util.Objects#deepEquals(Object a, Object b)}
+     *     and {@link java.util.Arrays#deepEquals(Object[] a1, Object[] a2)}
      */
+    @Deprecated
     public static boolean compareDeepArray(Object[] a, Object[] b) {
         if (a == null || b == null) return a == b;
         if (a.length != b.length) return false;
