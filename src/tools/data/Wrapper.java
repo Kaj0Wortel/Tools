@@ -17,6 +17,8 @@ package tools.data;
 // Java imports
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import tools.MultiTool;
 
 
 /**
@@ -117,6 +119,19 @@ public class Wrapper<V> {
      */
     public int length() {
         return Array.getLength(data);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        Object v1 = data;
+        Object v2 = (obj instanceof Wrapper ? ((Wrapper) obj).get() : obj);
+        return Objects.deepEquals(v1, v2);
+    }
+    
+    @Override
+    public int hashCode() {
+        return MultiTool.calcHashCode(data);
     }
     
     @Override

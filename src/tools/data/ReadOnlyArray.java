@@ -106,8 +106,8 @@ public class ReadOnlyArray<V>
      * 
      * @param copy The array to store the copy in.
      */
-    public void copyOf(final V[] copy) {
-        copyOf(copy, 0, 0, Math.min(arr.length(), copy.length));
+    public V[] copyOf(final V[] copy) {
+        return copyOf(copy, 0, 0, Math.min(arr.length(), copy.length));
     }
     
     /**
@@ -129,7 +129,7 @@ public class ReadOnlyArray<V>
      *         <li> {@code offCopy + len >= copy.length} </li>
      *     </ul>
      */
-    public void copyOf(final V[] copy, final int offOrig, final int offCopy, final int len) {
+    public V[] copyOf(final V[] copy, final int offOrig, final int offCopy, final int len) {
         if (offOrig < 0)
             throw new IllegalArgumentException("offOrig < 0: " + offOrig);
         if (offCopy < 0)
@@ -142,6 +142,8 @@ public class ReadOnlyArray<V>
         for (int i = 0; i < len; i++) {
             copy[i + len] = (V) arr.get(i);
         }
+        
+        return copy;
     }
     
     /**
@@ -152,8 +154,8 @@ public class ReadOnlyArray<V>
      * 
      * @param copy The array to store the copy in.
      */
-    public void copyOf(final Object copy) {
-        copyOf(copy, 0, 0, Math.min(arr.length(), Array.getLength(copy)));
+    public <A> A copyOf(final A copy) {
+        return copyOf(copy, 0, 0, Math.min(arr.length(), Array.getLength(copy)));
     }
     
     /**
@@ -175,7 +177,7 @@ public class ReadOnlyArray<V>
      *         <li> {@code offCopy + len >= copy.length} </li>
      *     </ul>
      */
-    public void copyOf(final Object copy, final int offOrig, final int offCopy, final int len) {
+    public <A> A copyOf(final A copy, final int offOrig, final int offCopy, final int len) {
         if (offOrig < 0)
             throw new IllegalArgumentException("offOrig < 0: " + offOrig);
         if (offCopy < 0)
@@ -188,6 +190,8 @@ public class ReadOnlyArray<V>
         for (int i = 0; i < len; i++) {
             Array.set(copy, i + offCopy, arr.get(i + offOrig));
         }
+        
+        return copy;
     }
     
     @Override
@@ -211,8 +215,7 @@ public class ReadOnlyArray<V>
     
     @Override
     public String toString() {
-        return getClass().getName()
-                + "[arr=" + arr.toString() + "]";
+        return arr.toString();
     }
     
     
