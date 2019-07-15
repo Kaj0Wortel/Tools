@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -108,10 +108,8 @@ public class ZipReader
             throws IOException {
         if (zis != null) zis.close();
         String fileName = (!parted
-                ? filePrefix + ".zip"
-                : filePrefix +
-                ".part" + MultiTool.fillZero(fileCounter++, 4) +
-                ".zip");
+                ? filePrefix
+                : filePrefix + ".part" + MultiTool.fillZero(fileCounter++, 4));
         File file = new File(fileName);
         
         try {
@@ -144,8 +142,8 @@ public class ZipReader
     public int read()
             throws IOException {
         byte[] data = new byte[1];
-        if (read(data, 0, 1) == -1) return -1;
-        else return data[0];
+        if (read(data, 0, 1) != 1) return -1;
+        else return data[0] & 0xFF;
     }
     
     @Override
@@ -183,5 +181,6 @@ public class ZipReader
             if (zis != null) zis.close();
         }
     }
+    
     
 }
