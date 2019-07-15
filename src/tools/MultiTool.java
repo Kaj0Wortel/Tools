@@ -1885,7 +1885,7 @@ public class MultiTool {
      * @return A byte array representing the given {@code data}.
      */
     public static byte[] toBytes(short data) {
-        byte[] rtn = new byte[4];
+        byte[] rtn = new byte[2];
         rtn[0] = (byte) (data >>> 8);
         rtn[1] = (byte) (data & 0xFF);
         return rtn;
