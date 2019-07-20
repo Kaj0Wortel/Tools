@@ -506,7 +506,7 @@ public class Key implements Cloneable {
      * Checks if two keys are identical, i.e. the {@link #key}, {@link #mask},
      * {@link #onKeyRelease}, and {@link #immutable} fields are compared. <br>
      * <br>
-     * Also returns true if: <ul>
+     * Also returns {@code true} if: <ul>
      * <li>{@code obj} is a {@link Number}, and the integer value of
      *     this number is equal to the key value.</li>
      * <li>{@code obj} is a {@link KeyStroke}, and the key and mask

@@ -22,7 +22,7 @@ import java.util.Random;
 /**DONE
  * Interface for storing the constants used in the tools package.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public interface Var {
     /** The OS dependent line separator. */

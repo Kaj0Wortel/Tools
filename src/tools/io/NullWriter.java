@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -35,4 +35,6 @@ public class NullWriter extends Writer {
     
     @Override
     public void write(char[] c, int i, int i2) { }
+    
+    
 }

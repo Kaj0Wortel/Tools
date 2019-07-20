@@ -15,7 +15,9 @@ package tools.data;
 
 
 // Java imports.
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import tools.MultiTool;
 
 
@@ -72,10 +74,11 @@ public final class Array {
     /**
      * Entrypoint of the {@code Arrays.toString} function.
      * 
-     * @param array the array to print.
-     * @return the String representation as specified by {@link Arrays#toString(Object[])}.
+     * @param array The array to print.
      * 
-     * @throws IllegalArgumentException if the given object is not an array.
+     * @return The String representation as specified by {@link Arrays#toString(Object[])}.
+     * 
+     * @throws IllegalArgumentException If the given object is not an array.
      * 
      * @see Arrays#toString(Object[])
      * @see Arrays#toString(boolean[])
@@ -136,7 +139,8 @@ public final class Array {
      * 
      * @param array The integer typed array to print.
      * @param radix The radix of the values.
-     * @return the String representation as specified by {@link Arrays#toString(Object[])}.
+     * 
+     * @return The String representation as specified by {@link Arrays#toString(Object[])}.
      * 
      * @throws IllegalArgumentException if the given object is not an array,
      *     or has the wrong type.
@@ -180,7 +184,15 @@ public final class Array {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                sb.append(MultiTool.fillZero(arr[i] & 0xFF, 8, radix));
+                if (radix == 2) {
+                    sb.append(MultiTool.fillZero(arr[i] & 0xFF, 8, radix));
+                    
+                } else if (radix == 16) {
+                    sb.append(MultiTool.fillZero(arr[i] & 0xFF, 2, radix));    
+                    
+                } else {
+                    sb.append(Integer.toString(arr[i] & 0xFF, radix));
+                }
             }
             sb.append("]");
             return sb.toString();
@@ -192,7 +204,15 @@ public final class Array {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                sb.append(MultiTool.fillZero(arr[i] & 0xFFFF, 16, radix));
+                if (radix == 2) {
+                    sb.append(MultiTool.fillZero(arr[i] & 0xFF, 16, radix));
+                    
+                } else if (radix == 16) {
+                    sb.append(MultiTool.fillZero(arr[i] & 0xFF, 32, radix));    
+                    
+                } else {
+                    sb.append(Integer.toString(arr[i] & 0xFF, radix));
+                }
             }
             sb.append("]");
             return sb.toString();
@@ -204,7 +224,15 @@ public final class Array {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                sb.append(MultiTool.fillZero(arr[i] & 0xFFFF, 16, radix));
+                if (radix == 2) {
+                    sb.append(MultiTool.fillZero(arr[i] & 0xFF, 16, radix));
+                    
+                } else if (radix == 16) {
+                    sb.append(MultiTool.fillZero(arr[i] & 0xFF, 32, radix));    
+                    
+                } else {
+                    sb.append(Integer.toString(arr[i] & 0xFF, radix));
+                }
             }
             sb.append("]");
             return sb.toString();
@@ -260,8 +288,10 @@ public final class Array {
     /**
      * Returns the length of the specified array object, as an {@code int}.
      *
-     * @param array the array
-     * @return the length of the array
+     * @param array The array
+     * 
+     * @return The length of the array
+     * 
      * @throws IllegalArgumentException if the object argument is not an array
      * 
      * @see java.lang.reflect.Array#getLength(Object) &nbsp reflect entry point.
@@ -309,9 +339,10 @@ public final class Array {
      * array object. The value is automatically wrapped in an object
      * if it has a primitive type.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the (possibly wrapped) value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The (possibly wrapped) value of the indexed component in the specified array.
      * 
      * @throws NullPointerException If the specified object is null.
      * @throws IllegalArgumentException If the specified object is not an array
@@ -372,9 +403,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code boolean}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -395,9 +427,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code byte}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -418,9 +451,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code char}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -441,9 +475,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code boolean}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -464,9 +499,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code short}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -487,9 +523,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code long}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -510,9 +547,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code float}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -533,9 +571,10 @@ public final class Array {
      * Returns the value of the indexed component in the specified
      * array object, as a {@code double}.
      *
-     * @param array the array.
-     * @param index the index.
-     * @return the value of the indexed component in the specified array.
+     * @param array The array.
+     * @param index The index.
+     * 
+     * @return The value of the indexed component in the specified array.
      * 
      * @throws ClassCastException If the specified object is not
      *     an array, or if the indexed element cannot be converted to the
@@ -557,9 +596,9 @@ public final class Array {
      * object to the specified new value. The new value is first
      * automatically unwrapped if the array has a primitive component type.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param value the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param value The new value of the indexed component.
      * 
      * @throws IllegalArgumentException If the specified object argument
      *     is not an array.
@@ -623,9 +662,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code boolean} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param b The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -636,18 +675,18 @@ public final class Array {
      * @see java.lang.reflect.Array#setBoolean(Object, int, boolean) &nbsp reflect entry point.
      * @see #set(Object, int, Object)
      */
-    public static void setBoolean(Object array, int index, boolean z)
+    public static void setBoolean(Object array, int index, boolean b)
             throws ArrayIndexOutOfBoundsException, ClassCastException {
-        ((boolean[]) array)[index] = z;
+        ((boolean[]) array)[index] = b;
     }
 
     /**
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code byte} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param b The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -667,9 +706,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code char} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param c The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -689,9 +728,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code short} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param s The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -711,9 +750,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code int} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param i The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -733,9 +772,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code long} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param l The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -755,9 +794,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code boolean} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param f The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -777,9 +816,9 @@ public final class Array {
      * Sets the value of the indexed component of the specified array
      * object to the specified {@code double} value.
      * 
-     * @param array the array.
-     * @param index the index into the array.
-     * @param z the new value of the indexed component.
+     * @param array The array.
+     * @param index The index into the array.
+     * @param d The new value of the indexed component.
      * 
      * @throws ArrayIndexOutOfBoundsException If the specified {@code index}
      *     argument is negative, or if it is greater than or equal to
@@ -793,6 +832,37 @@ public final class Array {
     public static void setDouble(Object array, int index, double d)
             throws ArrayIndexOutOfBoundsException, ClassCastException {
         ((double[]) array)[index] = d;
+    }
+    
+    /**
+     * Unwraps an array of {@link Wrapper}s to a list of the underlaying type.
+     * 
+     * @param <V> The underlaying type.
+     * @param arr The array to unwrap.
+     * 
+     * @return A list containing all unwrapped elements.
+     */
+    public static <V> List<V> unwrapToList(Wrapper<V>[] arr) {
+        if (arr == null) return null;
+        List<V> list = new ArrayList<>(arr.length);
+        for (Wrapper<V> wrap : arr) {
+            list.add(wrap.get());
+        }
+        return list;
+    }
+    
+    /**
+     * Converts the given array to a list of the same type.
+     * 
+     * @param <V> The type of the given array.
+     * @param arr The array to convert.
+     * 
+     * @return An array of the given list.
+     * 
+     * @see Arrays#asList(Object...)
+     */
+    public static <V> List<V> asList(V... arr) {
+        return Arrays.asList(arr);
     }
     
     

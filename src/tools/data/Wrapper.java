@@ -15,14 +15,16 @@ package tools.data;
 
 
 // Java imports
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+
+
+// Tools imports
 import tools.MultiTool;
 
 
 /**
  * TODO: everything
+ * - clone
  * 
  * @author Kaj Wortel
  */
@@ -32,7 +34,7 @@ public class Wrapper<V> {
      * -------------------------------------------------------------------------
      */
     /** The data to be wrapped */
-    private V data;
+    protected V data;
     /*
     final private static Map<Class, Function> TO_STRING = new HashMap<>();
     static {
@@ -80,42 +82,26 @@ public class Wrapper<V> {
      * Gets an element of an array.  Primitive elements will be wrapped in
      * the corresponding class type.
      *
-    * @param array the array to access
-    * @param index the array index to access
-    * @return the element at <code>array[index]</code>
+    * @param array The array to access
+    * @param index The array index to access
     * 
-    * @throws IllegalArgumentException if <code>array</code> is not an array
-    * @throws NullPointerException if <code>array</code> is null
-    * @throws ArrayIndexOutOfBoundsException if <code>index</code> is out of bounds
+    * @return The element at <code>array[index]</code>
     * 
-    * @see #getBoolean(Object, int)
-    * @see #getByte(Object, int)
-    * @see #getChar(Object, int)
-    * @see #getShort(Object, int)
-    * @see #getInt(Object, int)
-    * @see #getLong(Object, int)
-    * @see #getFloat(Object, int)
-    * @see #getDouble(Object, int)
+    * @throws IllegalArgumentException If <code>array</code> is not an array
+    * @throws NullPointerException If <code>array</code> is null
+    * @throws ArrayIndexOutOfBoundsException If <code>index</code> is out of bounds
+    * 
+    * @see Array#get(Object, int)
     */
     public Object get(int index) {
-        if (data instanceof Object[]) return ((Object[]) data)[index];
-        if (data instanceof boolean[]) return ((boolean[]) data)[index];
-        if (data instanceof byte[]) return ((byte[]) data)[index];
-        if (data instanceof char[]) return ((char[]) data)[index];
-        if (data instanceof short[]) return ((short[]) data)[index];
-        if (data instanceof int[]) return ((int[]) data)[index];
-        if (data instanceof long[]) return ((long[]) data)[index];
-        if (data instanceof float[]) return ((float[]) data)[index];
-        if (data instanceof double[]) return ((double[]) data)[index];
-        if (data == null) throw new NullPointerException();
-        throw new IllegalArgumentException("Data is not an array!");
+        return Array.get(data, index);
     }
     
     /**
-     * The length of the array if {@code data} is an array.
+     * The length of the array if {@code data} is an array. <br>
      * Throws an {@link IllegalArgumentException} otherwise.
      * 
-     * @return the length of the array if {@code data} is an array.
+     * @return The length of the array if {@code data} is an array.
      */
     public int length() {
         return Array.getLength(data);

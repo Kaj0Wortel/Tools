@@ -66,7 +66,7 @@ public abstract class BlockBufferOutputStream
     @Override
     public void write(int data)
             throws IOException {
-        buffer.add((byte) data);
+        buffer.add((byte) (data & 0xFF));
         checkBuffer();
     }
     
@@ -107,6 +107,14 @@ public abstract class BlockBufferOutputStream
             byte[] data = buffer.getRemaining();
             processBlock(data);
         }
+    }
+    
+    @Override
+    @SuppressWarnings("ConvertToTryWithResources")
+    public void close()
+            throws IOException {
+        flush();
+        super.close();
     }
     
     /**

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -46,15 +46,16 @@ import javax.swing.SwingUtilities;
 
 /**
  * Logs the data to a GUI.
- * @author Kaj Wortel (0991586)
+ * 
+ * @author Kaj Wortel
  */
 public class ScreenLogger
         extends DefaultLogger {
     // The spacing on the left side.
-    final protected static int SPACING = 5;
+    protected final static int SPACING = 5;
     
     // Default title.
-    final protected static String DEFAULT_TITLE = "Logger";
+    protected final static String DEFAULT_TITLE = "Logger";
     
     // GUI needed for the logger.
     private static JFrame frame;

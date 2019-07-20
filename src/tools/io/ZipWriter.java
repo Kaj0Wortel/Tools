@@ -113,7 +113,10 @@ public class ZipWriter
         String fileName = (!parted
                 ? targetFile
                 : targetFile + ".part" + MultiTool.fillZero(fileCounter++, 4));
-        zos = new ZipOutputStream(new FileOutputStream(new File(fileName)));
+        File file = new File(fileName);
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        zos = new ZipOutputStream(new FileOutputStream(file));
         zos.putNextEntry(cloneEntry(entry));
     }
     

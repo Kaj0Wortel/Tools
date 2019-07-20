@@ -61,8 +61,8 @@ public abstract class BlockBufferInputStream
             int blockSize = getNextBlockSize();
             byte[] data = new byte[blockSize];
             int len = readBlock(data);
+            if (len == -1) return buffer.size();
             buffer.add(data, 0, len);
-            if (len != blockSize) return buffer.size();
         }
         
         return amt;
@@ -72,7 +72,7 @@ public abstract class BlockBufferInputStream
     public int read()
             throws IOException {
         return (checkBuffer(1) == 1
-                ? buffer.get(1)[0]
+                ? buffer.get(1)[0] & 0xFF
                 : -1);
     }
     
@@ -80,6 +80,7 @@ public abstract class BlockBufferInputStream
     public int read(byte[] b)
             throws IOException {
         int avail = checkBuffer(b.length);
+        if (avail <= 0) return -1;
         buffer.get(b, 0, avail);
         return avail;
     }
@@ -88,6 +89,7 @@ public abstract class BlockBufferInputStream
     public int read(byte[] b, int off, int len)
             throws IOException {
         int avail = checkBuffer(len);
+        if (avail <= 0) return -1;
         buffer.get(b, off, avail);
         return avail;
     }

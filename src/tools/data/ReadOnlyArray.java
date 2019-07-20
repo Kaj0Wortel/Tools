@@ -21,6 +21,7 @@ import tools.iterators.ArrayIterator;
 
 // Java imports
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -59,7 +60,7 @@ public class ReadOnlyArray<V>
      * 
      * @param arr The backening array.
      */
-    public ReadOnlyArray(final V[] arr) {
+    public ReadOnlyArray(final V... arr) {
         this(new Wrapper<V[]>(arr));
     }
     
@@ -74,7 +75,7 @@ public class ReadOnlyArray<V>
     
     
     /* -------------------------------------------------------------------------
-     * Functions.
+     * Access functions.
      * -------------------------------------------------------------------------
      */
     /**
@@ -98,6 +99,35 @@ public class ReadOnlyArray<V>
         return arr.length();
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ReadOnlyArray) {
+            return Objects.deepEquals(arr, ((ReadOnlyArray) obj).arr);
+        } else {
+            return Objects.deepEquals(arr, obj);
+        }
+    }
+    
+    @Override
+    public int hashCode() {
+        return MultiTool.calcHashCode(arr);
+    }
+    
+    @Override
+    public ReadOnlyArray<V> clone() {
+        return new ReadOnlyArray<V>(arr);
+    }
+    
+    @Override
+    public String toString() {
+        return arr.toString();
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Array copy functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Copies the read-only array to the given array of the same type. <br>
      * If not enough space is available in the copy, then the last elements
@@ -134,13 +164,13 @@ public class ReadOnlyArray<V>
             throw new IllegalArgumentException("offOrig < 0: " + offOrig);
         if (offCopy < 0)
             throw new IllegalArgumentException("offCopy < 0: " + offCopy);
-        if (offOrig + len >= arr.length())
-            throw new IllegalArgumentException("offOrig + len >= length()");
-        if (offOrig + len >= copy.length)
-            throw new IllegalArgumentException("offCopy + len >= copy.length");
+        if (offOrig + len > arr.length())
+            throw new IllegalArgumentException("offOrig + len > length()");
+        if (offOrig + len > copy.length)
+            throw new IllegalArgumentException("offCopy + len > copy.length");
         
         for (int i = 0; i < len; i++) {
-            copy[i + len] = (V) arr.get(i);
+            copy[i + offCopy] = (V) arr.get(i + offOrig);
         }
         
         return copy;
@@ -194,28 +224,31 @@ public class ReadOnlyArray<V>
         return copy;
     }
     
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ReadOnlyArray) {
-            return Objects.deepEquals(arr, ((ReadOnlyArray) obj).arr);
-        } else {
-            return Objects.deepEquals(arr, obj);
+    
+    /* -------------------------------------------------------------------------
+     * List copy functions.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Adds all elements from this array to the given list.
+     * 
+     * @param list The list to add the elements to.
+     * 
+     * @return The given list.
+     */
+    public List<V> asList(List<V> list) {
+        if (list == null) throw new NullPointerException();
+        for (V val : this) {
+            list.add(val);
         }
+        return list;
     }
     
-    @Override
-    public int hashCode() {
-        return MultiTool.calcHashCode(arr);
-    }
-    
-    @Override
-    public ReadOnlyArray<V> clone() {
-        return new ReadOnlyArray<V>(arr);
-    }
-    
-    @Override
-    public String toString() {
-        return arr.toString();
+    /**
+     * @return A list from the given array.
+     */
+    public List<V> asList() {
+        return Array.asList(arr.get().clone());
     }
     
     

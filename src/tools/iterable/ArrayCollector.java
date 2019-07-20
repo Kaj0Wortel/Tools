@@ -31,7 +31,7 @@ import java.util.List;
  * 
  * Collector class for creating an iterator over multiple arrays.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class ArrayCollector<V>
         implements Iterable<V> {
@@ -48,6 +48,15 @@ public class ArrayCollector<V>
      * Functions.
      * -------------------------------------------------------------------------
      */
+    
+    public void appendItem(V part) {
+        data.add(new Wrapper(new Object[] {part}));
+    }
+    
+    public void appendItem(Wrapper<V> part) {
+        data.add(new Wrapper(new Object[] {part.get()}));
+    }
+    
     /**
      * Adds the given part to the iterator.
      * 

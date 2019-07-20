@@ -14,9 +14,6 @@
 package tools.iterable;
 
 
-// Tools imports
-
-
 // Java imports
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +23,7 @@ import java.util.Iterator;
 /**
  * 
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class IteratorToInputStream
         extends InputStream {

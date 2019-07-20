@@ -15,9 +15,11 @@ package tools.iterators;
 
 
 // Java imports
-import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+// Tool imports
+import tools.data.Array;
 import tools.data.Wrapper;
 
 
@@ -25,7 +27,7 @@ import tools.data.Wrapper;
  * Simple class that iterates over an array.
  * Has no modification checks.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class ArrayIterator<V>
         implements Iterator<V> {

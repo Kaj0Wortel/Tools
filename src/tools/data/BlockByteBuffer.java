@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 
-/**DONE
+/**
  * Creates a buffer for bytes.
  * This buffer can be used to create equally sized blocks from a stream.
  * 
@@ -44,7 +44,7 @@ public class BlockByteBuffer
     /**
      * Adds the given value to the buffer.
      * 
-     * @param value the value to be added to the buffer.
+     * @param value The value to be added to the buffer.
      */
     public void add(byte value) {
         buffer.addLast(value);
@@ -66,9 +66,9 @@ public class BlockByteBuffer
      * Adds {@code len} values from the index {@code off} onwards
      * to the buffer.
      * 
-     * @param values the values to be added to the buffer.
-     * @param off the index to start adding from.
-     * @param len the amount of values to add.
+     * @param values The values to be added to the buffer.
+     * @param off The index to start adding from.
+     * @param len The amount of values to add.
      */
     public void add(byte[] values, int off, int len) {
         for (int i = 0; i < len; i++) {
@@ -77,7 +77,7 @@ public class BlockByteBuffer
     }
     
     /**
-     * @return the size of the remaining buffer.
+     * @return The size of the remaining buffer.
      */
     public int size() {
         return buffer.size();
@@ -89,8 +89,9 @@ public class BlockByteBuffer
      * The elements are returned according to the FIFO policy.
      * 
      * @param dest The destination array of the operation.
-     * @param off  The index to start adding from.
-     * @param len  The amount of values to add.
+     * @param off The index to start adding from.
+     * @param len The amount of values to add.
+     * 
      * @return {@code dest} filled with the elements from the buffer.
      */
     public byte[] get(byte[] dest, int off, int len) {
@@ -106,6 +107,7 @@ public class BlockByteBuffer
      * the FIFO policy.
      * 
      * @param dest The destination array of the operation.
+     * 
      * @return {@code dest} filled with the elements from the buffer.
      */
     public byte[] get(byte[] dest) {
@@ -117,8 +119,9 @@ public class BlockByteBuffer
      * from the buffer. The elements are returned according to
      * the FIFO policy.
      * 
-     * @param len the length of the returning array.
-     * @return an array of length {@code length} containing
+     * @param len The length of the returning array.
+     * 
+     * @return An array of length {@code length} containing
      *     the elements from the buffer.
      * 
      * @see #get(byte[])
@@ -132,7 +135,7 @@ public class BlockByteBuffer
      * them in an array. The elements are returned according to
      * the FIFO policy.
      * 
-     * @return an array containing the remaining elements of the buffer.
+     * @return An array containing the remaining elements of the buffer.
      * 
      * @see #get(int)
      */
@@ -145,9 +148,10 @@ public class BlockByteBuffer
      * them in the given array, starting at the index {@code off}.
      * The elements are returned according to the FIFO policy.
      * 
-     * @param dest the destination array of the operation.
-     * @param off the index to start adding from.
-     * @return the given array containing the remaining elements of the buffer.
+     * @param dest The destination array of the operation.
+     * @param off The index to start adding from.
+     * 
+     * @return The given array containing the remaining elements of the buffer.
      */
     public byte[] getRemaining(byte[] dest, int off) {
         return get(dest, off, buffer.size());

@@ -52,7 +52,7 @@ public abstract class DefaultLogger
      * the {@code System.out stream}. Catch The exception here to change the
      * behaviour.
      * 
-     * @throws IOException.
+     * @throws IOException If some IO error occured.
      */
     protected abstract void writeText(String text)
             throws IOException;
