@@ -23,6 +23,9 @@ import tools.MultiTool;
 
 /**
  * TODO.
+ * - equals(Object, Object) (all types)
+ * - deepEquals(Object, Object) (all types)
+ * - partOf(byte[] b, int off, int len) (all types)
  * - binarySearch(byte[] a, byte key) (all types)
  * - binarySearch(byte[] a, int fromIndex, int toIndex, byte key) (all types)
  * - copyOf(boolean[] original, int newLength)

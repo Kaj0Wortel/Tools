@@ -25,6 +25,7 @@ import java.util.Random;
  * @author Kaj Wortel
  */
 public interface Var {
+    
     /** The OS dependent line separator. */
     public static final String LS = System.getProperty("line.separator");
     /** The OS dependent file separator. */
@@ -36,6 +37,8 @@ public interface Var {
     public static final String WORKING_DIR = System.getProperty("user.dir") + FS + "src" + FS;
     /** The global project test directory. */
     public static final String TEST_DIR = System.getProperty("user.dir") + FS + "test" + FS;
+    /** The global project log directory. */
+    public static final String LOG_DIR = System.getProperty("user.dir") + FS + "log" + FS;
     
     /** The directory of the tool package. */
     public static final String TOOL_DIR = WORKING_DIR + "tools" + FS;
@@ -46,7 +49,7 @@ public interface Var {
     /** The data direcotry. */
     public static final String DATA_DIR = WORKING_DIR + "data" + FS;
     /** The default log file. */
-    public static final File LOG_FILE = new File(WORKING_DIR + "log.log");
+    public static final File LOG_FILE = new File(LOG_DIR + "log.log");
     
     /** Random number generator. */
     public static final Random RAN = new Random();

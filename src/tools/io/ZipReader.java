@@ -14,10 +14,6 @@
 package tools.io;
 
 
-// Own imports
-import tools.MultiTool;
-
-
 // Java imports
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +23,10 @@ import java.io.InputStream;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import tools.log.Logger;
+
+
+// Tools imports
+import tools.MultiTool;
 
 
 /**
@@ -45,11 +44,13 @@ public class ZipReader
     private ZipInputStream zis;
     final private boolean parted;
     
-    // Counters
+    // Counters and state variables.
     private int fileCounter = 0;
     private ZipEntry curEntry = null;
     private boolean entryFinished = false;
     private boolean closed = false;
+    private boolean readSingleFile = false;
+    
     
     /* -------------------------------------------------------------------------
      * Constructors.
@@ -106,23 +107,22 @@ public class ZipReader
      */
     private void generateNextStream()
             throws IOException {
-        if (zis != null) zis.close();
+        if (zis != null) {
+            zis.close();
+            zis = null;
+        }
+        if (readSingleFile) return;
+        
         String fileName = (!parted
                 ? filePrefix
                 : filePrefix + ".part" + MultiTool.fillZero(fileCounter++, 4));
         File file = new File(fileName);
         
-        try {
-            zis = (file.exists()
-                    ? new ZipInputStream(new FileInputStream(file))
-                    : null);
-            
-        } catch (FileNotFoundException e) {
-            Logger.write(new Object[] {
-                this.getClass().getSimpleName() + ": File does not exist:",
-                e
-            }, Logger.Type.ERROR);
-        }
+        zis = (file.exists()
+                ? new ZipInputStream(new FileInputStream(file))
+                : null);
+        
+        readSingleFile = !parted;
     }
     
     /**
