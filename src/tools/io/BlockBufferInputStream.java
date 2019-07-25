@@ -51,15 +51,14 @@ public abstract class BlockBufferInputStream
      * @param amt The amount of requested bytes.
      * 
      * @return The amount of bytes which can be removed from the buffer
-     *     for the request (i.e. a value {@code 0 <= n <= amt}.
+     *     for the request (i.e. a value {@code 0 <= n <= amt}).
      * 
      * @throws IOException If an IO error occurs.
      */
     private int checkBuffer(int amt)
             throws IOException {
         while (buffer.size() < amt) {
-            int blockSize = getNextBlockSize();
-            byte[] data = new byte[blockSize];
+            byte[] data = new byte[getNextBlockSize()];
             int len = readBlock(data);
             if (len == -1) return buffer.size();
             buffer.add(data, 0, len);
