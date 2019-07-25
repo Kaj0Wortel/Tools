@@ -53,7 +53,7 @@ public class BlockByteBuffer
     /**
      * Adds all values in the array to the buffer.
      * 
-     * @param values the values to be added to the buffer.
+     * @param values The values to be added to the buffer.
      * 
      * @see #add(byte[], int, int)
      * @see #add(Byte[])
@@ -71,8 +71,12 @@ public class BlockByteBuffer
      * @param len The amount of values to add.
      */
     public void add(byte[] values, int off, int len) {
+        if (values == null) throw new NullPointerException();
+        if (values.length < off + len) {
+            throw new IllegalArgumentException("values.length < off + len");
+        }
         for (int i = 0; i < len; i++) {
-            buffer.addLast(values[i + off]);
+            buffer.addLast(values[off + i]);
         }
     }
     
@@ -143,7 +147,7 @@ public class BlockByteBuffer
         return get(buffer.size());
     }
     
-    /**
+    /**TODO: change that {@code true} is returned when the buffer is false.
      * Retrieves the remaining elements from the buffer and returns
      * them in the given array, starting at the index {@code off}.
      * The elements are returned according to the FIFO policy.
