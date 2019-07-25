@@ -54,5 +54,8 @@ public interface Var {
     /** Random number generator. */
     public static final Random RAN = new Random();
     
+    /** The number of available CPU cores. */
+    public static final int CORES = Runtime.getRuntime().availableProcessors();
+    
     
 }
