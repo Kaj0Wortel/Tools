@@ -28,3 +28,9 @@ hs_err_pid*
 /tools/nbproject/private/
 /build/
 /dist/
+/nbproject/
+/build.xml
+/manifest.mf
+
+# Intellij
+/.idea/
