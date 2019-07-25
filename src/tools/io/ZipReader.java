@@ -30,26 +30,28 @@ import tools.MultiTool;
 
 
 /**
- * 
+ * TODO: check all cases!
  * 
  * @author Kaj Wortel
  */
 public class ZipReader
-        extends InputStream {
+        extends InputStream
+        implements ExceptionInputStream {
+    
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
-    final private String filePrefix;
-    private ZipInputStream zis;
-    final private boolean parted;
+    private final String filePrefix;
+    private final boolean parted;
     
     // Counters and state variables.
     private int fileCounter = 0;
+    private ZipInputStream zis;
     private ZipEntry curEntry = null;
     private boolean entryFinished = false;
-    private boolean closed = false;
     private boolean readSingleFile = false;
+    private boolean closed = false;
     
     
     /* -------------------------------------------------------------------------
@@ -81,15 +83,13 @@ public class ZipReader
      */
     private boolean generateNextEntry()
             throws FileNotFoundException, IOException {
-        if (zis == null) generateNextStream();
-        if (zis == null) return false;
         ZipEntry entry;
-        while ((entry = zis.getNextEntry()) == null) {
+        while (zis == null || (entry = zis.getNextEntry()) == null) {
             generateNextStream();
             if (zis == null) {
                 curEntry = null;
                 entryFinished = true;
-                return true;
+                return false;
             }
         }
         
@@ -103,7 +103,7 @@ public class ZipReader
     /**
      * Opens the stream for the next source file.
      * 
-     * @throws IOException if the file could not be written to.
+     * @throws IOException If the file could not be written to.
      */
     private void generateNextStream()
             throws IOException {
@@ -133,8 +133,9 @@ public class ZipReader
     public ZipEntry nextEntry()
             throws IOException {
         if (closed) throw new IOException("The stream was already closed.");
-        if (curEntry == null || !entryFinished) generateNextEntry();
-        entryFinished = (curEntry == null);
+        if (curEntry == null || !entryFinished) {
+            while (generateNextEntry()) { }
+        }
         return curEntry;
     }
     
@@ -161,11 +162,13 @@ public class ZipReader
             generateNextEntry();
             if (zis == null) return -1;
         }
+        
         int read;
         int lenRemaining = len;
         int newOff = off;
         do {
             read = zis.read(b, newOff, lenRemaining);
+            if (read == -1) break;
             lenRemaining -= Math.max(0, read);
             newOff += Math.max(0, read);
             
