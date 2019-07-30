@@ -24,84 +24,65 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JFrame;
 
 
-/**DONE
- * Provides an easy way for getting and setting cursors used in a GUI application.
+/**
+ * Provides an easy way for getting and setting CURSORS used in a GUI application. <br>
+ * The default cursors are initialized upon static class loading.
  * 
  * @author Kaj Wortel
  */
 public class ModCursors {
     
     /* -------------------------------------------------------------------------
-     * Variables.
+     * Constants.
      * -------------------------------------------------------------------------
      */
-    private JFrame frame;
-    
     /** Map where the cursors will be stored. */
-    public static final ConcurrentHashMap<String, Cursor> cursors
-        = new ConcurrentHashMap<String, Cursor>();
+    public static final ConcurrentHashMap<String, Cursor> CURSORS
+            = new ConcurrentHashMap<String, Cursor>();
     
     /*
      * Provided cursors.
      */
     /** The crosshair cursor. */
-   
     public static final Cursor CROSSHAIR_CURSOR = new Cursor(Cursor.CROSSHAIR_CURSOR);
-    
     /** The default cursor. */
-    public static final Cursor DEFAULT_CURSOR
-        = new Cursor(Cursor.DEFAULT_CURSOR);
-    
-    /** The hand cursor */
-    public static final Cursor HAND_CURSOR
-        = new Cursor(Cursor.HAND_CURSOR);
-    
+    public static final Cursor DEFAULT_CURSOR = new Cursor(Cursor.DEFAULT_CURSOR);
+    /** The hand cursor. */
+    public static final Cursor HAND_CURSOR = new Cursor(Cursor.HAND_CURSOR);
     /** The move cursor. */
-    public static final Cursor MOVE_CURSOR
-        = new Cursor(Cursor.MOVE_CURSOR);
-    
+    public static final Cursor MOVE_CURSOR = new Cursor(Cursor.MOVE_CURSOR);
     /** The text select cursor. */
-    public static final Cursor TEXT_CURSOR
-        = new Cursor(Cursor.TEXT_CURSOR);
-    
+    public static final Cursor TEXT_CURSOR = new Cursor(Cursor.TEXT_CURSOR);
     /** The wait cursor. */
-    public static final Cursor WAIT_CURSOR
-        = new Cursor(Cursor.WAIT_CURSOR);
+    public static final Cursor WAIT_CURSOR = new Cursor(Cursor.WAIT_CURSOR);
     
     /*
      * Provided resize cursors.
      */
     /** The north-resize cursor. */
-    public static final Cursor N_RESIZE_CURSOR
-        = new Cursor(Cursor.N_RESIZE_CURSOR);
-    
+    public static final Cursor N_RESIZE_CURSOR = new Cursor(Cursor.N_RESIZE_CURSOR);
     /** The north-east-resize cursor. */
-    public static final Cursor NE_RESIZE_CURSOR
-        = new Cursor(Cursor.NE_RESIZE_CURSOR);
-    
+    public static final Cursor NE_RESIZE_CURSOR = new Cursor(Cursor.NE_RESIZE_CURSOR);
     /** The east-resize cursor. */
-    public static final Cursor E_RESIZE_CURSOR
-        = new Cursor(Cursor.E_RESIZE_CURSOR);
-    
+    public static final Cursor E_RESIZE_CURSOR = new Cursor(Cursor.E_RESIZE_CURSOR);
     /** The south-east-resize cursor. */
-    public static final Cursor SE_RESIZE_CURSOR
-        = new Cursor(Cursor.SE_RESIZE_CURSOR);
-    
+    public static final Cursor SE_RESIZE_CURSOR = new Cursor(Cursor.SE_RESIZE_CURSOR);
     /** The south-resize cursor. */
-    public static final Cursor S_RESIZE_CURSOR
-        = new Cursor(Cursor.S_RESIZE_CURSOR);
-    
+    public static final Cursor S_RESIZE_CURSOR = new Cursor(Cursor.S_RESIZE_CURSOR);
     /** The south-west-resize cursor. */
-    public static final Cursor SW_RESIZE_CURSOR
-        = new Cursor(Cursor.SW_RESIZE_CURSOR);
-    
+    public static final Cursor SW_RESIZE_CURSOR = new Cursor(Cursor.SW_RESIZE_CURSOR);
     /** The west-resize cursor. */
-    public static final Cursor W_RESIZE_CURSOR
-        = new Cursor(Cursor.W_RESIZE_CURSOR);
-    
+    public static final Cursor W_RESIZE_CURSOR = new Cursor(Cursor.W_RESIZE_CURSOR);
     /** The north-west-resize cursor. */
-    public static final Cursor NW_RESIZE_CURSOR
-        = new Cursor(Cursor.NW_RESIZE_CURSOR);
+    public static final Cursor NW_RESIZE_CURSOR = new Cursor(Cursor.NW_RESIZE_CURSOR);
+    
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The currently active frame to change the mouse for. */
+    private JFrame frame;
     
     
     /* -------------------------------------------------------------------------
@@ -155,10 +136,10 @@ public class ModCursors {
     /**
      * Creates a cursor from an image.
      * 
-     * @param name the name of the cursor.
-     * @param bi   the image of the cursor.
+     * @param name The name of the cursor.
+     * @param bi The image of the cursor.
      * 
-     * @throws IllegalArgumentException if {@code cursors.contains(name)}.
+     * @throws IllegalArgumentException if {@code CURSORS.contains(name)}.
      * 
      * @see #loadCursor(java.lang.String, java.awt.Image, int, int) 
      * @see replaceCursor(String, Image, int, int).
@@ -171,18 +152,18 @@ public class ModCursors {
     /**
      * Creates a cursor from an image.
      * 
-     * @param name the name of the cursor.
-     * @param bi   the image of the cursor.
-     * @param x    the x hot spot of the cursor.
-     * @param y    the y hot spot of the cursor.
+     * @param name The name of the cursor.
+     * @param bi The image of the cursor.
+     * @param x The x hot spot of the cursor.
+     * @param y The y hot spot of the cursor.
      * 
-     * @throws IllegalArgumentException if {@code cursors.contains(name)}.
+     * @throws IllegalArgumentException if {@code CURSORS.contains(name)}.
      * 
      * @see replaceCursor(String, Image, int, int).
      */
     public static void loadCursor(String name, Image bi, int x, int y)
             throws IllegalArgumentException {
-        if (cursors.contains(name)) {
+        if (CURSORS.contains(name)) {
             throw new IllegalArgumentException(
                     "There already exists a cursor with the name: " + name);
         }
@@ -193,9 +174,10 @@ public class ModCursors {
     /**
      * Replaces the cursor of the given name by the new image.
      * 
-     * @param name the name of the cursor.
-     * @param bi   the image of the cursor.
-     * @return the removed cursor.
+     * @param name The name of the cursor.
+     * @param bi The image of the cursor.
+     * 
+     * @return The removed cursor.
      * 
      * @see #replaceCursor(java.lang.String, java.awt.Image, int, int) 
      */
@@ -206,41 +188,44 @@ public class ModCursors {
     /**
      * Replaces the cursor of the given name by the new image.
      * 
-     * @param name the name of the cursor.
-     * @param bi   the image of the cursor.
-     * @param x    the x hot spot of the cursor.
-     * @param y    the y hot spot of the cursor.
-     * @return the removed cursor.
+     * @param name The name of the cursor.
+     * @param bi The image of the cursor.
+     * @param x The x hot spot of the cursor.
+     * @param y The y hot spot of the cursor.
+     * 
+     * @return The removed cursor.
      */
     public static Cursor replaceCursor(String name, Image bi, int x, int y) {
         Toolkit tk = Toolkit.getDefaultToolkit();
         Cursor newCursor = tk.createCustomCursor(bi, new Point(x, y), name);
-        return cursors.put(name, newCursor);
+        return CURSORS.put(name, newCursor);
     }
     
     /**
-     * @param name the name of the cursor to be returned.
-     * @return the cursor stored at the given name.
+     * @param name The name of the cursor to be returned.
+     * 
+     * @return The cursor stored at the given name.
      */
     public static Cursor getCursor(String name) {
-        return cursors.get(name);
+        return CURSORS.get(name);
     }
     
     /**
      * Removes the given cursor.
      * 
-     * @param name the name of the cursor to be removed.
-     * @return the removed cursor.
+     * @param name The name of the cursor to be removed.
+     * 
+     * @return The removed cursor.
      */
     public static Cursor removeCursor(String name) {
-        return cursors.remove(name);
+        return CURSORS.remove(name);
     }
     
     /**
-     * Clears all cursors from the list.
+     * Clears all created cursors.
      */
     public static void clear() {
-        cursors.clear();
+        CURSORS.clear();
     }
     
     

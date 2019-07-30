@@ -125,7 +125,7 @@ public class ReadOnlyArray<V>
     
     
     /* -------------------------------------------------------------------------
-     * Array copy functions.
+     * ArrayTools copy functions.
      * -------------------------------------------------------------------------
      */
     /**
@@ -185,7 +185,7 @@ public class ReadOnlyArray<V>
      * @param copy The array to store the copy in.
      */
     public <A> A copyOf(final A copy) {
-        return copyOf(copy, 0, 0, Math.min(arr.length(), Array.getLength(copy)));
+        return copyOf(copy, 0, 0, Math.min(arr.length(), ArrayTools.getLength(copy)));
     }
     
     /**
@@ -214,11 +214,11 @@ public class ReadOnlyArray<V>
             throw new IllegalArgumentException("offCopy < 0: " + offCopy);
         if (offOrig + len >= arr.length())
             throw new IllegalArgumentException("offOrig + len >= length()");
-        if (offOrig + len >= Array.getLength(copy))
+        if (offOrig + len >= ArrayTools.getLength(copy))
             throw new IllegalArgumentException("offCopy + len >= copy.length");
         
         for (int i = 0; i < len; i++) {
-            Array.set(copy, i + offCopy, arr.get(i + offOrig));
+            ArrayTools.set(copy, i + offCopy, arr.get(i + offOrig));
         }
         
         return copy;
@@ -248,7 +248,7 @@ public class ReadOnlyArray<V>
      * @return A list from the given array.
      */
     public List<V> asList() {
-        return Array.asList(arr.get().clone());
+        return ArrayTools.asList(arr.get().clone());
     }
     
     

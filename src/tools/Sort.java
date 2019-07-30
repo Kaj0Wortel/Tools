@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) 2018 by Kaj Wortel - all rights reserved                    *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -10,67 +10,77 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// TODO
+
 package tools;
 
 
 /**
  * Provides various sorting algorithms.
+ * <br>
+ * This class is currently under development. <br>
+ * Do not use this class, or use with care and check runtimes! <br>
  * 
- * Todo:
- * - Add sorting algorithms:
- *   o Radix sort
- *   o Coctail sort
- * 
+ * @todo:
+ * <ul>
+ *   <li> Consider which alrogithms can be replaced by {@link java.util.Collections#sort},
+ *        {@link java.util.Arrays#sort} and {@link tools.data.ArrayTools#sort}.
+ *   <li> Add sorting algorithms:
+ *     <ul>
+ *       <li> Radix sort. </li>
+ *       <li> Coctail sort. </li>
+ *     </ul>
+ * </ul>
+ *
  * @author Kaj Wortel
  */
+@Deprecated
 public class Sort {
-    final public static int TYPE_LETTERS_Aa_Zz = 0;
-    final public static int TYPE_LETTERS_Zz_Aa = 1;
-    final public static int TYPE_NUM_9_0 = 2;
-    final public static int TYPE_NUM_0_9 = 3;
+    public static final int TYPE_LETTERS_ALPAHBETICAL = 0;
+    public final static int TYPE_LETTERS_REVERSE_ALPHABETICAL = 1;
+    public final static int TYPE_NUM_ALPHABETICAL = 2;
+    public final static int TYPE_NUM_REVERSE_ALPHABETICAL = 3;
     
-    final public static int HINT_OTHER_NUM_LETTERS = 4;
-    final public static int HINT_OTHER_LETTERS_NUM = 5;
-    final public static int HINT_NUM_OTHER_LETTERS = 6;
-    final public static int HINT_LETTERS_OTHER_NUM = 7;
-    final public static int HINT_NUM_LETTERS_OTHER = 8;
-    final public static int HINT_LETTERS_NUM_OTHER = 9;
+    public final static int HINT_OTHER_NUM_LETTERS = 4;
+    public final static int HINT_OTHER_LETTERS_NUM = 5;
+    public final static int HINT_NUM_OTHER_LETTERS = 6;
+    public final static int HINT_LETTERS_OTHER_NUM = 7;
+    public final static int HINT_NUM_LETTERS_OTHER = 8;
+    public final static int HINT_LETTERS_NUM_OTHER = 9;
     
-    final public static int HINT_LONG_FIRST = 10;
-    final public static int HINT_SHORT_FIRST = 11;
+    public final static int HINT_LONG_FIRST = 10;
+    public final static int HINT_SHORT_FIRST = 11;
     
-    final private static int TYPE_OTHER = 0;
-    final private static int TYPE_NUM = 1;
-    final private static int TYPE_LETTER_CAPS = 2;
-    final private static int TYPE_LETTER_NO_CAPS = 3;
+    private final static int TYPE_OTHER = 0;
+    private final static int TYPE_NUM = 1;
+    private final static int TYPE_LETTER_CAPS = 2;
+    private final static int TYPE_LETTER_NO_CAPS = 3;
     
     
-    /* 
-     * This is supposed to be a static function only class, 
+    /*
+     * This is supposed to be a static function only class,
      * so it only uses memory and overhead if you create an instance.
      */
     @Deprecated
     public Sort() { }
     
-    /* 
+    /*
      * Uses bubble sort to sort the array.
      * The algorithm is in place, so the input array is modified.
      * The sorted String array is also returned.
      */
-    public static String[] bubbleSort(String[] inArray, 
+    public static String[] bubbleSort(String[] inArray,
                                       int typeLetters, int typeNum,
                                       int sortingHint, int lengthHint) {
-        if (typeLetters < 0 || typeLetters > 1) 
+        if (typeLetters < 0 || typeLetters > 1)
             throw new IllegalArgumentException
                 ("Invallid type for letters: "+ typeLetters);
-        if (typeNum < 2 || typeNum > 3) 
+        if (typeNum < 2 || typeNum > 3)
             throw new IllegalArgumentException
                 ("Invallid type for numbers: " + typeNum);
-        if (sortingHint < 4 || sortingHint > 9) 
+        if (sortingHint < 4 || sortingHint > 9)
             throw new IllegalArgumentException
                 ("Invallid sorting hint: " + sortingHint);
-        if (lengthHint < 10 || lengthHint > 11) 
+        if (lengthHint < 10 || lengthHint > 11)
             throw new IllegalArgumentException
                 ("Invallid length hint: " + lengthHint);
         
@@ -86,7 +96,7 @@ public class Sort {
             
             while (changed) {
                 changed = false;
-                
+
                 //System.out.println(start + ", " + end);
                 for (int i = (direction ? start   : end - 2);
                          (direction ? i < end - 1 : i >= start);
@@ -114,12 +124,12 @@ public class Sort {
         return inArray;
     }
     
-    /* 
+    /*
      * Compares the two Strings using the sorting hint.
      * Returns true iff str1 <= str2.
      * False otherwise.
      */
-    public static boolean inOrder(String str1, String str2, 
+    public static boolean inOrder(String str1, String str2,
                                   int typeLetters, int typeNum,
                                   int sortingHint, int lengthHint) {
         // Check for equality
@@ -160,30 +170,30 @@ public class Sort {
                     return  (key[0] <= key[1]);
                     
                 } else if (type[0] == TYPE_NUM) {
-                    if (typeNum == TYPE_NUM_0_9) {
+                    if (typeNum == TYPE_NUM_REVERSE_ALPHABETICAL) {
                         return  (key[0] <= key[1]);
                         
-                    } else { // typeNum == TYPE_NUM_9_0
+                    } else { // typeNum == TYPE_NUM_ALPHABETICAL
                         return  (key[0] >= key[1]);
                     }
                     
-                } else if (type[0] == TYPE_LETTER_CAPS || 
+                } else if (type[0] == TYPE_LETTER_CAPS ||
                            type[0] == TYPE_LETTER_NO_CAPS) {
-                    if (typeLetters == TYPE_LETTERS_Aa_Zz) {
+                    if (typeLetters == TYPE_LETTERS_ALPAHBETICAL) {
                         return  (key[0] <= key[1]);
                         
-                    } else { // typeLetters == TYPE_LETTERS_Zz_Aa
+                    } else { // typeLetters == TYPE_LETTERS_REVERSE_ALPHABETICAL
                         return  (key[0] >= key[1]);
                     }
                 }
                 
             } else {
                 if (type[0] == TYPE_NUM) {
-                    if (sortingHint == HINT_NUM_OTHER_LETTERS || 
+                    if (sortingHint == HINT_NUM_OTHER_LETTERS ||
                         sortingHint == HINT_NUM_LETTERS_OTHER) {
                         return true;
                         
-                    } else if (sortingHint == HINT_OTHER_LETTERS_NUM || 
+                    } else if (sortingHint == HINT_OTHER_LETTERS_NUM ||
                                sortingHint == HINT_LETTERS_OTHER_NUM) {
                         return false;
                         
@@ -194,31 +204,31 @@ public class Sort {
                         return (type[1] != TYPE_OTHER);
                     }
                     
-                } else if (type[0] == TYPE_LETTER_CAPS || 
+                } else if (type[0] == TYPE_LETTER_CAPS ||
                            type[0] == TYPE_LETTER_NO_CAPS) {
                     // Note that type[0] != type[1]
                     if (type[1] == TYPE_LETTER_NO_CAPS) { // type[0] == TYPE_LETTER_CAPS
-                        if (typeLetters == TYPE_LETTERS_Aa_Zz) {
+                        if (typeLetters == TYPE_LETTERS_ALPAHBETICAL) {
                             return  (key[0] - 'A' <= key[1] - 'a');
                             
-                        } else { // typeLetters == TYPE_LETTERS_Zz_Aa
+                        } else { // typeLetters == TYPE_LETTERS_REVERSE_ALPHABETICAL
                             return  (key[0] - 'A' >= key[1] - 'a');
                         }
                         
                     } else if (type[1] == TYPE_LETTER_CAPS) { // type[0] == TYPE_LETTER_NO_CAPS
-                        if (typeLetters == TYPE_LETTERS_Aa_Zz) {
+                        if (typeLetters == TYPE_LETTERS_ALPAHBETICAL) {
                             return  (key[0] - 'a' < key[1] - 'A');
                             
-                        } else { // typeLetters == TYPE_LETTERS_Zz_Aa
+                        } else { // typeLetters == TYPE_LETTERS_REVERSE_ALPHABETICAL
                             return  (key[0] - 'a' > key[1] - 'A');
                         }
                         
                     } else {
-                        if (sortingHint == HINT_LETTERS_OTHER_NUM || 
+                        if (sortingHint == HINT_LETTERS_OTHER_NUM ||
                             sortingHint == HINT_LETTERS_NUM_OTHER) {
                             return true;
                             
-                        } else if (sortingHint == HINT_OTHER_NUM_LETTERS || 
+                        } else if (sortingHint == HINT_OTHER_NUM_LETTERS ||
                                    sortingHint == HINT_NUM_OTHER_LETTERS) {
                             return false;
                             
@@ -231,11 +241,11 @@ public class Sort {
                     }
                     
                 } else { // type[0] == TYPE_OTHER
-                    if (sortingHint == HINT_OTHER_NUM_LETTERS || 
+                    if (sortingHint == HINT_OTHER_NUM_LETTERS ||
                         sortingHint == HINT_OTHER_LETTERS_NUM) {
                         return true;
                         
-                    } else if (sortingHint == HINT_NUM_LETTERS_OTHER || 
+                    } else if (sortingHint == HINT_NUM_LETTERS_OTHER ||
                                sortingHint == HINT_LETTERS_NUM_OTHER) {
                         return false;
                         
@@ -275,14 +285,15 @@ public class Sort {
         String[] sorted = null;
         long time1 = System.currentTimeMillis();
         for (int i = 0; i < 1; i++) {
-            sorted = bubbleSort(array, TYPE_LETTERS_Aa_Zz, TYPE_NUM_0_9, HINT_OTHER_NUM_LETTERS, HINT_SHORT_FIRST);
+            sorted = bubbleSort(array, TYPE_LETTERS_ALPAHBETICAL, TYPE_NUM_REVERSE_ALPHABETICAL, HINT_OTHER_NUM_LETTERS, HINT_SHORT_FIRST);
         }
         long time2 = System.currentTimeMillis();
         System.out.println("Time taken: " + (time2 - time1));
-        
+
         for (int i = 0; i < array.length; i++) {
             System.out.println(array[i]);
         }
     }*/
+    
     
 }

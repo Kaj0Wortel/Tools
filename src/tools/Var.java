@@ -43,7 +43,7 @@ public interface Var {
     /** The directory of the tool package. */
     public static final String TOOL_DIR = WORKING_DIR + "tools" + FS;
     /** The font directory. */
-    public static final String FONT_DIR = TOOL_DIR + "font" + FS;
+    public static final String FONT_DIR = WORKING_DIR + "font" + FS;
     /** The image directory. */
     public static final String IMG_DIR = WORKING_DIR + "img" + FS;
     /** The data direcotry. */

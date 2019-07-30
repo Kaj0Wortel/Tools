@@ -88,6 +88,17 @@ public class BlockByteBuffer
     }
     
     /**
+     * @return {@code true} if the buffer is empty. {@code false} otherwise.
+     */
+    public boolean isEmpty() {
+        return buffer.isEmpty();
+    }
+    
+    public byte getByte() {
+        return buffer.removeFirst();
+    }
+    
+    /**
      * Retrieves {@code len} elements from the buffer and returns
      * them in the given array from the index {@code off} onwards.
      * The elements are returned according to the FIFO policy.

@@ -16,35 +16,45 @@ package tools;
 
 // Java import
 import java.io.File;
-
 import java.util.ArrayList;
-
+import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
+
+
+// Tools imports.
+import tools.io.FileTools;
+import tools.io.PartFile;
 
 
 /**
  * Contains a method to clean and compile an entire folder or file.
  * 
- * Notes:
- * - Only works when it uses JDK and NOT JRE!
- * - Ignores the files from CleanCompile and MultiTool.
- * So use with caution!
+ * @todo
+ * <ul>
+ *   <li> Add functionality for commandline arguments in {@link #main(String[] args)}. </li>
+ * </ul>
+ * 
+ * @apiNote
+ * Only works when the application uses JDK, and <b>NOT</b> JRE!
  * 
  * @author Kaj Wortel
  */
 public class CleanCompile {
+    
+    /**
+     * Compiles the provided directory tree or file.
+     * 
+     * @param dir The root directory to compile, or a single file.
+     */
     public static void cleanCompile(File dir) {
-        ArrayList<File[]> filesInDir =
-            MultiTool.listFilesAndPathsFromRootDir(dir, false);
+        List<PartFile> filesInDir = FileTools.getFileList(dir, false);
         
         // Delete all class files.
-        for (File[] file : filesInDir) {
-            String name = file[0].getName();
-            if (name.endsWith(".class") &&
-                    !name.equals("CleanCompile.class") &&
-                    !name.equals("MultiTool.class")) {
-                file[0].delete();
+        for (PartFile file : filesInDir) {
+            String name = file.getName();
+            if (name.endsWith(".class")) {
+                file.delete();
             }
         }
         
@@ -52,22 +62,27 @@ public class CleanCompile {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         ArrayList<String> filesToCompileList = new ArrayList<String>();
         
-        for (File[] file : filesInDir) {
-            String name = file[0].getName();
-            if (name.endsWith(".java") && !name.equals("CleanCompile.java")) {
-                filesToCompileList.add(file[0].getPath());
+        for (PartFile file : filesInDir) {
+            String name = file.getName();
+            if (name.endsWith(".java")) {
+                filesToCompileList.add(file.getPath());
             }
         }
         
-        String[] filesToCompile = MultiTool.listToArray(filesToCompileList, String.class);
+        String[] filesToCompile = filesToCompileList.toArray(new String[filesToCompileList.size()]);
         compiler.run(null, null, null, filesToCompile);
     }
     
     /**
-     * Cleans and compiles all given files/directorys.
+     * Cleans and compiles all given files/directories.
+     * 
+     * @param args The command line arguments.
      */
     public static void main(String[] args) {
-        if (args == null) return;
+        if (args == null || args.length == 0) {
+            //System.out.println("Use -h or --help for help");
+            return;
+        }
         
         for (String file : args) {
             System.out.println("Begin clean compile of: " + file);

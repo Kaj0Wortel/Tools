@@ -18,6 +18,8 @@ package tools.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
 import tools.MultiTool;
 
 
@@ -55,7 +57,7 @@ import tools.MultiTool;
  * @see java.lang.reflect.Array
  * @see java.lang.reflect.Arrays
  */
-public final class Array {
+public final class ArrayTools {
 
     /* -------------------------------------------------------------------------
      * Constructor.
@@ -65,7 +67,7 @@ public final class Array {
      * Constructor.
      * Class Array is not instantiable.
      */
-    private Array() { }
+    private ArrayTools() { }
     
     
     /* -------------------------------------------------------------------------
@@ -830,7 +832,7 @@ public final class Array {
      * @see #copyOf(Object, Object, int, int, int)
      */
     public static <V> V copyOf(Object src, V dst) {
-        return copyOf(src, dst, 0, 0, Math.min(Array.getLength(src), Array.getLength(dst)));
+        return copyOf(src, dst, 0, 0, Math.min(ArrayTools.getLength(src), ArrayTools.getLength(dst)));
     }
     
     /**
@@ -1043,7 +1045,7 @@ public final class Array {
      * @see #copyOf(boolean[], boolean[], int, int, int)
      */
     public static boolean[] copyOf(boolean[] src, boolean[] dst) {
-        return copyOf(src, dst, 0, 0, Math.min(Array.getLength(src), Array.getLength(dst)));
+        return copyOf(src, dst, 0, 0, Math.min(ArrayTools.getLength(src), ArrayTools.getLength(dst)));
     }
     
     /**
@@ -1496,6 +1498,253 @@ public final class Array {
             dst[offDst + i] = src[offSrc + i];
         }
         return dst;
+    }
+    
+    
+    // TODO
+    
+    /**
+     * Performs a swap between two elements of an array.
+     *
+     * @param arr the array where the swap occurs.
+     * @param i the first element of the swap.
+     * @param j the second element of the swap.
+     * @return arr, but then with the elements i and j swapped.
+     * @throws throws ArrayIndexOutOfBoundsException if {@code i} or {@code j}
+     *     are invallid indices of {@code arr}.
+     *
+     */
+    public static <V> V[] swap(V[] arr, int i, int j)
+            throws ArrayIndexOutOfBoundsException {
+        V tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+        return (V[]) arr;
+    }
+    /**
+     * Randomly shuffles an array.
+     *
+     * @param in The input array.
+     * @param rnd The used Random object.
+     */
+    public static <V> V[] shuffleArray(V[] in) {
+        return shuffleArray(in, new Random());
+    }
+    
+    public static <V> V[] shuffleArray(V[] in, Random rnd) {
+        for (int i = in.length; i > 1; i--) {
+            swap(in, i - 1, rnd.nextInt(i));
+        }
+
+        return in;
+    }
+    /**
+     * Calculates the dimensions of the array.
+     *
+     * @param obj array to calculate the dimensions of.
+     * @param isEqual whether each sub-level of the array as the same dimension.
+     *     (So new {@code int[5][5]} yields true, but
+     *      {@code int[][] {int[4], int[5]}} yields false).
+     * @return an array containing the dimensions of the array, where the
+     *     lowest index denotes the topmost level. When the array is unequal,
+     *     the maximum value for each level is taken.
+     *     (so {@code int[][] {int[4], int[5]}} yields {@code int[] {2, 5}}).
+     */
+    public static int[] calcDimArray(Object obj) {
+        return calcDimArray(obj, false);
+    }
+    
+    public static int[] calcDimArray(Object obj, boolean isEqual) {
+        return calcDimArray(obj, isEqual, calcDepthArray(obj) - 1);
+    }
+    
+    private static int[] calcDimArray(Object obj, boolean isEqual, int depth) {
+        if (obj == null || depth < 0) return new int[0];
+        
+        if (obj.getClass().isArray()) {
+            int[] dim = new int[depth + 1];
+            dim[0] = ArrayTools.getLength(obj);
+            
+            if (ArrayTools.getLength(obj) == 0) {
+                return dim;
+            }
+            
+            if (isEqual) {
+                int[] oldDim = calcDimArray(ArrayTools.get(obj, 0), isEqual, depth - 1);
+                for (int i = 0; i < oldDim.length; i++) {
+                    dim[i + 1] = oldDim[i];
+                }
+                
+                return dim;
+                
+            } else {
+                for (int i = 0; i < ArrayTools.getLength(obj); i++) {
+                    int[] oldDim = calcDimArray(ArrayTools.get(obj, i), isEqual, depth - 1);
+                    for (int j = 0; j < oldDim.length; j++) {
+                        if (oldDim[j] > dim[j + 1]) {
+                            dim[j + 1] = oldDim[j];
+                        }
+                    }
+                }
+                
+                return dim;
+                
+            }
+            
+        } else {
+            return new int[0];
+        }
+    }
+    
+    
+    /**
+     * Calculates the depth of the given array.
+     *
+     * @param obj the array to calculate the depth of.
+     * @return the depth of the given array.
+     */
+    public static int calcDepthArray(Object obj) {
+        if (obj == null) return -1;
+        String name = obj.getClass().getName();
+
+        int depth = -1;
+        while (depth < name.length() && name.charAt(++depth) == '[') {}
+
+        return depth;
+    }
+    
+    /**
+     * Executes the given action for each element of the given array.
+     *
+     * @param <V> the type of elements in the array.
+     * 
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     */
+    public static <V> void forEach(V[] arr, Consumer<? super V> action) {
+        for (V v : arr) {
+            action.accept(v);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code boolean} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(boolean[] arr, Consumer<Boolean> action) {
+        for (boolean b : arr) {
+            action.accept(b);
+        }
+    }
+        
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for byte arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(byte[] arr, Consumer<Byte> action) {
+        for (byte b : arr) {
+            action.accept(b);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code short} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(short[] arr, Consumer<Short> action) {
+        for (short s : arr) {
+            action.accept(s);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code char} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(char[] arr, Consumer<Character> action) {
+        for (char c : arr) {
+            action.accept(c);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code int} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(int[] arr, Consumer<Integer> action) {
+        for (int i : arr) {
+            action.accept(i);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code long} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(long[] arr, Consumer<Long> action) {
+        for (long l : arr) {
+            action.accept(l);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code float} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(float[] arr, Consumer<Float> action) {
+        for (float f : arr) {
+            action.accept(f);
+        }
+    }
+    
+    /**
+     * Executes the given action for each element of the given array. <br>
+     * Variant for {@code double} arrays.
+     *
+     * @param arr The array the for each statement will be applied.
+     * @param action The action that is executed for each element.
+     *
+     * @see #forEach(Object[], Consumer)
+     */
+    public static void forEach(double[] arr, Consumer<Double> action) {
+        for (double d : arr) {
+            action.accept(d);
+        }
     }
     
     

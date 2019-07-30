@@ -106,7 +106,7 @@ public class DefaultValueArray<V>
     
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(arr, def);
+        return MultiTool.calcHashCode(new Object[] {arr, def});
     }
     
     @Override

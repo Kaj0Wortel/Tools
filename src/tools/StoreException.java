@@ -14,10 +14,10 @@
 package tools;
 
 
-/**DONE
+/**
  * This exception is thrown when a value is attempted to be stored
  * at a location that is not suitable for that value.
- * 
+ *
  * @author Kaj Wortel
  */
 public class StoreException
@@ -30,10 +30,9 @@ public class StoreException
         super();
     }
     
-    
     /**
      * Creates a fresh store exception with a message.
-     * 
+     *
      * @param msg The message of the exception.
      */
     public StoreException(String msg) {
@@ -42,7 +41,7 @@ public class StoreException
     
     /**
      * Creates a fresh store exception with a cause.
-     * 
+     *
      * @param cause The cause of the exception.
      */
     public StoreException(Throwable cause) {
@@ -51,12 +50,13 @@ public class StoreException
     
     /**
      * Creates a fresh store exception with a message and a cause.
-     * 
+     *
      * @param msg The message of the exception.
      * @param cause The cause of the exception.
      */
     public StoreException(String msg, Throwable cause) {
         super(msg, cause);
     }
+    
     
 }

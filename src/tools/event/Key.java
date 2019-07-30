@@ -535,7 +535,7 @@ public class Key implements Cloneable {
     
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(key, mask, onKeyRelease);
+        return MultiTool.calcHashCode(new Object[] {key, mask, onKeyRelease});
     }
     
     @Override

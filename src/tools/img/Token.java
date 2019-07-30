@@ -86,7 +86,7 @@ abstract class Token {
     
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(fileName, idName);
+        return MultiTool.calcHashCode(new Object[] {fileName, idName});
     }
     
     /**

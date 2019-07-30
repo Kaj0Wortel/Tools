@@ -14,7 +14,7 @@
 package tools;
 
 
-/**DONE
+/**
  * Class for coupling two objects together.
  * 
  * @author Kaj Wortel
@@ -40,8 +40,8 @@ public final class Pair<V1, V2> {
     /**
      * Creates a new pair of values.
      * 
-     * @param v1 value 1 of the pair.
-     * @param v2 value 2 of the pair.
+     * @param v1 Value 1 of the pair.
+     * @param v2 Value 2 of the pair.
      */
     public Pair(final V1 v1, final V2 v2) {
         this(v1, v2, true);
@@ -50,9 +50,9 @@ public final class Pair<V1, V2> {
     /**
      * Creates a new pair of values.
      * 
-     * @param v1 value 1 of the pair.
-     * @param v2 value 2 of the pair.
-     * @param mod whether this pair is modifiable.
+     * @param v1 Value 1 of the pair.
+     * @param v2 Value 2 of the pair.
+     * @param mod Whether this pair is modifiable.
      */
     public Pair(V1 v1, V2 v2, boolean mod) {
         this.v1 = v1;
@@ -66,14 +66,14 @@ public final class Pair<V1, V2> {
      * -------------------------------------------------------------------------
      */
     /**
-     * @return the first value of the pair.
+     * @return The first value of the pair.
      */
     public V1 getFirst() {
         return v1;
     }
     
     /**
-     * @return the second value of the pair.
+     * @return The second value of the pair.
      */
     public V2 getSecond() {
         return v2;
@@ -88,7 +88,8 @@ public final class Pair<V1, V2> {
     }
     
     /**
-     * @param v1 the new value of the first value.
+     * @param v1 The new value of the first value.
+     * 
      * @throws IllegalStateException if the pair is not modifiable.
      */
     public void setFirst(V1 v1)
@@ -98,7 +99,8 @@ public final class Pair<V1, V2> {
     }
     
     /**
-     * @param v2 the new value of the second value.
+     * @param v2 The new value of the second value.
+     * 
      * @throws IllegalStateException if the pair is not modifiable.
      */
     public void setSecond(V2 v2)
@@ -112,8 +114,10 @@ public final class Pair<V1, V2> {
      */
     private void checkMod()
             throws IllegalStateException {
-        if (!mod) throw new IllegalStateException(
-                "Tried to modify an unmodifiable pair!");
+        if (!mod) {
+            throw new IllegalStateException(
+                    "Tried to modify an unmodifiable pair!");
+        }
     }
     
     

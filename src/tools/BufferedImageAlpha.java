@@ -10,38 +10,36 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// todo
+
 package tools;
+
+
+// Java imports
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 
 // Tools imports
 import tools.log.Logger;
 
 
-// Java imports
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
-
-/*
- * This file is currently under development.
+/**
+ * Provides easy alpha handeling for a {@link BufferedImage}. <br>
+ * <br>
+ * This class is currently under development. <br>
  * Do not use this class.
  * 
- * todo: reviving old artefact class.
- */
-/**
- * Provides easy alpha handeling for a {@link BufferedImage}.
+ * @todo
+ * Current status: reviving old artefact class.
  * 
  * @author Kaj Wortel
+ * 
  * @deprecated needs to be reviewed before being used anywhere.
  */
 @Deprecated

@@ -459,7 +459,7 @@ public class ComplexNumber<N extends Number>
     
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(real, comp);
+        return MultiTool.calcHashCode(new Object[] {real, comp});
     }
     
     @Override

@@ -31,6 +31,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.HashMap;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.util.Map;
@@ -42,6 +43,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+import tools.Pair;
 
 
 /**
@@ -88,7 +90,7 @@ public class ScreenLogger
     }
     
     public ScreenLogger(String title, Key key, Runnable run) {
-        this(title, MultiTool.createMap(key, run));
+        this(title, MultiTool.addToMap(new HashMap<>(), new Pair<>(key, run)));
     }
     
     public ScreenLogger(Map<Key, Runnable> map) {

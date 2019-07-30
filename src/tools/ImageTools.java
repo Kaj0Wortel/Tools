@@ -23,10 +23,13 @@ import java.awt.image.BufferedImage;
 
 
 /**
- * TODO: everything
+ * Provides easy tool functions for images. <br>
+ * <br>
+ * This class is currently under development. <br>
+ * Do not use this class, or use with care and check runtimes! <br>
  * 
- * Currently under development.
- * Use with care and check runtimes!
+ * @todo
+ * Current status: reviving old artefact class.
  * 
  * @author Kaj Wortel
  * 

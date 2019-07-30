@@ -15,6 +15,7 @@ package tools.matrix;
 
 
 // Tools imports
+import java.util.Objects;
 import tools.Cloneable;
 import tools.MultiTool;
 import tools.numbers.PrimitiveNumber;
@@ -1595,7 +1596,7 @@ public class Mat
         if (obj == null) return false;
         if (!(obj instanceof Mat)) return false;
         
-        return MultiTool.compareDeepArray(values, ((Mat) obj).values);
+        return Objects.deepEquals(values, ((Mat) obj).values);
     }
     
     /**

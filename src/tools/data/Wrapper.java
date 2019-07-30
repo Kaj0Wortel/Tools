@@ -29,6 +29,7 @@ import tools.MultiTool;
  * @author Kaj Wortel
  */
 public class Wrapper<V> {
+    
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
@@ -75,7 +76,7 @@ public class Wrapper<V> {
     }
     
     public void set(V value, int pos) {
-        Array.set(data, pos, value);
+        ArrayTools.set(data, pos, value);
     }
     
     /**
@@ -84,17 +85,13 @@ public class Wrapper<V> {
      *
     * @param array The array to access
     * @param index The array index to access
-    * 
-    * @return The element at <code>array[index]</code>
-    * 
-    * @throws IllegalArgumentException If <code>array</code> is not an array
     * @throws NullPointerException If <code>array</code> is null
     * @throws ArrayIndexOutOfBoundsException If <code>index</code> is out of bounds
     * 
-    * @see Array#get(Object, int)
+    * @see ArrayTools#get(Object, int)
     */
     public Object get(int index) {
-        return Array.get(data, index);
+        return ArrayTools.get(data, index);
     }
     
     /**
@@ -104,7 +101,7 @@ public class Wrapper<V> {
      * @return The length of the array if {@code data} is an array.
      */
     public int length() {
-        return Array.getLength(data);
+        return ArrayTools.getLength(data);
     }
     
     @Override
@@ -125,7 +122,7 @@ public class Wrapper<V> {
         if (data == null) return "null";
         Class<?> c = ((Object) data).getClass();
         if (c.isArray()) {
-            return Array.toString(data);
+            return ArrayTools.toString(data);
         } else {
             return ((Object) data).toString();
         }

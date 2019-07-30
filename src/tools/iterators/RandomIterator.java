@@ -15,7 +15,6 @@ package tools.iterators;
 
 
 // Tools imports
-import tools.MultiTool;
 
 
 // Java imports
@@ -24,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import tools.data.ArrayTools;
 
 
 /**
@@ -62,7 +62,7 @@ public  class RandomIterator<V>
         for (V value : col) {
             arr[i++] = value;
         }
-        MultiTool.shuffleArray(arr);
+        ArrayTools.shuffleArray(arr);
         it = new ArrayIterator(arr);
     }
     

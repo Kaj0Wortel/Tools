@@ -14,7 +14,7 @@
 package tools;
 
 
-/**DONE
+/**
  * A usefull interface that forces the implementer to have a public
  * clone method instead of the private clone method from {@link Object}.
  * 
@@ -24,7 +24,7 @@ public interface Cloneable
         extends java.lang.Cloneable {
     
     /**
-     * @return a clone of {@code this}.
+     * @return A clone of {@code this}.
      * 
      * @see Object#clone()
      */

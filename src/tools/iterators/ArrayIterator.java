@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 // Tool imports
-import tools.data.Array;
+import tools.data.ArrayTools;
 import tools.data.Wrapper;
 
 
@@ -44,7 +44,7 @@ public class ArrayIterator<V>
     
     @Override
     public boolean hasNext() {
-        return i < Array.getLength(array.get());
+        return i < ArrayTools.getLength(array.get());
     }
     
     @Override

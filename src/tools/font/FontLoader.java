@@ -14,25 +14,24 @@
 package tools.font;
 
 
-// Tools packages
-import tools.MultiTool;
-import tools.log.Logger;
-import tools.Var;
-
-
 // Java packages
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.UIManager;
+import tools.io.FileTools;
+
+
+// Tools packages
+import tools.log.Logger;
+import tools.Var;
+import tools.io.PartFile;
 
 
 /**DONE (line 125?)
@@ -76,10 +75,10 @@ public class FontLoader {
      * @param localPath the path of the font file relative to the font directoy.
      * @param style the style of the font. Should be one of:
      *     <ul>
-     *       <li>{@link Font.PLAIN}</li>
-     *       <li>{@link Font.ITALIC}</li>
-     *       <li>{@link Font.BOLD}</li>
-     *       <li>{@link Font.BOLD} | {@link Font.ITALIC}</li>
+     *       <li>{@link Font.PLAIN} </li>
+     *       <li>{@link Font.ITALIC} </li>
+     *       <li>{@link Font.BOLD} </li>
+     *       <li>{@link Font.BOLD} | {@link Font.ITALIC} </li>
      *     </ul>
      * 
      * @see Var#FONT_DIR
@@ -120,10 +119,10 @@ public class FontLoader {
     protected static Font loadFont(String path, int style, int type) {
         Font font = null;
         
-        try (FileInputStream fis = new FileInputStream(path)) {
+        try (InputStream stream = FontLoader.class.getResourceAsStream(path)) {
             //font = Font.createFont(type, fis).deriveFont(style, 12F);
             //font = Font.createFont(type, fis).deriveFont(12F);
-            font = Font.createFont(type, fis);// Check this.
+            font = Font.createFont(type, stream);// Check this.
             FONTS.put(path, font);
             
         } catch (FontFormatException | IOException e) {
@@ -227,11 +226,10 @@ public class FontLoader {
             "",
             "========== START LOADING FONTS =========="
         }, Logger.Type.INFO);
-        ArrayList<File[]> files = MultiTool.listFilesAndPathsFromRootDir(
-                new File(Var.FONT_DIR), false);
+        List<PartFile> files = FileTools.getFileList(new File(Var.FONT_DIR), false);
         
-        for (File[] file : files) {
-            String fontLoc = file[0].toString();
+        for (PartFile file : files) {
+            String fontLoc = file.toString();
             String fontString = fontLoc.toLowerCase();
             
             if (fontString.endsWith(".ttf")) {
@@ -255,11 +253,10 @@ public class FontLoader {
                                                 : "ERROR!");
                 */
                 
-                Font font = loadFont(file[0].toString(), style,
-                        Font.TRUETYPE_FONT);
+                Font font = loadFont(fontLoc, style, Font.TRUETYPE_FONT);
                 if (font == null) {
                     Logger.write("A null font has been created: "
-                            + file[0].toString(), Logger.Type.ERROR);
+                            + fontLoc, Logger.Type.ERROR);
                     
                 } else if (!registerFont(font)) {
                     if (allFonts == null) {
@@ -277,20 +274,20 @@ public class FontLoader {
                     
                     if (isRegistered) {
                         Logger.write("Font was already registered: "
-                                + file[0].toString(), Logger.Type.WARNING);
+                                + fontLoc, Logger.Type.WARNING);
                         
                     } else {
                         Logger.write("Could not register font: "
-                                + file[0].toString(), Logger.Type.ERROR);
+                                + fontLoc, Logger.Type.ERROR);
                     }
                     
                 } else {
                     Logger.write("Successfully loaded font: "
-                            + file[0].toString(), Logger.Type.INFO);
+                            + fontLoc, Logger.Type.INFO);
                 }
             } else {
                 Logger.write("Ignored file: " 
-                        + file[0].toString(), Logger.Type.INFO);
+                        + fontLoc, Logger.Type.INFO);
             }
             
         }

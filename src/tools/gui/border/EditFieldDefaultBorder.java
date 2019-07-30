@@ -23,22 +23,20 @@ import java.awt.Insets;
 
 
 /**
- * TODO: add comments.
- * 
  * Default border for the {@link tools.swing.EditField}.
- * 
+ *
  * @author Kaj Wortel
  */
 public class EditFieldDefaultBorder
         extends IOBorder {
-    
+
     public EditFieldDefaultBorder() {
         this(new Insets(3, 3, 3, 3));
     }
-    
+
     public EditFieldDefaultBorder(Insets in) {
         super("DEFAULT_CORNERS", "DEFAULT_BARS", in);
     }
-    
-    
+
+
 }
