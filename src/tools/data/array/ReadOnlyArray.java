@@ -22,6 +22,7 @@ import tools.data.Wrapper;
 /**
  * Data class for making any array read-only.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ReadOnlyArray<V>

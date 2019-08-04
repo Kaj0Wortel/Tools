@@ -18,6 +18,7 @@ package tools.data.array;
  * Interface for classes which support the read function of the
  * {@link AttributedArray} class.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public interface ReadArray<V> {

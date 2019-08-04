@@ -27,6 +27,7 @@ import tools.data.Wrapper;
  * Array data class for preventing an {@link IndexOutOfBoundsException}
  * when requesting non-existing elements from an array.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class DefaultValueArray<V>

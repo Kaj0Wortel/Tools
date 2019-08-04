@@ -21,10 +21,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-// Tools imports
-import tools.MultiTool;
-
-
 /**
  * Class which adds extra functionallity to the default
  * {@link java.util.Timer} class. The added functionalities are:
