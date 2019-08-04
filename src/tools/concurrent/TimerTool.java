@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,10 +14,6 @@
 package tools.concurrent;
 
 
-// Tools imports
-import tools.MultiTool;
-
-
 // Java imports
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,37 +21,89 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
+// Tools imports
+import tools.MultiTool;
+
+
 /**
- * TODO: comments
- * 
  * Class which adds extra functionallity to the default
  * {@link java.util.Timer} class. The added functionalities are:
- *  o Changing the update interval. Keeps the same task running. Can be set
- *    via interval or updates per second (fps).
- *  o Pausing a timer. A paused timer will, after being resumed, continue
- *    as if it wasn't paused. So if the next update is over 500ms before
- *    being paused, then after being resumed the next update will occur over
- *    500ms. If the update interval was decreased with {@code dt} while the
- *    timer was paused, then the next update will occur over
- *    {@code max(0, 500-dt)}.
- *  o Canceling a timer. After a timer has been canceled, it can be started
- *    again with the same settings.
- *  o Manual and automatic frame rate handeling. In manual mode, a target
- *    interval is set and the updates occur after every interval time.
- *    If the previous update was still running, then the current update is
- *    ignored.
- *    In automatic mode, a target interval is set and AIMD is used to prevent
- *    clashing update cycles.
- *  o Starting a timer which is already started does nothing.
- *  o Resuming a timer which is already started or canceled does nothing.
- *  o Pausing a timer which is already paused or canceled does nothing.
- *  o Canceling a timer which is already canceled does nothing.
+ * <ul>
+ *   <li> Changing the update interval. Keeps the same task running. Can be set
+ *        via interval or updates per second (fps). </li>
+ *   <li> Pausing a timer. A paused timer will, after being resumed, continue
+ *        as if it wasn't paused. So if the next update is over 500ms before
+ *        being paused, then after being resumed the next update will occur over
+ *        500ms. If the update interval was decreased with {@code dt} while the
+ *        timer was paused, then the next update will occur over
+ *        {@code max(0, 500-dt)}. <li>
+ *   <li> Canceling a timer. After a timer has been canceled, it can be started
+ *        again with the same settings. </li>
+ *   <li> Manual and automatic frame rate handeling. In manual mode, a target
+ *        interval is set and the updates occur after every interval time.
+ *        If the previous update was still running, then the current update is
+ *        ignored. <br>
+ *        In automatic mode, a target interval is set and AIMD is used to prevent
+ *        clashing update cycles. </li>
+ *   <li> Starting a timer which is already started does nothing. </li>
+ *   <li> Resuming a timer which is already started or canceled does nothing. </li>
+ *   <li> Pausing a timer which is already paused or canceled does nothing. </li>
+ *   <li> Canceling a timer which is already canceled does nothing. </li>
+ * </ul>
  * 
  * This class is suitable for concurrent access.
  * 
+ * @todo Comments + refactoring + testing
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class TimerTool {
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** Lock for concurrent operations. */
+    private final Lock lock = new ReentrantLock();
+    /** The tasks to be executed. */
+    private final Runnable[] tasks;
+    /** Whether the timers will run on daemon threads. */
+    private final boolean isDaemon;
+    
+    /** The state of the timer. */
+    private TimerState timerState = TimerState.CANCELED;
+    /** The FPS scheduling mode. */
+    private static FPSState fpsState = FPSState.MANUAL;
+    
+    /** The current timer object. */
+    private Timer timer;
+    /** The initial delay. */
+    private long delay;
+    /** The timer interval. */
+    private long interval;
+    /** The target interval. */
+    private long targetInterval;
+    
+    /** The start timestamp of the timer for the current iteration. */
+    private Long startTime;
+    
+    /** The pause timestamp of the timer. If there was no pause in
+     *  this iteration then it is equal to the start timestamp. */
+    private Long pauseTime;
+    
+    /** Whether the execution is still being performed. */
+    public boolean running = false;
+    
+    /** Keeps track of how many cycles must pass before the
+     *  additative increase is replaced multiplicative increase. */
+    public int waitMul = 0;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Inner-classes.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Enum for the current state of the timer.
      */
@@ -63,65 +111,58 @@ public class TimerTool {
         RUNNING, PAUSED, CANCELED
     }
     
-    private TimerState timerState = TimerState.CANCELED;
-    private static FPSState fpsState = FPSState.MANUAL;
     
-    // Lock for concurrent operations.
-    final private Lock lock = new ReentrantLock();
-    
-    // The current timer object.
-    private Timer timer;
-    // The tasks to be executed.
-    final private Runnable[] tasks;
-    // The initial delay.
-    private long delay;
-    // The timer interval.
-    private long interval;
-    // The target interval.
-    private long targetInterval;
-    
-    // The start timestamp of the timer for the current iteration.
-    private Long startTime;
-    
-    // The pause timestamp of the timer. If there was no pause in
-    // this iteration then it is equal to the start timestamp.
-    private Long pauseTime;
-    
-    // Whether the execution is still being performed.
-    public boolean running = false;
-    
-    // Keeps track of how many cycles must pass before the
-    // additative increase is replaced multiplicative increase.
-    public int waitMul = 0;
-    
-    
-    /**-------------------------------------------------------------------------
-     * Constructor.
+    /* -------------------------------------------------------------------------
+     * Constructors.
      * -------------------------------------------------------------------------
      */
     /**
-     * @param r the action that will be executed when the timer ends.
-     * @param delay the time in ms before the first exectution of
+     * @param rs The actions that will be executed when the timer ends.
+     * @param delay The time in ms before the first exectution of
      *     {@code r.run()}.
-     * @param interval the time in ms which is between two executions of
+     * @param interval The time in ms which is between two executions of
      *     {@code r.run()}.
      */
     public TimerTool(Runnable... rs) {
-        this(0L, 1000L, rs);
+        this(0L, 1000L, true, rs);
     }
     
+    /**
+     * @param rs The actions that will be executed when the timer ends.
+     * @param interval The time in ms which is between two executions of {@code r.run()}.
+     */
     public TimerTool(long interval, Runnable... rs) {
-        this(0L, interval, rs);
+        this(0L, interval, true, rs);
     }
     
+    /**
+     * Creates a new timer with the given delay and interval, which will run
+     * the given runnables as tasks.
+     * 
+     * @param rs The actions that will be executed when the timer ends.
+     * @param interval The time in ms which is between two executions of {@code r.run()}.
+     */
     public TimerTool(long delay, long interval, Runnable... rs) {
-        // Update the values to the values in this class
+        this(delay, interval, true, rs);
+    }
+    
+    /**
+     * Creates a new timer with the given delay and interval, which will run
+     * the given runnables as tasks. The times will run on daemon threads only
+     * if {@link isDaemon == true}
+     * 
+     * @param rs The actions that will be executed when the timer ends.
+     * @param delay The time in ms before the first exectution of {@code r.run()}.
+     * @param interval The time in ms which is between two executions of {@code r.run()}.
+     * @param isDaemon Whether the created times will be daemon or not.
+     */
+    public TimerTool(long delay, long interval, boolean isDaemon, Runnable... rs) {
         this.tasks = rs;
         this.delay = delay;
         this.interval = interval;
         
         // Create new timer.
-        timer = new Timer(true);
+        timer = new Timer(this.isDaemon = isDaemon);
         
         this.delay = delay;
         
@@ -135,22 +176,22 @@ public class TimerTool {
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
     /**
      * Create a new timer task from the given runnable.
-     * Also updates the start time and the pause time.
-     * 
-     * @param rs the tasks to be executed. Is allowed to be null,
-     * but this is not effective.
-     * 
+     * Also updates the start time and the pause time. <br>
+     * <br>
      * Handles the fps rate using M/AIMD (multiplicative/additative increase,
      * multiplicative decrease). Decreases when the executing task cannot
      * keep up with the speed of the timer. Increases when the
      * executing task can keep up with the speed of the timer and the
      * targetInterval has not yet been reached.
+     * 
+     * @param rs The tasks to be executed. Is allowed to be null,
+     *     but this is not effective.
      */
     private TimerTask createTimerTask(Runnable... rs) {
         return new TimerTask() {
@@ -171,8 +212,6 @@ public class TimerTool {
                 }
                 
                 if (wasRunning) {
-                    //System.err.println("QUIT");
-                    
                     if (fpsState == FPSState.AUTO) {
                         waitMul += 10;
                         setInterval((long) Math.ceil((interval * 1.05)));
@@ -222,7 +261,7 @@ public class TimerTool {
     }
     
     /**
-     * Starts the timer.
+     * Starts the timer. <br>
      * Does nothing if the timer is already running or paused.
      */
     public void start() {
@@ -235,7 +274,7 @@ public class TimerTool {
             startTime = System.currentTimeMillis();
             pauseTime = System.currentTimeMillis();
             
-            timer = new Timer(true);
+            timer = new Timer(isDaemon);
             
             timer.scheduleAtFixedRate(createTimerTask(tasks), delay, interval);
             
@@ -248,7 +287,7 @@ public class TimerTool {
     }
     
     /**
-     * Pauses the timer.
+     * Pauses the timer. <br>
      * Does nothing if the timer is paused or stopped.
      */
     public void pause() {
@@ -272,7 +311,7 @@ public class TimerTool {
     }
     
     /**
-     * Resumes a paused timer.
+     * Resumes a paused timer. <br>
      * Does nothing if the timer is running or canceled.
      */
     public void resume() {
@@ -291,7 +330,7 @@ public class TimerTool {
             // Update the start time stamp.
             startTime = curTime - timeBeforeRun;
             
-            timer = new Timer(true);
+            timer = new Timer(isDaemon);
             
             timer.scheduleAtFixedRate(createTimerTask(tasks), startDelay,
                     interval);
@@ -305,7 +344,7 @@ public class TimerTool {
     }
     
     /**
-     * Cancels a timer.
+     * Cancels a timer. <br>
      * Does nothing if the timer is canceled.
      */
     public void cancel() {
@@ -330,7 +369,7 @@ public class TimerTool {
     /**
      * Sets a new interval for the timer.
      * 
-     * @param interval the new interval to be set.
+     * @param interval The new interval to be set.
      */
     public void setInterval(long interval) {
         lock.lock();
@@ -359,7 +398,7 @@ public class TimerTool {
                 }
                 
                 // Start a new timer
-                timer = new Timer(true);
+                timer = new Timer(isDaemon);
                 timer.scheduleAtFixedRate(createTimerTask(tasks), startDelay,
                         interval);
             }
@@ -373,7 +412,7 @@ public class TimerTool {
      * Sets the interval using frame rates.
      * Uses {@link #setInterval(long)} for the implementation.
      * 
-     * @param fps the new fps.
+     * @param fps The new fps.
      */
     public void setFPS(double fps) {
         setInterval((long) (1000 / fps));
@@ -381,12 +420,11 @@ public class TimerTool {
     
     /**
      * Sets the target interval.
-     * When using the auto-fps mode, this value will be used
-     * even when a shorter interval is possible.
-     * Also sets the current interval to the target interval
-     * to improve convergence.
+     * When using the auto-fps mode, this value will be used even when
+     * a shorter interval is possible. Also sets the current interval
+     * to the target interval to improve convergence.
      * 
-     * @param interval the new target interval.
+     * @param interval The new target interval.
      */
     public void setTargetInterval(long interval) {
         lock.lock();
@@ -402,21 +440,21 @@ public class TimerTool {
     /**
      * Sets the target frame rate.
      * 
-     * @param fps the new target frame rate.
+     * @param fps The new target frame rate.
      */
     public void setTargetFPS(double fps) {
         setTargetInterval((long) (1000 / fps));
     }
     
     /**
-     * @return the current interval between two updates.
+     * @return The current interval between two updates.
      */
     public long getInterval() {
         return interval;
     }
     
     /**
-     * @return the current number of frames per second.
+     * @return The current number of frames per second.
      */
     public double getFPS() {
         return 1000.0 / interval;
@@ -425,7 +463,7 @@ public class TimerTool {
     /**
      * Sets the state for handeling the frame rate.
      * 
-     * @param state the new state.
+     * @param state The new state.
      */
     public void setFPSState(FPSState state) {
         lock.lock();
@@ -438,52 +476,17 @@ public class TimerTool {
     }
     
     /**
-     * @return the current state for handeling the frame rate.
+     * @return The current state for handeling the frame rate.
      */
     public FPSState getFPSState() {
         return fpsState;
     }
     
     /**
-     * @return the current state of the timer.
+     * @return The current state of the timer.
      */
     public TimerState getState() {
         return timerState;
-    }
-    
-    
-    /**------------
-     * TMP
-     */
-    private static long dt;
-    public static void main(String[] args) {
-        TimerTool tt = new TimerTool(1000L, 33L, () -> {
-            System.out.println("STARTED");
-            long curTime = System.currentTimeMillis();
-            MultiTool.sleepThread(30);
-            System.out.println("test: " + (curTime - dt));
-            dt = curTime;
-            System.out.println("COMPLETED");
-        });
-        dt = System.currentTimeMillis();
-        tt.setTargetFPS(1);
-        
-        
-        tt.setFPSState(FPSState.AUTO);
-        tt.setFPS(1);
-        tt.start();
-        for (int i = 0; i < 10; i++) {
-            MultiTool.sleepThread(250);
-            tt.pause();
-            MultiTool.sleepThread(250);
-            tt.resume();
-            MultiTool.sleepThread(750);
-        }
-        
-        // To keep the program alive.
-        while(true) {
-            MultiTool.sleepThread(100);
-        }
     }
     
     

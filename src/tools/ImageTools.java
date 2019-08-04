@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
  * @todo
  * Current status: reviving old artefact class.
  * 
+ * @version 0.0
  * @author Kaj Wortel
  * 
  * @deprecated old class. Implementations are slow and might be broken.

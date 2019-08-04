@@ -19,9 +19,10 @@ import java.io.File;
 import java.util.Random;
 
 
-/**DONE
+/**
  * Interface for storing the constants used in the tools package.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public interface Var {

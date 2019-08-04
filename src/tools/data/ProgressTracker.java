@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -19,6 +19,7 @@ package tools.data;
  * A progress tracker can have a title bar, a text field, and a progress bar,
  * and is used to display the progress of an application.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public interface ProgressTracker {
@@ -62,14 +63,14 @@ public interface ProgressTracker {
     void clearText();
     
     /**
-     * Sets the progress bar. <br>
+     * Sets the progress bar to the given position.
      * 
      * @param progress The new progress amount of the progress bar.
      */
     void setProgress(double progress);
     
     /**
-     * Sets the progress bar. <br>
+     * Sets the progress bar to the given position.
      * 
      * @param progress The new progress amount of the progress bar.
      */
@@ -78,7 +79,7 @@ public interface ProgressTracker {
     }
     
     /**
-     * Sets the progress bar. <br>
+     * Sets the progress bar to the given position.
      * 
      * @param progress The new progress amount of the progress bar.
      */
@@ -87,14 +88,14 @@ public interface ProgressTracker {
     }
     
     /**
-     * Returns the current progress. <br>
+     * Returns the current progress as double.
      * 
      * @return The current progress.
      */
     double getDoubleProgress();
     
     /**
-     * Returns the current progress. <br>
+     * Returns the current progress as float.
      * 
      * @return The current progress.
      */
@@ -103,7 +104,7 @@ public interface ProgressTracker {
     }
     
     /**
-     * Returns the current progress. <br>
+     * Returns the current progress as int.
      * 
      * @return The current progress.
      */

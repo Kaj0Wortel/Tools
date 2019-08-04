@@ -15,13 +15,26 @@ package tools.data;
 
 
 /**
- * TODO: everything
+ * Runnable-like class which allows arguments and return values in the
+ * {@code run} function.
  * 
- * @author Kaj Wortel (0991586)
+ * @version 1.0
+ * @author Kaj Wortel
+ * 
+ * @param <V> The class of argument of the function.
+ * @param <R> The class of return value of the function.
  */
 @FunctionalInterface
 public interface Function<V, R> {
-    
+   
+    /**
+     * The function to execute.
+     * 
+     * @param arg The argument of the fuction.
+     * 
+     * @return The result of the function.
+     */
     R run(V arg);
+    
     
 }

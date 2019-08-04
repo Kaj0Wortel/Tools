@@ -15,7 +15,6 @@ package tools.event;
 
 
 // Tools imports
-import tools.Cloneable;
 import tools.MultiTool;
 
 
@@ -25,6 +24,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.text.ParseException;
 import javax.swing.KeyStroke;
+import tools.PublicCloneable;
 
 
 /**DONE
@@ -33,7 +33,7 @@ import javax.swing.KeyStroke;
  * 
  * @author Kaj Wortel
  */
-public class Key implements Cloneable {
+public class Key implements PublicCloneable {
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------

@@ -15,40 +15,56 @@ package tools.data;
 
 
 // Java imports
+import tools.data.array.ArrayTools;
 import java.util.Objects;
 
 
 // Tools imports
+import java.util.RandomAccess;
 import tools.MultiTool;
 
 
 /**
- * TODO: everything
- * - clone
+ * Class for wrapping any object or array (primitive or object).
+ * This class can be used to overcome the difficulty of accepting both object
+ * and primitive typed arrays. <br>
+ * This class can now be used instead of fully copying an object array
+ * to a primitive typed array, or vice verca.<br>
+ * <br>
+ * <b>Example</b><br>
+ * Suppose you have have as input the integer array {@code new int[] {1, 2, 3}},
+ * and with it you want to instantiate the following class: <br>
+ * <pre>{@code
+ * public class MyClass<V> {
+ *     private V[] arg;
+ *     public MyClass(V[] arg) {
+ *         this.arg = arg;
+ *     }
+ * }}</pre>
+ * Now you first have to convert your {@code int[]} array to an {@code Integer[]}.
+ * However, by using the wrapper you can transform the class into: <br>
+ * <pre>{@code
+ * public class MyClass<V> {
+ *     private Wrapper<V[]> arg;
+ *     public MyClass(Wrapper<V[]> arg) {
+ *         this.arg = arg;
+ *     }
+ * }}</pre>
+ * Now you can simply call {@code MyClass<Integer>(new Wrapper(int[] {1, 2, 3}))}
+ * to instantiate the class, and no unneeded array copies are needed.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class Wrapper<V> {
+public class Wrapper<V>
+        implements RandomAccess {
     
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
-    /** The data to be wrapped */
+    /** The wrapped data. */
     protected V data;
-    /*
-    final private static Map<Class, Function> TO_STRING = new HashMap<>();
-    static {
-        TO_STRING.put(Byte.TYPE     , (Function<byte[]   , String>) Arrays::toString);
-        TO_STRING.put(Short.TYPE    , (Function<short[]  , String>) Arrays::toString);
-        TO_STRING.put(Integer.TYPE  , (Function<int[]    , String>) Arrays::toString);
-        TO_STRING.put(Long.TYPE     , (Function<long[]   , String>) Arrays::toString);
-        TO_STRING.put(Float.TYPE    , (Function<float[]  , String>) Arrays::toString);
-        TO_STRING.put(Double.TYPE   , (Function<double[] , String>) Arrays::toString);
-        TO_STRING.put(Boolean.TYPE  , (Function<boolean[], String>) Arrays::toString);
-        TO_STRING.put(Character.TYPE, (Function<char[]   , String>) Arrays::toString);
-        TO_STRING.put(Object.class  , (Function<Object[] , String>) Arrays::toString);
-    }*/
     
     
     /* -------------------------------------------------------------------------
@@ -56,7 +72,9 @@ public class Wrapper<V> {
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * Creates a new wrapper for the provided object.
+     * 
+     * @param data The data to wrap.
      */
     public Wrapper(V data) {
         set(data);
@@ -67,31 +85,57 @@ public class Wrapper<V> {
      * Functions.
      * -------------------------------------------------------------------------
      */
-    public void set(V data) {
-        this.data = data;
-    }
-    
+    /**
+     * @return The wrapped data.
+     */
     public V get() {
         return data;
     }
     
-    public void set(V value, int pos) {
-        ArrayTools.set(data, pos, value);
-    }
-    
     /**
-     * Gets an element of an array.  Primitive elements will be wrapped in
-     * the corresponding class type.
+     * Gets an element of the wrapped array object.
      *
     * @param array The array to access
     * @param index The array index to access
-    * @throws NullPointerException If <code>array</code> is null
-    * @throws ArrayIndexOutOfBoundsException If <code>index</code> is out of bounds
+    * 
+    * @throws NullPointerException If {@code array} is null.
+    * @throws ArrayIndexOutOfBoundsException If {@code index} is out of bounds.
+    * @throws IllegalArgumentException If the wrapped element is not an array.
     * 
     * @see ArrayTools#get(Object, int)
     */
-    public Object get(int index) {
-        return ArrayTools.get(data, index);
+    public <T> T get(int index) {
+        return(T) ArrayTools.get(data, index);
+    }
+    
+    /**
+     * Sets the wrapped object.
+     * 
+     * @param data The new wrapped object.
+     */
+    public void set(V data) {
+        this.data = data;
+    }
+    
+    /**
+     * Replaces the value at the given index of the wrapped array object
+     * with the given value.
+     * 
+     * @param value The new element to set.
+     * @param index The index to place the element at.
+     * 
+     * @throws IllegarAgrumentException If the wrapped object is not an array.
+     */
+    public void set(Object value, int index) {
+        ArrayTools.set(data, index, value);
+    }
+    
+    /**
+     * @return {@code true} if the wrapped object is an array.
+     *     {@code false} otherwise.
+     */
+    public boolean isArray() {
+        return data != null && data.getClass().isArray();
     }
     
     /**
@@ -101,7 +145,7 @@ public class Wrapper<V> {
      * @return The length of the array if {@code data} is an array.
      */
     public int length() {
-        return ArrayTools.getLength(data);
+        return ArrayTools.length(data);
     }
     
     @Override
@@ -117,14 +161,38 @@ public class Wrapper<V> {
         return MultiTool.calcHashCode(data);
     }
     
+    /**
+     * {@inheritDoc}
+     * 
+     * This class uses the wrapped object only for generating a string
+     * representation. This is done because the wrapper should be
+     * as see-through as possible. There are three cases:
+     * <table border='1'>
+     *   <tr>
+     *     <th> Condition </th>
+     *     <th> Output </th>
+     *   </tr>
+     *   <tr>
+     *     <td> The wrapped object is {@code null} </td>
+     *     <td> "null" </td>
+     *   </tr>
+     *   <tr>
+     *     <td> The wrapped object is an array. </td>
+     *     <td> {@link ArrayTools#toString(Object)} </td>
+     *   </tr>
+     *   <tr>
+     *     <td> The wrapped object is not an array. </td>
+     *     <td> {@link Object#toString()} </td>
+     *   </tr>
+     * </table>
+     */
     @Override
     public String toString() {
         if (data == null) return "null";
-        Class<?> c = ((Object) data).getClass();
-        if (c.isArray()) {
+        if (data.getClass().isArray()) {
             return ArrayTools.toString(data);
         } else {
-            return ((Object) data).toString();
+            return data.toString();
         }
     }
     

@@ -28,6 +28,7 @@ import javax.swing.JFrame;
  * Provides an easy way for getting and setting CURSORS used in a GUI application. <br>
  * The default cursors are initialized upon static class loading.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ModCursors {
@@ -139,7 +140,7 @@ public class ModCursors {
      * @param name The name of the cursor.
      * @param bi The image of the cursor.
      * 
-     * @throws IllegalArgumentException if {@code CURSORS.contains(name)}.
+     * @throws IllegalArgumentException If the given name already occurs.
      * 
      * @see #loadCursor(java.lang.String, java.awt.Image, int, int) 
      * @see replaceCursor(String, Image, int, int).
@@ -157,7 +158,7 @@ public class ModCursors {
      * @param x The x hot spot of the cursor.
      * @param y The y hot spot of the cursor.
      * 
-     * @throws IllegalArgumentException if {@code CURSORS.contains(name)}.
+     * @throws IllegalArgumentException If the given name already occurs.
      * 
      * @see replaceCursor(String, Image, int, int).
      */

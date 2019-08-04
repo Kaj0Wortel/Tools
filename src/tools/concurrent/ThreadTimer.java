@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -10,11 +10,15 @@
  * It is not allowed to redistribute any (modified) versions of this file    *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// Note to self: Not completely tested.
-// Works, but not the pause/resume function (fucks up the initial delay somehow).
-
 
 package tools.concurrent;
+
+
+// Java imports
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 // Tool imports
@@ -22,103 +26,135 @@ import tools.MultiTool;
 import tools.log.Logger;
 
 
-// Java imports
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-
 /**
- * TODO: comments
- * 
  * Class which replaces the {@link java.util.Timer} class. The added functionalities are:
  * <ul>
  *   <li> Changing the update interval. Keeps the same task running. Can be set
- *        via interval or updates per second (fps).</li>
+ *        via interval or updates per second (fps). </li>
  *   <li> Pausing a timer. A paused timer will, after being resumed, continue
  *        as if it wasn't paused. So if the next update is over 500ms before
  *        being paused, then after being resumed the next update will occur over
  *        500ms. If the update interval was decreased with {@code dt} while the
  *        timer was paused, then the next update will occur over
- *        {@code max(0, 500-dt)}.</li>
+ *        {@code max(0, 500-dt)}. </li>
  *   <li> Canceling a timer. After a timer has been canceled, it can be started
- *        again with the same settings.</li>
+ *        again with the same settings. </li>
  *   <li> Manual and automatic frame rate handeling. In manual mode, a target
  *        interval is set and the updates occur after every interval time.
  *        If the previous update was still running, then the current update is
- *        ignored.
+ *        ignored. <br>
  *        In automatic mode, a target interval is set and AIMD is used to prevent
- *        clashing update cycles.
+ *        clashing update cycles. </li>
  *   <li> Starting a timer which is already started does nothing.</li>
  *   <li> Resuming a timer which is already started or canceled does nothing.</li>
  *   <li> Pausing a timer which is already paused or canceled does nothing.</li>
  *   <li> Canceling a timer which is already canceled does nothing.</li>
  * </ul>
  * 
- * This class is suitable for concurrent access.
+ * This class is thread safe.
  * 
+ * @todo
+ * - Fix performance bug when quickly pausing/unpausing. See case below.
+ * - Improve performance.
+ * - Extensive testing.
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ThreadTimer {
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    /** Counter to keep track of the timer id's of {@code ThreadTimer}s. */
+    private static final AtomicInteger TIMER_ID_COUNTER = new AtomicInteger(0);
+    /** The amount of metric data kept in memory. */
+    private final static int METRIC_SIZE = 20;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The ID of this {@code ThreadTimer}. */
+    private final int timeId;
+    /** The tasks to be executed. */
+    private final Runnable[] tasks;
+    
+    /** Lock used for concurrent operations. */
+    private final Lock lock = new ReentrantLock(true);
+    /** The condition used to wait for the currently executing
+     *  thread to prevent race conditions. */
+    private final Condition threadIdCondition = lock.newCondition();
+    /** The condition to wake the update thread after it is done. */
+    private final Condition wait = lock.newCondition();
+    
+    /** The current FPS scheduling mode. */
+    private static FPSState fpsState = FPSState.MANUAL;
     /** The current state of the timer. */
+    private TimerState timerState = TimerState.CANCELED;
+    
+    /** The thread used for executing the run functions. */
+    private Thread updateThread;
+    /** The current ID of the thread which is allowed to execute the run function.
+     *  This value is updated <b>before</b> the thread starts. */
+    private volatile int threadId = 0;
+    /** The previous ID of the thraed which was allowed to execute the run function.
+     *  This value is updated <b>after</b> the previous thread was terminated. */
+    private volatile int prevThreadId = 0;
+    
+    /** The delay set by the user when starting the timer. */
+    private long initialDelay;
+    /** The initial delay of the timer used for un-pausing the timer. */
+    private volatile long delay;
+    /** The current interval of the interval. */
+    private volatile long interval;
+    /** The interval the timer should aim for when using {@link FPSState#AUTO}. */
+    private volatile long targetInterval;
+    
+    /** The start timestamp of the timer for the current iteration. */
+    private volatile long startTime;
+    /** The pause timestamp of the timer. If there was no pause in
+     *  this iteration then it is equal to {@link #startTime}. */
+    private volatile long pauseTime;
+    
+    /**  Keeps track of how many cycles must pass before the
+     *  additative increase is replaced by multiplicative increase. */
+    public int waitMul = 0;
+    
+    /** Denotes the thread priority for this timer. */
+    private int priority = Thread.NORM_PRIORITY;
+    
+    /** The scheduler used for executing the tasks. */
+    private final Scheduler sched;
+    
+    /*
+     * Metric variables.
+     */
+    private final Lock metricLock = new ReentrantLock();
+    /** Whether to restart the metrics on the next cycle. */
+    private boolean restartMetric = true;
+    /** The timestamp used for calculating time metrics. */
+    private long metricTimeStamp = System.currentTimeMillis();
+    /** The average interval time of the timer. */
+    private float metricAvgSpeed = 0.0f;
+    /** The number of time the metrics were calculated this second. */
+    private int metricCompleted = 0;
+    /** The FPS rate metric. */
+    private int metricFPS = 0;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Inner classes.
+     * -------------------------------------------------------------------------
+     */
+    /** 
+     * Enum for denoting the current time state.
+     */
     public enum TimerState {
         RUNNING, PAUSED, CANCELED
     }
-    
-    // Lock and condition for concurrent operations.
-    final private Lock interruptLock = new ReentrantLock();
-    final private Lock lock = new ReentrantLock(true);
-    final private Condition threadIDCondition = lock.newCondition();
-    
-    private static FPSState fpsState = FPSState.MANUAL;
-    
-    // Counters to keep track of the timer id's.
-    private static AtomicInteger timerIDCounter = new AtomicInteger(0);
-    final private int timerID;
-    
-    private Thread updateThread;
-    private volatile int threadID = 0;
-    private volatile int prevThreadID = 0;
-    
-    // The tasks to be executed.
-    final private Runnable[] tasks;
-    // The delay set by the user when starting the timer.
-    private long initialDelay;
-    // The initial delay.
-    private volatile long delay;
-    // The timer interval.
-    private volatile long interval;
-    // The target interval.
-    private volatile long targetInterval;
-    
-    // The start timestamp of the timer for the current iteration.
-    private volatile long startTime;
-    
-    // The pause timestamp of the timer. If there was no pause in
-    // this iteration then it is equal to the start timestamp.
-    private volatile long pauseTime;
-    
-    private TimerState timerState = TimerState.CANCELED;
-    
-    // Keeps track of how many cycles must pass before the
-    // additative increase is replaced multiplicative increase.
-    public int waitMul = 0;
-    
-    // Denotes the thread priority for this timer.
-    private int priority = Thread.NORM_PRIORITY;
-    
-    // The scheduler used for executing the tasks.
-    final private Scheduler sched;
-    
-    // Metric variables.
-    final private static int METRIC_SIZE = 20;
-    private boolean restartMetric = true;
-    private volatile long metricTimeStamp = System.currentTimeMillis();
-    private volatile float metricAvgSpeed = 0.0f;
-    private volatile int metricCompleted = 0;
-    private volatile int metricFPS = 0;
     
     
     /* -------------------------------------------------------------------------
@@ -126,7 +162,14 @@ public class ThreadTimer {
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * Creates a new timer which uses a separate thread to execute the given functions
+     * once every interval.
+     * 
+     * @param interval The time in ms which is between two executions of the tasks.
+     * @param rs The tasks that will be executed on every interval.
+     * 
+     * @throws IllegalArgumentException If {@code interval <= 0}.
+     * @throws NullPointerException If {@code rs == null}.
      * 
      * @see #ThreadTimer(long, long, Scheduler, Runnable...)
      */
@@ -135,7 +178,15 @@ public class ThreadTimer {
     }
     
     /**
-     * Constructor.
+     * Creates a new timer which uses a separate thread to execute the given functions
+     * once every interval. After starting, first waits until the initial delay has past.
+     * 
+     * @param delay The time in ms before the first exectution of the tasks.
+     * @param interval The time in ms which is between two executions of the tasks.
+     * @param rs The tasks that will be executed on every interval.
+     * 
+     * @throws IllegalArgumentException If {@code interval <= 0} or {@code delay <= 0}.
+     * @throws NullPointerException If {@code rs == null}.
      * 
      * @see #ThreadTimer(long, long, Scheduler, Runnable...)
      */
@@ -144,7 +195,16 @@ public class ThreadTimer {
     }
     
     /**
-     * Constructor.
+     * Creates a new timer which uses a separate thread to execute the given functions
+     * once every interval on the given scheduler.
+     * 
+     * @param interval The time in ms which is between two executions of the tasks.
+     * @param sched The scheduler used for scheduling tasks. If {@code null}, then
+     *     {@link SelfScheduler} is used as default.
+     * @param rs The tasks that will be executed on every interval.
+     * 
+     * @throws IllegalArgumentException If {@code interval <= 0}.
+     * @throws NullPointerException If {@code rs == null}.
      * 
      * @see #ThreadTimer(long, long, Scheduler, Runnable...)
      */
@@ -153,31 +213,31 @@ public class ThreadTimer {
     }
     
     /**
-     * Full constructor.
+     * Creates a new timer which uses a separate thread to execute the given functions
+     * once every interval on the given scheduler. After starting, first waits until
+     * the initial delay has past.
      * 
-     * @param delay the time in ms before the first exectution of the tasks.
-     * @param interval the time in ms which is between two executions of
-     *     the tasks.
-     * @param sched the scheduler used for scheduling tasks. If {@code null},
-     *     then {@link SelfScheduler} is used as default.
-     * @param rs the tasks that will be executed on every interval.
+     * @param delay The time in ms before the first exectution of the tasks.
+     * @param interval The time in ms which is between two executions of the tasks.
+     * @param sched The scheduler used for scheduling tasks. If {@code null}, then
+     *     {@link SelfScheduler} is used as default.
+     * @param rs The tasks that will be executed on every interval.
      * 
-     * @throws IllegalArgumentException if {@code interval <= 0} or
-     *     {@code delay <= 0}.
-     * @throws NullPointerException if {@code rs == null}.
+     * @throws IllegalArgumentException If {@code interval <= 0} or {@code delay <= 0}.
+     * @throws NullPointerException If {@code rs == null}.
      */
-    public ThreadTimer(long delay, long interval, Scheduler sched,
-            Runnable... rs) {
-        if (interval <= 0)
+    public ThreadTimer(long delay, long interval, Scheduler sched, Runnable... rs) {
+        if (rs == null) throw new NullPointerException("Runnable was null!");
+        if (interval <= 0){
             throw new IllegalArgumentException(
                     "Expected interval < 0, but found: " + interval);
-        if (delay <= 0)
+        }
+        if (delay <= 0) {
             throw new IllegalArgumentException(
                     "Expected delay < 0, but found: " + delay);
-        if (rs == null)
-            throw new NullPointerException("Runnable was null!");
+        }
         
-        timerID = timerIDCounter.getAndIncrement();
+        timeId = TIMER_ID_COUNTER.getAndIncrement();
         
         // Set the initial values.
         this.initialDelay = this.delay = delay;
@@ -200,46 +260,61 @@ public class ThreadTimer {
      */
     /**
      * Updates the metrics and adjusts the interval is needed.
-     * @param timeStamp 
-     * @param exeTime 
+     * 
+     * @param timeStamp The timestamp before execution of the method to calculate
+     *     the metrics of.
+     * @param exeTime The execution time of the method to calculate the metrics of.
      */
     private void updateMetric(long timeStamp, long exeTime) {
-        if (restartMetric) {
-            metricCompleted = 0;
-            metricFPS = (int) getFPS();
-            metricAvgSpeed = exeTime;
-            metricTimeStamp = System.currentTimeMillis() + getInterval() / 2;
-            restartMetric = false;
-            return;
+        // Update metrics.
+        metricLock.lock();
+        try {
+            if (restartMetric) {
+                metricCompleted = 0;
+                metricFPS = (int) getFPS();
+                metricAvgSpeed = exeTime;
+                metricTimeStamp = System.currentTimeMillis() + getInterval() / 2;
+                restartMetric = false;
+                return;
+            }
+            
+            // Update metrics.
+            metricCompleted++;
+            metricAvgSpeed = (metricAvgSpeed * (METRIC_SIZE - 1) + exeTime) / METRIC_SIZE;
+            while (timeStamp > metricTimeStamp + 1000) {
+                metricFPS = (int) (metricCompleted * 1000 / (metricTimeStamp - timeStamp));
+                metricCompleted = 0;
+                metricTimeStamp += 1000;
+            }
+            
+        } finally {
+            metricLock.unlock();
         }
         
-        metricCompleted++;
-        metricAvgSpeed = (metricAvgSpeed * (METRIC_SIZE - 1) + exeTime)
-                / METRIC_SIZE;
-        if (timeStamp > metricTimeStamp + 1000) {
-            metricFPS = (int) (metricCompleted *
-                    1000 / (metricTimeStamp - timeStamp));
-            metricCompleted = 0;
-            metricTimeStamp += 1000;
-        }
-        
+        // Change interval if needed.
         if (fpsState == FPSState.AUTO) {
             int diff = (int) (interval - exeTime);
             if (diff < 0) {
+                // Multiplicative decrease (= increase interval fast).
                 waitMul += 10;
-                setInterval((long) Math.ceil((interval * 1.05)));
+                double add = Math.max(interval * 0.05, 1);
+                setInterval((long) Math.ceil((interval + add)));
                 
             } else {
                 if (interval > targetInterval) {
                     if (--waitMul <= 0) {
+                        // Multiplicative increase (= decrease interval fast).
                         waitMul = 0;
-                        setInterval(Math.max((long) (interval * 0.95),
-                                targetInterval));
+                        long sub = Math.max((long) Math.ceil(interval * 0.05), 1);
+                        setInterval(Math.max((long) (interval - sub), targetInterval));
+
                     } else {
+                        // Additative increase (= decrease interval slow).
                         setInterval(interval - 1);
                     }
                     
                 } else if (interval < targetInterval) {
+                    // Cap interval at the target interval.
                     setInterval(targetInterval);
                 }
             }
@@ -250,21 +325,39 @@ public class ThreadTimer {
      * @return the average time it takes to complete one update cycle.
      */
     public float getAverageExecutionTime() {
-        return metricAvgSpeed;
+        metricLock.lock();
+        try {
+            return metricAvgSpeed;
+            
+        } finally {
+            metricLock.unlock();
+        }
     }
     
     /**
      * @return the frames per second measured by the metrics.
      */
     public int getMetricFPS() {
-        return metricFPS;
+        metricLock.lock();
+        try {
+            return metricFPS;
+            
+        } finally {
+            metricLock.unlock();
+        }
     }
     
     /**
      * Re-initializes the metric values.
      */
     public void restartMetric() {
-        restartMetric = true;
+        metricLock.lock();
+        try {
+            restartMetric = true;
+            
+        } finally {
+            metricLock.unlock();
+        }
     }
     
     /* -------------------------------------------------------------------------
@@ -272,7 +365,7 @@ public class ThreadTimer {
      * -------------------------------------------------------------------------
      */
     /**
-     * Starts the timer.
+     * Starts the timer. <br>
      * Does nothing if the timer is already running or paused.
      */
     public void start() {
@@ -282,24 +375,25 @@ public class ThreadTimer {
                     timerState == TimerState.PAUSED) return;
             
             // Update time stamps.
-            metricTimeStamp = pauseTime = startTime
-                    = System.currentTimeMillis();
+            pauseTime = startTime = System.currentTimeMillis();
             delay = initialDelay;
             
             // Update the timeState.
             timerState = TimerState.RUNNING;
             
             // Set and start update thread.
-            updateThread = createUpdateThread(++threadID);
+            updateThread = createUpdateThread(++threadId);
             updateThread.start();
             
         } finally {
             lock.unlock();
         }
+        
+        restartMetric();
     }
     
     /**
-     * Pauses the timer.
+     * Pauses the timer. <br>
      * Does nothing if the timer is already paused or stopped.
      */
     public void pause() {
@@ -309,11 +403,10 @@ public class ThreadTimer {
                     timerState == TimerState.CANCELED) return;
             
             // Stop the timer.
-            threadID++;
+            threadId++;
             
             // Set the pause time stamp.
             pauseTime = System.currentTimeMillis();
-            System.err.println("PAUSED: " + (pauseTime - startTime));
             
             // Update the timeState.
             timerState = TimerState.PAUSED;
@@ -327,7 +420,7 @@ public class ThreadTimer {
     }
     
     /**
-     * Resumes a paused timer.
+     * Resumes the paused timer. <br>
      * Does nothing if the timer is running or canceled.
      */
     public void resume() {
@@ -336,31 +429,37 @@ public class ThreadTimer {
             if (timerState == TimerState.RUNNING ||
                     timerState == TimerState.CANCELED) return;
             
-            // Obtain current time stamp.
-            long curTime = System.currentTimeMillis();
-            long timePaused = curTime - pauseTime;
+            // Update time stamps.
+            long timePaused = System.currentTimeMillis() - pauseTime;
             long timeWaited = pauseTime - startTime;
-            System.err.println("RESUME: " + timePaused + ", " + timeWaited);
+            System.out.println("RESUME: " + timePaused + ", " + timeWaited);
             
             // Update time stamps.
             delay = Math.max(0, interval - timeWaited);
             startTime += timePaused;
-            metricTimeStamp += timePaused;
             
             // Update the timeState.
             timerState = TimerState.RUNNING;
             
             // Create and start update thread.
-            updateThread = createUpdateThread(threadID);
+            updateThread = createUpdateThread(threadId);
             updateThread.start();
             
         } finally {
             lock.unlock();
         }
+        
+        metricLock.lock();
+        try {
+            restartMetric();
+
+        } finally {
+            metricLock.unlock();
+        }
     }
     
     /**
-     * Cancels a timer.
+     * Cancels a timer. <br>
      * Does nothing if the timer is already canceled.
      */
     public void cancel() {
@@ -370,7 +469,7 @@ public class ThreadTimer {
             
             // Kill the current timer if needed.
             if (timerState == TimerState.RUNNING) {
-                threadID++;
+                threadId++;
             }
             
             // Update the timeState.
@@ -510,76 +609,74 @@ public class ThreadTimer {
      * -------------------------------------------------------------------------
      */
     /**
-     * Wakes the update thread if needed such that a change will be taken
-     * into account.
-     *//*
-    private void notifyThread() {
-        /*
-        if (!interruptLock.tryLock()) return;
-        try {
-            if (updateThread != null) updateThread.interrupt();
-            
-        } finally {
-            interruptLock.unlock();
-        }*//*
-        
+     * Waits a given amount of nanoseconds.
+     * 
+     * @param nanos The amount of nanoseconds to waint.
+     * @param tId The id of the waiting thread.
+     */
+    private void waitTime(long nanos, int tId) {
+        if (nanos <= 100_000) return;
+        long nanosRem = nanos;
         lock.lock();
         try {
-            wait.signalAll();
+            while (nanosRem > 100_000L && tId == threadId) {
+                try {
+                    nanosRem = wait.awaitNanos(nanosRem - 100_000);
+                    
+                } catch (InterruptedException e) {
+                    Logger.write(new Object[] {
+                        "Update thread interrupted (" + tId + "): "
+                                + Thread.currentThread().getName(),
+                        "Ignoring interrupt!",
+                        e
+                    }, Logger.Type.WARNING);
+                }
+            }
             
         } finally {
             lock.unlock();
         }
-    }*/
-    
-    Condition wait = lock.newCondition();
+    }
     
     /**
      * Function for the update thread.
      * 
-     * @param tID the of of this thread.
+     * @param tId The of of this thread.
      */
     @SuppressWarnings("UseSpecificCatch")
-    private void threadFunction(int tID) {
+    private void threadFunction(int tId) {
         // Set initial thread priority.
         Thread.currentThread().setPriority(priority);
         
         lock.lock();
         try {
             // Prevent multiple threads from running in case of fast
-            // start/stop actions.
-            while (prevThreadID < tID - 1) {
+            // start/stop triggers.
+            while (prevThreadId < tId - 1) {
                 // Terminate current thread if it should be stopped.
-                if (tID != threadID) return;
+                if (tId != threadId) return;
                 
                 try {
-                    threadIDCondition.await();
-                } catch (InterruptedException e) { }
-            }
-            
-            // Terminate current thread if it should be stopped.
-            if (tID != threadID) return;
-            
-            while (startTime + delay > System.currentTimeMillis() &&
-                    tID == threadID) {
-                System.err.println("delay sleep:" +
-                        (startTime + delay - System.currentTimeMillis()));
-                try {
-                    long time = Math.max(0, startTime + delay
-                            - System.currentTimeMillis());
-                    wait.await(time, TimeUnit.MILLISECONDS);
+                    threadIdCondition.await();
                     
                 } catch (InterruptedException e) {
                     Logger.write(new Object[] {
-                        "Updater thread " + tID + " was interrupted!",
-                        "Interrupt was ignored!",
+                        "Update thread interrupted (" + tId + "): "
+                                + Thread.currentThread().getName(),
+                        "Ignoring interrupt!",
                         e
                     }, Logger.Type.WARNING);
                 }
             }
             
             // Terminate current thread if it should be stopped.
-            if (tID != threadID) return;
+            if (tId != threadId) return;
+            
+            // Wait the delay time.
+            waitTime((startTime - System.currentTimeMillis() + delay) * 1000_000L, tId);
+            
+            // Terminate current thread if it should be stopped.
+            if (tId != threadId) return;
             
             // Increase the start time.
             startTime += delay;
@@ -588,17 +685,25 @@ public class ThreadTimer {
             lock.unlock();
         }
         
-        restartMetric = true;
+        
+        metricLock.lock();
+        try {
+            restartMetric = true;
+            
+        } finally {
+            metricLock.unlock();
+        }
+            
         do {
-            // tmp
-            System.out.println("Thread id: " + threadID);
-            System.out.println("my thread: " + tID);
+            // tmp TODO
+            System.out.println("Thread id: " + threadId);
+            System.out.println("my thread: " + tId);
             
             // If the thread was interrupted, clear the interrupt status
             // and log an error.
             if (Thread.interrupted()) {
                 Logger.write(new Object[] {
-                    "Updater thread " + tID + " was interrupted!",
+                    "Updater thread " + tId + " was interrupted!",
                     "Interrupt was ignored!"
                 }, Logger.Type.WARNING);
             }
@@ -617,57 +722,35 @@ public class ThreadTimer {
             try {
                 sched.waitUntilDone();
                 
-            } catch(InterruptedException e) {
-                Logger.write(e);
+            } catch(Exception e) {
+                Logger.write(new Object[] {
+                    "Update thread interrupted (" + tId + "): "
+                            + Thread.currentThread().getName(),
+                    "Ignoring interrupt!",
+                    e
+                }, Logger.Type.WARNING);
+            }
+            
+            // Update metrics.
+            long timeStamp = System.currentTimeMillis();
+            long exeTime = timeStamp - startTime;
+            metricLock.lock();
+            try {
+                updateMetric(timeStamp, exeTime);
+                
+            } finally {
+                metricLock.unlock();
             }
             
             lock.lock();
             try {
-                // Update metrics.
-                long timeStamp = System.currentTimeMillis();
-                long exeTime = timeStamp - startTime;
-                updateMetric(timeStamp, exeTime);
-                
-                // Wait remaining time.
-                long sleepTime = interval - exeTime;
-                System.err.println("sleep time: " + sleepTime);
-                while (sleepTime/* - 2*/ > 0 && tID == threadID) {
-                    try {
-                        wait.await(sleepTime/* - 2*/, TimeUnit.MILLISECONDS);
-                        sleepTime -= (System.currentTimeMillis() - timeStamp);
-                        
-                    } catch (InterruptedException e) {
-                        Logger.write(new Object[] {
-                            "Updater thread " + tID + " was interrupted!",
-                            "Interrupt was ignored!",
-                            e
-                        }, Logger.Type.WARNING);
-                        /*
-                        long timeWaited = System.currentTimeMillis() - timeStamp;
-                        System.err.println("INTERRUPT: " + timeWaited);
-                        if (tID != threadID) return;
-                        timeStamp = System.currentTimeMillis();
-                        sleepTime = interval - (timeStamp - startTime);
-                        */
-                    }
-                }
-                
-                /*
-                // Precision: +-1 ms
-                while (System.currentTimeMillis() - startTime < interval &&
-                        tID == threadID) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) { }
-                }
-                /*
-                // Precision: +-0 ms
-                while (System.currentTimeMillis() - startTime
-                        < interval) { }
-                /**/
+                // tmp TODO
+                System.out.println("interval: " + interval + ", exe: " + exeTime);
+                System.out.println(interval - exeTime);
+                waitTime((interval - exeTime) * 1000_000L, tId);
 
                 // Update start time stamp.
-                if (tID == threadID) {
+                if (tId == threadId) {
                     startTime += interval;
                 }
                 
@@ -675,22 +758,24 @@ public class ThreadTimer {
                 lock.unlock();
             }
             
-        } while (tID == threadID);
+        } while (tId == threadId);
     }
     
     /**
-     * @param tID the ID of the update thread to create.
+     * @param tId The ID of the update thread to create.
+     * 
      * @return A fresh update thread with the given id.
      */
-    private Thread createUpdateThread(int tID) {
-        return new Thread("Timer-thread-" + timerID) {
+    private Thread createUpdateThread(int tId) {
+        return new Thread("Timer-thread-" + timeId) {
             @Override
             public void run() {
-                threadFunction(tID);
+                threadFunction(tId);
+                
                 lock.lock();
                 try {
-                    prevThreadID++;
-                    threadIDCondition.signalAll();
+                    prevThreadId++;
+                    threadIdCondition.signalAll();
                     
                 } finally {
                     lock.unlock();
@@ -713,6 +798,26 @@ public class ThreadTimer {
     }
     private static ThreadTimer tt;
     private static long dt;
+    
+    public static void main2(String[] args) {
+        tt = new ThreadTimer(1000L, () -> {
+            System.out.println("STARTED");
+            printMetric();
+            long curTime = System.currentTimeMillis();
+            MultiTool.sleepThread(15);
+            System.out.println("dt : " + (curTime - dt));
+            dt = curTime;
+            System.out.println("COMPLETED");
+            System.out.println();
+        });
+        for (int i = 0; i < 100; i++) {
+            long time1 = System.currentTimeMillis();
+            tt.waitTime(1000*1000, 0);
+            long time2 = System.currentTimeMillis();
+            System.out.println("diff: " + (time2 - time1));
+        }
+    }
+    
     public static void main(String[] args) {
         tt = new ThreadTimer(1000L, () -> {
             System.out.println("STARTED");
@@ -732,14 +837,15 @@ public class ThreadTimer {
         MultiTool.sleepThread(100);
         tt.start();
         MultiTool.sleepThread(1000);
-        
-        for (int i = 0; i < 10; i++) {
+        /**/
+        for (int i = 0; i < 7; i++) {
             MultiTool.sleepThread(500);
             tt.pause();
             MultiTool.sleepThread(250);
             tt.resume();
             MultiTool.sleepThread(500);
         }
+        /**/
         
         // To keep the program alive.
         while(true) {

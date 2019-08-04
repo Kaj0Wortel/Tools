@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,15 +11,16 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.data;
-
-
-// Tools Imports
-import tools.MultiTool;
+package tools.data.array;
 
 
 // Java imports
 import java.util.Objects;
+
+
+// Tools Imports
+import tools.MultiTool;
+import tools.data.Wrapper;
 
 
 /**
@@ -36,7 +37,7 @@ public class DefaultValueArray<V>
      * -------------------------------------------------------------------------
      */
     /** The default value. */
-    private final Wrapper<V> def;
+    protected final Wrapper<V> def;
     
     
     /* -------------------------------------------------------------------------
@@ -92,7 +93,7 @@ public class DefaultValueArray<V>
     /**
      * @param index The index of the element to return.
      * 
-     * @return he element at the given index if the index is in range.
+     * @return The element at the given index if the index is in range.
      *     The default value otherwise.
      */
     @Override

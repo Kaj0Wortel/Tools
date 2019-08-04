@@ -20,6 +20,7 @@ package tools;
  *
  * @param <V> The value class to evaluate.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 @FunctionalInterface

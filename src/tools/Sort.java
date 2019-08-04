@@ -31,6 +31,7 @@ package tools;
  *     </ul>
  * </ul>
  *
+ * @version 0.0
  * @author Kaj Wortel
  */
 @Deprecated

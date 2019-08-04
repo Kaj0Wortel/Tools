@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import tools.data.ArrayTools;
+import tools.data.array.ArrayTools;
 
 
 /**
@@ -62,7 +62,7 @@ public  class RandomIterator<V>
         for (V value : col) {
             arr[i++] = value;
         }
-        ArrayTools.shuffleArray(arr);
+        ArrayTools.shuffle(arr);
         it = new ArrayIterator(arr);
     }
     

@@ -16,12 +16,12 @@ package tools.matrix;
 
 // Tools imports
 import java.util.Objects;
-import tools.Cloneable;
 import tools.MultiTool;
 import tools.numbers.PrimitiveNumber;
 import tools.numbers.ToolNumber;
 import tools.numbers.ToolNumberAdapter;
 import tools.observer.HashObservableInterface;
+import tools.PublicCloneable;
 
 
 /**
@@ -29,7 +29,7 @@ import tools.observer.HashObservableInterface;
  */
 public class Mat
         extends ToolNumberAdapter<Mat>
-        implements Cloneable, HashObservableInterface {
+        implements PublicCloneable, HashObservableInterface {
     
     protected ToolNumber[][] values;
     

@@ -22,7 +22,7 @@ import tools.matrix.Mat;
  */
 public abstract class ToolNumber
         extends Number 
-        implements tools.Cloneable {
+        implements tools.PublicCloneable {
     
     
     // Array containing the classes of the primative data types.

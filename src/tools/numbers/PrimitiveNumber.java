@@ -20,7 +20,7 @@ import tools.MultiTool;
 
 // Java imports
 import java.lang.reflect.Array;
-import tools.data.ArrayTools;
+import tools.data.array.ArrayTools;
 
 
 /**
@@ -28,7 +28,7 @@ import tools.data.ArrayTools;
  */
 public class PrimitiveNumber<N extends Number>
         extends ToolNumberOperationAdapter
-        implements tools.Cloneable {
+        implements tools.PublicCloneable {
     
     // The data representation.
     protected N value;
@@ -112,7 +112,7 @@ public class PrimitiveNumber<N extends Number>
     public static Object toPrimNumber(Object obj) {
         if (obj.getClass().isArray()) {
             Object[] result = (Object[]) Array.newInstance
-                (PrimitiveNumber.class, ArrayTools.calcDimArray(obj));
+                (PrimitiveNumber.class, ArrayTools.calcDimBalanced(obj));
             
             // Recursivly convert the number
             for (int i = 0; i < Array.getLength(obj); i++) {

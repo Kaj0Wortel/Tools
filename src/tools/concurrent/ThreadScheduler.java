@@ -14,47 +14,66 @@
 package tools.concurrent;
 
 
-// Tools imports
-import tools.log.Logger;
-
-
 // Java imports
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+
+// Tools imports
+import tools.log.Logger;
 
 
 /**
- * TODO: comments
+ * Scheduler implementation using a separate thread to execute the tasks.
  * 
- * Updating thread.
- * Use {@link #scheduleTask(Runnable)} to schedule a task.
+ * @todo testing
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ThreadScheduler
         extends Scheduler {
-    final protected Deque<Runnable> requestQueue = new LinkedList<>();
     
-    final protected Condition addedToQueue = lock.newCondition();
-    final protected Condition waitForEmpty = lock.newCondition();
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    /** The ID counter used for keeping track of multiple thread schedulers
+     *  for debugging and benchmarking. */
+    private static final AtomicInteger ID = new AtomicInteger(0);
     
-    final protected Lock interruptLock = new ReentrantLock();
     
-    private static AtomicInteger id = new AtomicInteger(0);
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The request queue used for the tasks to be executed. */
+    protected final Deque<Runnable> requestQueue = new LinkedList<>();
+    /** The thead used for execution of the tasks. */
+    protected final Thread thread;
+    /** Condition which is signaled when a task was added to the queue. */
+    protected final Condition addedToQueue = lock.newCondition();
+    /** Condition which is signaled when the task queue is empty and no
+     *  tasks are currently being executed. */
+    protected final Condition waitForEmpty = lock.newCondition();
+    
+    /** Denotes whether the scheduler was started. */
     protected volatile boolean started = false;
+    /** Denotes whether the scheduler was terminated. */
     protected volatile boolean terminated = false;
+    /** Denotes whether the scheduler is done. */
     protected volatile boolean isDone = true;
     
-    final protected Thread thread;
     
-    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
     /**
-     * Creates a new update thread.
+     * Creates a new update thread with normal priority.
      */
     public ThreadScheduler() {
         this(Thread.NORM_PRIORITY);
@@ -66,97 +85,27 @@ public class ThreadScheduler
      * {@link #scheduleTask(Runnable)} to schedule a task on this thread.<br>
      * Use {@link #terminate()} to terminate the update thread and clean-up.
      * 
-     * @param priority 
+     * @param priority The priority of the thread. Must be a value between
+     *     {@code 1} and {@code 10} (both inclusive).
+     * 
+     * @see Thread#MIN_PRIORITY
+     * @see Thread#NORM_PRIORITY
+     * @see Thread#MAX_PRIORITY
      */
     public ThreadScheduler(int priority) {
-        int threadID = id.getAndIncrement();
+        int threadID = ID.getAndIncrement();
         
         thread = new Thread("Update-thread-" + threadID) {
             @Override
             public void run() {
-                while (true) {
-                    /** Obtain the task. */
-                    Runnable r = null;
-                    lock.lock();
-                    try {
-                        // If the queue is empty, wait for a task.
-                        if (requestQueue.isEmpty()) {
-                            isDone = true;
-                            lock.unlock();
-                            try {
-                                forceNotifyObservers(Event.ALL_TASKS_FINISHED);
-                                
-                            } finally {
-                                lock.lock();
-                            }
-                        }
-                        
-                        if (requestQueue.isEmpty()) {
-                            waitForEmpty.signalAll();
-                            addedToQueue.await();
-                            
-                        } else {
-                            isDone = false;
-                        }
-                        
-                        if (terminated || Thread.currentThread()
-                                .isInterrupted()) {
-                            cleanup();
-                            return;
-                        }
-                        
-                        // Obtain and remove the task from the queue.
-                        r = requestQueue.pollFirst();
-                        
-                    } catch (InterruptedException e) {
-                        if (terminated || Thread.currentThread()
-                                .isInterrupted()) {
-                            cleanup();
-                            return;
-                            
-                        } else {
-                            Logger.write(new Object[] {
-                                "Interrupted exception was caught in "
-                                        + "update thread:",
-                                e
-                            }, Logger.Type.ERROR);
-                        }
-                        
-                    } finally {
-                        lock.unlock();
-                    }
+                try {
+                    while (threadTask()) { }
                     
-                    /** Execute the task. */
-                    forceNotifyObservers(Event.TASK_STARTED);
-                    try {
-                        if (r != null) {
-                            r.run();
-                        }
-                        
-                        if (terminated || Thread.currentThread()
-                                .isInterrupted()) {
-                            cleanup();
-                            return;
-                        }
-                        
-                    } catch (Exception e) {
-                        // Note that no interrupts from {@link #interrupt()} from
-                        // this class can be thrown when the task is executing.
-                        if (!terminated) {
-                            Logger.write(new Object[] {
-                                "Uncaught exception in " + getName() + ":",
-                                e
-                            }, Logger.Type.ERROR);
-                        }
-                        
-                    }
+                } catch (Exception e) {
+                    Logger.write(e);
                     
-                    forceNotifyObservers(Event.TASK_FINISHED);
-                    
-                    if (terminated || Thread.currentThread().isInterrupted()) {
-                        cleanup();
-                        return;
-                    }
+                } finally {
+                    cleanup();
                 }
             }
         };
@@ -164,37 +113,124 @@ public class ThreadScheduler
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
     /**
+     * This function regulates running scheduled tasks, notifying observers,
+     * and notifying waiting threads.
+     * 
+     * @return {@code true} if the cycle should be repeated. {@code false} otherwise.
+     */
+    private boolean threadTask() {
+        /* Obtain the task. */
+        Runnable r = null;
+        lock.lock();
+        try {
+            // If the queue is empty, wait for a task.
+            if (requestQueue.isEmpty()) {
+                isDone = true;
+                lock.unlock();
+                try {
+                    forceNotifyObservers(new SchedulerEventObject(
+                            ThreadScheduler.this,
+                            SchedulerEvent.ALL_TASKS_FINISHED));
+                    
+                } finally {
+                    lock.lock();
+                }
+            }
+            
+            if (requestQueue.isEmpty()) {
+                waitForEmpty.signalAll();
+                addedToQueue.await();
+                
+            } else {
+                isDone = false;
+            }
+            
+            if (terminated || Thread.currentThread().isInterrupted()) {
+                return false;
+            }
+            
+            // Obtain and remove the task from the queue.
+            r = requestQueue.pollFirst();
+            
+        } catch (InterruptedException e) {
+            if (terminated || Thread.currentThread().isInterrupted()) {
+                return false;
+                
+            } else {
+                Logger.write(new Object[] {
+                    "Interrupted exception was caught in update thread:",
+                    e
+                }, Logger.Type.ERROR);
+            }
+            
+        } finally {
+            lock.unlock();
+        }
+        
+        /* Execute the task. */
+        forceNotifyObservers(new SchedulerEventObject(ThreadScheduler.this,
+                SchedulerEvent.TASK_STARTED));
+        try {
+            if (r != null)r.run();
+            
+            if (terminated || Thread.currentThread().isInterrupted()) {
+                return false;
+            }
+            
+        } catch (Exception e) {
+            // Note that no interrupts from {@link #interrupt()} from
+            // this class can be thrown when the task is executing.
+            if (!terminated) {
+                Logger.write(new Object[] {
+                    "Uncaught exception in " + Thread.currentThread().getName() + ":",
+                    e
+                }, Logger.Type.ERROR);
+            }
+        }
+        
+        forceNotifyObservers(new SchedulerEventObject(ThreadScheduler.this,
+                (requestQueue.isEmpty()
+                        ? SchedulerEvent.ALL_TASKS_FINISHED
+                        : SchedulerEvent.TASK_FINISHED)));
+            
+        
+        return !(terminated || Thread.currentThread().isInterrupted());
+    }
+    
+    /**
      * Internal cleanup when terminated.
      */
     private void cleanup() {
+        boolean generateEvent = false;
         lock.lock();
         try {
+            generateEvent = !terminated;
+            terminated = true;
             requestQueue.clear();
-            
-            // To prevent waiting threads for stopped scheduleTask thread.
             waitForEmpty.signalAll();
             
         } finally {
             lock.unlock();
-            forceNotifyObservers(Event.TERMINATED);
+            if (generateEvent) {
+                forceNotifyObservers(new SchedulerEventObject(this, SchedulerEvent.TERMINATED));
+            }
         }
     }
     
     @Override
     public void scheduleTask(Runnable task)
             throws IllegalStateException {
-        if (!started) throw new IllegalStateException("Not yet started!");
-        if (terminated) throw new IllegalStateException("Already terminated!");
-        if (task == null) return;
+        if (task == null) throw new NullPointerException();
         
         lock.lock();
         try {
-            if (terminated) return;
+            if (!started) throw new IllegalStateException("Not yet started!");
+            if (terminated) throw new IllegalStateException("Already terminated!");
             isDone = false;
             requestQueue.addLast(task);
             addedToQueue.signalAll();
@@ -215,26 +251,25 @@ public class ThreadScheduler
         if (started) return;
         lock.lock();
         try {
-            if (terminated)
+            if (terminated) {
                 throw new IllegalStateException("Already terminated!");
+            }
             started = true;
             thread.start();
             
         } finally {
             lock.unlock();
-            forceNotifyObservers(Event.STARTED);
         }
+        
+        forceNotifyObservers(new SchedulerEventObject(this, SchedulerEvent.STARTED));
     }
     
     @Override
     public void terminate()
             throws InterruptedException {
-        if (terminated) return;
         lock.lock();
         try {
-            terminated = true;
-            addedToQueue.signalAll();
-            waitForEmpty.signalAll();
+            cleanup();
             
         } finally {
             lock.unlock();
@@ -246,12 +281,9 @@ public class ThreadScheduler
     @Override
     public boolean terminate(long timeout, TimeUnit tu)
             throws InterruptedException {
-        if (terminated) return true;
         lock.lock();
         try {
-            terminated = true;
-            addedToQueue.signalAll();
-            waitForEmpty.signalAll();
+            cleanup();
             
         } finally {
             lock.unlock();
@@ -264,25 +296,36 @@ public class ThreadScheduler
     /**
      * {@inheritDoc}
      * 
+     * @apiNote
      * Does not terminate if the current executing task is infinitely
      * blocking and does not does not check the interrupted flag of the thread.
      */
     @Override
     public void forceTerminate()
             throws InterruptedException {
-        if (terminated) return;
         lock.lock();
         try {
-            terminated = true;
-            thread.interrupt();
-            addedToQueue.signalAll();
-            waitForEmpty.signalAll();
+            if (!terminated) thread.interrupt();
+            cleanup();
             
         } finally {
             lock.unlock();
         }
         
         thread.join();
+    }
+    
+    @Override
+    public boolean tryTerminate() {
+        lock.lock();
+        try {
+            cleanup();
+            
+        } finally {
+            lock.unlock();
+        }
+        
+        return thread.isAlive();
     }
     
     @Override
@@ -304,9 +347,6 @@ public class ThreadScheduler
             
         } finally {
             lock.unlock();
-            if (!started) {
-                forceNotifyObservers(Event.TERMINATED);
-            }
         }
     }
     
@@ -324,10 +364,10 @@ public class ThreadScheduler
     @Override
     public void waitUntilDone()
             throws InterruptedException {
+        if (terminated || isDone) return;
         lock.lock();
         try {
-            if (terminated) return;
-            if (isDone) return;
+            if (terminated || isDone) return;
             waitForEmpty.await();
             
         } finally {
@@ -336,7 +376,7 @@ public class ThreadScheduler
     }
     
     /**
-     * @param priority the new priority of the update thread.
+     * @param priority The new priority of the update thread.
      * 
      * @see Thread#setPriority(int)
      */
@@ -345,7 +385,7 @@ public class ThreadScheduler
     }
     
     /**
-     * @return the priority of the update thread.
+     * @return The priority of the update thread.
      * 
      * @see Thread#getPriority()
      */

@@ -17,6 +17,7 @@ package tools;
 /**
  * Class for coupling two objects together.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public final class Pair<V1, V2> {
@@ -43,7 +44,7 @@ public final class Pair<V1, V2> {
      * @param v1 Value 1 of the pair.
      * @param v2 Value 2 of the pair.
      */
-    public Pair(final V1 v1, final V2 v2) {
+    public Pair(V1 v1, V2 v2) {
         this(v1, v2, true);
     }
     
@@ -90,7 +91,7 @@ public final class Pair<V1, V2> {
     /**
      * @param v1 The new value of the first value.
      * 
-     * @throws IllegalStateException if the pair is not modifiable.
+     * @throws IllegalStateException If the pair is not modifiable.
      */
     public void setFirst(V1 v1)
             throws IllegalStateException {
@@ -101,7 +102,7 @@ public final class Pair<V1, V2> {
     /**
      * @param v2 The new value of the second value.
      * 
-     * @throws IllegalStateException if the pair is not modifiable.
+     * @throws IllegalStateException If the pair is not modifiable.
      */
     public void setSecond(V2 v2)
             throws IllegalStateException {
@@ -110,7 +111,7 @@ public final class Pair<V1, V2> {
     }
     
     /**
-     * @throws IllegalStateException if the pair is not modifiable.
+     * @throws IllegalStateException If the pair is not modifiable.
      */
     private void checkMod()
             throws IllegalStateException {

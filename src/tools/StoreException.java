@@ -18,6 +18,7 @@ package tools;
  * This exception is thrown when a value is attempted to be stored
  * at a location that is not suitable for that value.
  *
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class StoreException

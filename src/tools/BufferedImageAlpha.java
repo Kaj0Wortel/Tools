@@ -38,6 +38,7 @@ import tools.log.Logger;
  * @todo
  * Current status: reviving old artefact class.
  * 
+ * @version 0.0
  * @author Kaj Wortel
  * 
  * @deprecated needs to be reviewed before being used anywhere.

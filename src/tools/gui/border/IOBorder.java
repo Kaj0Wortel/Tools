@@ -16,7 +16,6 @@ package tools.swing;
 
 // Tools imports
 import tools.img.ImageManager;
-import tools.Cloneable;
 
 
 // Java imports
@@ -32,6 +31,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import tools.PublicCloneable;
 
 
 /**
@@ -40,7 +40,7 @@ import javax.swing.border.Border;
  * @author Kaj Wortel (0991586)
  */
 public class IOBorder
-        implements Border, Cloneable {
+        implements Border, PublicCloneable {
     /**
      * The states of the border.
      * Note that, if necessary added.

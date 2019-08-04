@@ -18,8 +18,9 @@ package tools.iterators;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+
 // Tool imports
-import tools.data.ArrayTools;
+import tools.data.array.ArrayTools;
 import tools.data.Wrapper;
 
 
@@ -31,7 +32,7 @@ import tools.data.Wrapper;
  */
 public class ArrayIterator<V>
         implements Iterator<V> {
-    final private Wrapper<V[]> array;
+    private final Wrapper<V[]> array;
     private int i = 0;
     
     public ArrayIterator(Wrapper<V[]> array) {
@@ -44,7 +45,7 @@ public class ArrayIterator<V>
     
     @Override
     public boolean hasNext() {
-        return i < ArrayTools.getLength(array.get());
+        return i < ArrayTools.length(array.get());
     }
     
     @Override

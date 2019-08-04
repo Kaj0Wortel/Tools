@@ -37,7 +37,7 @@ import javax.swing.text.JTextComponent;
 
 
 // Tools imports
-import tools.data.ArrayTools;
+import tools.data.array.ArrayTools;
 import tools.data.Wrapper;
 import tools.event.Key;
 import tools.font.FontLoader;
@@ -54,6 +54,7 @@ import tools.log.ScreenLogger;
  * Take a look at the {@link #deepClone(Object)} and {@link #deepArrayClone(Object[])} functions
  * (maybe rename the latter to {@code deepCloneArray}).
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public final class MultiTool {
@@ -95,7 +96,7 @@ public final class MultiTool {
      *
      * @see Thread#sleep(long)
      */
-    public static void sleepThread(final long time) {
+    public static void sleepThread(long time) {
         try {
             Thread.sleep(time);
             
@@ -117,8 +118,8 @@ public final class MultiTool {
      *
      * @see #fireActionEvents(Object, String, long, int, ActionListener[])
      */
-    public static void fireActionEvents(final Object source, final String command,
-            final int modifiers, final ActionListener[] als) {
+    public static void fireActionEvents(Object source, String command,
+            int modifiers, ActionListener[] als) {
         fireActionEvents(source, command, System.currentTimeMillis(), modifiers, als);
     }
     
@@ -133,16 +134,16 @@ public final class MultiTool {
      * @param als Array containing the ActionListeners that
      *     need to be notified of the event.
      */
-    public static void fireActionEvents(final Object source, final String command,
-            final long when, final int modifiers, final ActionListener[] als) {
+    public static void fireActionEvents(Object source, String command,
+            long when, int modifiers, ActionListener[] als) {
         if (als == null) return;
         
         new Thread(source.getClass().getName() + " ActionEvent") {
             @Override
             public void run() {
-                final ActionEvent e = new ActionEvent(source,
+                ActionEvent e = new ActionEvent(source,
                         ActionEvent.ACTION_PERFORMED, command, when, modifiers);
-                for (final ActionListener al : als) {
+                for (ActionListener al : als) {
                     if (al == null) continue;
                     al.actionPerformed(e);
                 }
@@ -158,13 +159,13 @@ public final class MultiTool {
      * 
      * @return A String representation of a double, having {@code decimals} decimals.
      */
-    public static String doubleToStringDecimals(final double num, final int decimals) {
+    public static String doubleToStringDecimals(double num, int decimals) {
         if (decimals < 0) {
             throw new IllegalArgumentException(
                     "Number of decimals was negative: " + decimals);
         }
         
-        final String number = Double.toString(num);
+        String number = Double.toString(num);
         for (int i = 0; i < number.length(); i++) {
             if (number.charAt(i) == '.') {
                 if (decimals == 0) {
@@ -174,7 +175,7 @@ public final class MultiTool {
                     return number.substring(0, i + decimals + 1);
                     
                 } else {
-                    final StringBuilder sb = new StringBuilder(number);
+                    StringBuilder sb = new StringBuilder(number);
                     while (sb.length() < i + decimals + 1) {
                         sb.append("0");
                     }
@@ -184,7 +185,7 @@ public final class MultiTool {
         }
         
         // '.' was not found
-        final StringBuilder sb = new StringBuilder(number);
+        StringBuilder sb = new StringBuilder(number);
         sb.append('.');
         for (int i = 0; i < decimals; i++) {
             sb.append('0');
@@ -208,7 +209,7 @@ public final class MultiTool {
      * 
      * @see #fillZero(int, int, int)
      */
-    public static String fillZero(final int num, final int len)
+    public static String fillZero(int num, int len)
             throws NumberFormatException {
         return fillZero(num, len, 10);
     }
@@ -227,7 +228,7 @@ public final class MultiTool {
      *     and is left filled with zeroes such that the total length of
      *     the returning string is {@code n}
      */
-    public static String fillZero(final int num, final int len, final int base)
+    public static String fillZero(int num, int len, int base)
             throws NumberFormatException {
         return fillLeft(Integer.toString(num, base), len, '0');
     }
@@ -243,7 +244,7 @@ public final class MultiTool {
      * 
      * @return The input string, left filled with spaces.
      */
-    public static String fillSpaceLeft(final String text, final int len) {
+    public static String fillSpaceLeft(String text, int len) {
         return fillLeft(text, len, ' ');
     }
     
@@ -258,7 +259,7 @@ public final class MultiTool {
      * 
      * @return The input string, right filled with spaces.
      */
-    public static String fillSpaceRight(final String text, final int len) {
+    public static String fillSpaceRight(String text, int len) {
         return fillRight(text, len, ' ');
     }
     
@@ -274,9 +275,9 @@ public final class MultiTool {
      * @return The given text, left filled with the given char {@code fill}
      *     until the target length has been reached.
      */
-    public static String fillLeft(final String text, final int len, final char fill) {
+    public static String fillLeft(String text, int len, char fill) {
         if (text.length() >= len) return text;
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (int i = text.length(); i < len; i++) {
             sb.append(fill);
         }
@@ -296,9 +297,9 @@ public final class MultiTool {
      * @return The given text, right filled with the given char {@code fill}
      *     until the target length has been reached.
      */
-    public static String fillRight(final String text, final int len, final char fill) {
+    public static String fillRight(String text, int len, char fill) {
         if (text.length() >= len) return text;
-        final StringBuilder sb = new StringBuilder(text);
+        StringBuilder sb = new StringBuilder(text);
         for (int i = text.length(); i < len; i++) {
             sb.append(fill);
         }
@@ -319,9 +320,9 @@ public final class MultiTool {
      * @return The given text, left and right filled with the given char
      *     {@code fill} until the target length has been reached.
      */
-    public static String fillCenter(final String text, final int len, final char fill) {
+    public static String fillCenter(String text, int len, char fill) {
         if (text.length() >= len) return text;
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         int amt = len - text.length();
         int left = amt / 2;
         int right = amt - left;
@@ -345,8 +346,8 @@ public final class MultiTool {
      * @return An approximation of the width of the string.
      *     Assumes normal English language as input string.
      */
-    public static double calcStringWidth(final String text, final Font font) {
-            final FontRenderContext frc = new FontRenderContext(font.getTransform(), true, true);
+    public static double calcStringWidth(String text, Font font) {
+            FontRenderContext frc = new FontRenderContext(font.getTransform(), true, true);
             return 1.1 * font.getStringBounds(text, frc).getWidth();
     }
     
@@ -356,7 +357,7 @@ public final class MultiTool {
      *
      * @param text The text to process.
      */
-    public static String toHTMLSpace(final String text) {
+    public static String toHTMLSpace(String text) {
         return text.replaceAll(" ", HTML_SPACE);
     }
     
@@ -373,7 +374,7 @@ public final class MultiTool {
      * @return {@code true} if the string only contains numbers in the given base.
      *     {@code false} otherwise.
      */
-    public static boolean isNumber(final String str, final int base) {
+    public static boolean isNumber(String str, int base) {
         if (str == null || str.length() == 0) return false;
         boolean dotFound = false;
         
@@ -401,7 +402,7 @@ public final class MultiTool {
      * 
      * @return {@code true} if the given char represents a digit in the given base.
      */
-    public static boolean isNumber(final char n, final int base) {
+    public static boolean isNumber(char n, int base) {
         if (base < 2) {
             throw new IllegalArgumentException("Expected 2 <= base <= 26, but found base: " + base);
             
@@ -454,7 +455,7 @@ public final class MultiTool {
      * 
      * @result the result of {@code base ^ pow}.
      */
-    public static double intPow(final double base, int pow) {
+    public static double intPow(double base, int pow) {
         if (pow > 0) {
             double r = base;
             double f = 1;
@@ -571,8 +572,8 @@ public final class MultiTool {
      *     && value.equals(\return)} will hold afterwards (assuming that the
      *     equals method is implemented correctly).
      * 
-     * @throws IllegalStateException if the clone method could not terminate normally.
-     * @throws UnsupportedOperationException if the provided value does not contain
+     * @throws IllegalStateException If the clone method could not terminate normally.
+     * @throws UnsupportedOperationException If the provided value does not contain
      *     one of the supported types.
      * 
      * @deprecated One should clone the array type specific to reduce the runtime significantly.
@@ -592,8 +593,8 @@ public final class MultiTool {
             throw new RuntimeException("TODO"); // TODO
             
         } else {
-            if (value instanceof tools.Cloneable) {
-                return (V) ((Cloneable) value).clone();
+            if (value instanceof tools.PublicCloneable) {
+                return (V) ((PublicCloneable) value).clone();
                 
             } else if (value instanceof java.lang.Cloneable) {
                 try {
@@ -653,8 +654,8 @@ public final class MultiTool {
      * 
      * @return A deep clone of the given array.
      * 
-     * @throws IllegalStateException if the clone method could not terminate normally.
-     * @throws UnsupportedOperationException if the provided value does not contain
+     * @throws IllegalStateException If the clone method could not terminate normally.
+     * @throws UnsupportedOperationException If the provided value does not contain
      *     one of the supported types.
      * 
      * @deprecated One should clone the array type specific to reduce the runtime significantly.
@@ -708,7 +709,7 @@ public final class MultiTool {
      * @see #calcHashCode(float)
      * @see #calcHashCode(double)
      */
-    public static int calcHashCode(final Object obj) {
+    public static int calcHashCode(Object obj) {
         if (obj == null) return 0;
         
         if (obj.getClass().isArray()) {
@@ -743,7 +744,7 @@ public final class MultiTool {
      * 
      * @return The hash code of the provided value.
      */
-    public static int calcHashCode(final boolean b) {
+    public static int calcHashCode(boolean b) {
         return (b ? 0x70FFFFFF : 0x000000FF);
     }
     
@@ -766,7 +767,7 @@ public final class MultiTool {
      * 
      * @return The hash code of the provided value.
      */
-    public static int calcHashCode(final byte b) {
+    public static int calcHashCode(byte b) {
         return 1 |
                 ((b & 0b0000_0001) << 3) |
                 ((b & 0b0000_0010) << 6) |
@@ -797,7 +798,7 @@ public final class MultiTool {
      * 
      * @return The hash code of the provided value.
      */
-    public static int calcHashCode(final short s) {
+    public static int calcHashCode(short s) {
         return 1 |
                 ((s & 0b0000_0001) << 1) | ((s & 0b0000_0001_0000_0000) << 9) |
                 ((s & 0b0000_0010) << 2) | ((s & 0b0000_0010_0000_0000) << 10) |
@@ -828,7 +829,7 @@ public final class MultiTool {
      * 
      * @return The hash code of the provided value.
      */
-    public static int calcHashCode(final char c) {
+    public static int calcHashCode(char c) {
         return Character.hashCode(c);
     }
     
@@ -851,7 +852,7 @@ public final class MultiTool {
      * 
      * @return The hash code of the provided value.
      */
-    public static int calcHashCode(final int i) {
+    public static int calcHashCode(int i) {
         return (i << 16) | (i >>> 16);
     }
     
@@ -863,7 +864,7 @@ public final class MultiTool {
      * 
      * @return The hash code of the provided value.
      */
-    public static int calcHashCode(final long l) {
+    public static int calcHashCode(long l) {
         return (int) (l ^ (l >>> 32));
     }
     
@@ -885,7 +886,7 @@ public final class MultiTool {
      * 
      * @see #calcHashCode(int)
      */
-    public static int calcHashCode(final float f) {
+    public static int calcHashCode(float f) {
         return calcHashCode(Float.floatToIntBits(f));
     }
     
@@ -909,7 +910,7 @@ public final class MultiTool {
      * 
      * @see #calcHashCode(long)
      */
-    public static int calcHashCode(final double d) {
+    public static int calcHashCode(double d) {
         return calcHashCode(Double.doubleToLongBits(d));
     }
     
@@ -937,7 +938,7 @@ public final class MultiTool {
      * @return The original {@code map} with the provided entries added to it.
      */
     public static <K, V, M extends Map<? super K, ? super V>> M addToMap(
-            final M map, final Pair<K, V>... entries) {
+            M map, Pair<K, V>... entries) {
         if (entries == null) return map;
         for (Pair<K, V> entry : entries) {
             map.put(entry.getFirst(), entry.getSecond());
@@ -959,7 +960,7 @@ public final class MultiTool {
      * @return The original collection {@code col} with the added elements in {@code arr}.
      */
     public static <V, C extends Collection<? super V>> C addToCollection(
-            final C col, final V... arr) {
+            C col, V... arr) {
         if (col == null || arr == null) throw new NullPointerException();
         for (V val : arr) {
             col.add(val);
@@ -986,7 +987,7 @@ public final class MultiTool {
      * 
      * @return An {@link Iterable} which returns the provided {@link Iterator} as iterator.
      */
-    public static <V> Iterable<V> toIterable(final Iterator<V> it) {
+    public static <V> Iterable<V> toIterable(Iterator<V> it) {
         return () -> it;
     }
     
@@ -1024,7 +1025,7 @@ public final class MultiTool {
      * @see Iterable#forEach(Consumer)
      */
     public static <V, C extends Collection<V>> void forEach(
-            final C col, SourceConsumer<? super C, ? super V> action) {
+            C col, SourceConsumer<? super C, ? super V> action) {
         for (V v : col) {
             action.accept(col, v);
         }
@@ -1057,7 +1058,7 @@ public final class MultiTool {
      * 
      * @return The value that was generated by the executor.
      */
-    public static <V> V createObject(final ConstructorExecutor<V> exe) {
+    public static <V> V createObject(ConstructorExecutor<V> exe) {
         return exe.execute();
     }
     
@@ -1084,7 +1085,7 @@ public final class MultiTool {
      * 
      * @see #printStackTrace(PrintStream, Thread)
      */
-    public static void printStackTrace(final PrintStream stream) {
+    public static void printStackTrace(PrintStream stream) {
         printStackTrace(stream, Thread.currentThread());
     }
     
@@ -1098,7 +1099,7 @@ public final class MultiTool {
      * 
      * @see #printStackTrace(PrintStream, Thread)
      */
-    public static void printStackTrace(final Thread thread) {
+    public static void printStackTrace(Thread thread) {
         printStackTrace(System.err, thread);
     }
     
@@ -1110,8 +1111,8 @@ public final class MultiTool {
      * @param stream The stream that will be used to print the stack trace on.
      * @param thread The thread to print the stack trace of.
      */
-    public static void printStackTrace(final PrintStream stream, final Thread thread) {
-        final StackTraceElement[] ste = thread.getStackTrace();
+    public static void printStackTrace(PrintStream stream, Thread thread) {
+        StackTraceElement[] ste = thread.getStackTrace();
         new Thread() {
             @Override
             public void run() {
@@ -1135,8 +1136,8 @@ public final class MultiTool {
      *
      * @param thread The thread to get the stacktrace of.
      */
-    public static void logStackTrace(final Thread thread) {
-        final StackTraceElement[] ste = thread.getStackTrace();
+    public static void logStackTrace(Thread thread) {
+        StackTraceElement[] ste = thread.getStackTrace();
         Logger.write(Var.LS + ArrayTools.toString(ste).replaceAll(", ", "," + Var.LS));
     }
     
@@ -1147,7 +1148,7 @@ public final class MultiTool {
      *
      * @param file the file the {@link FileLogger} will log to.
      */
-    public static void initLogger(final File file) {
+    public static void initLogger(File file) {
         // Netbeans is picky over some code later on.
         @SuppressWarnings("UnusedAssignment")
         FileLogger fl = null;
@@ -1184,8 +1185,7 @@ public final class MultiTool {
      * @return {@code true} if at least one of the values has changed.
      *     {@code false} otherwise.
      */
-    public static boolean boundsChanged(final Container c,
-            final int x, final int y, final int width, final int height) {
+    public static boolean boundsChanged(Container c, int x, int y, int width, int height) {
         return (x != c.getX()) || (y != c.getY()) || (width != c.getWidth()) ||
                 (height != c.getHeight());
     }
@@ -1202,11 +1202,11 @@ public final class MultiTool {
      *     {@code -1} if the document model was corrupted.
      */
     @SuppressWarnings("deprecation")
-    public static int countWrappedLines(final JTextComponent txtComp) {
+    public static int countWrappedLines(JTextComponent txtComp) {
         try {
-            final int height = txtComp.modelToView(txtComp.getDocument()
+            int height = txtComp.modelToView(txtComp.getDocument()
                     .getEndPosition().getOffset() - 1).y;
-            final int fontHeight = txtComp.getFontMetrics(txtComp.getFont()).getHeight();
+            int fontHeight = txtComp.getFontMetrics(txtComp.getFont()).getHeight();
             return height / fontHeight + 1;
             
         } catch (BadLocationException e) {
@@ -1229,9 +1229,8 @@ public final class MultiTool {
      * 
      * @return {@code true} if the two rectangle intersect.
      */
-    public static boolean intersects(final int x1, final int y1,
-            final int w1, final int h1, final int x2, final int y2,
-            final int w2, final int h2) {
+    public static boolean intersects(int x1, int y1, int w1, int h1, 
+            int x2, int y2, int w2, int h2) {
         return ((x1 <= x2 && x1 + w1 >= x2) ||
                 (x1 <= x2 + w2 && x1 + w1 >= x2 + w2)) &&
                ((y1 <= y2 && y1 + h1 >= y2) ||
@@ -1245,7 +1244,7 @@ public final class MultiTool {
      * 
      * @return A byte array representing the given {@code data}.
      */
-    public static byte[] toBytes(final long data) {
+    public static byte[] toBytes(long data) {
         byte[] rtn = new byte[8];
         rtn[0] = (byte) (data >>> 56);
         rtn[1] = (byte) (data >>> 48);
@@ -1265,7 +1264,7 @@ public final class MultiTool {
      * 
      * @return An {@code long} from the bytes.
      */
-    public static long longFromBytes(final byte[] data) {
+    public static long longFromBytes(byte[] data) {
         if (data.length != 8) {
             throw new IllegalArgumentException(
                     "Expected an array of length 8, but found: " + data.length);
@@ -1287,7 +1286,7 @@ public final class MultiTool {
      * 
      * @return A byte array representing the given {@code data}.
      */
-    public static byte[] toBytes(final int data) {
+    public static byte[] toBytes(int data) {
         byte[] rtn = new byte[4];
         rtn[0] = (byte) (data >>> 24);
         rtn[1] = (byte) (data >>> 16);
@@ -1303,7 +1302,7 @@ public final class MultiTool {
      * 
      * @return An {@code int} from the bytes.
      */
-    public static int intFromBytes(final byte[] data) {
+    public static int intFromBytes(byte[] data) {
         if (data.length != 4) {
             throw new IllegalArgumentException(
                     "Expected an array of length 4, but found: " + data.length);
@@ -1321,7 +1320,7 @@ public final class MultiTool {
      * 
      * @return A byte array representing the given {@code data}.
      */
-    public static byte[] toBytes(final short data) {
+    public static byte[] toBytes(short data) {
         byte[] rtn = new byte[2];
         rtn[0] = (byte) (data >>> 8);
         rtn[1] = (byte) (data & 0xFF);
@@ -1335,7 +1334,7 @@ public final class MultiTool {
      * 
      * @return A {@code short} from the bytes.
      */
-    public static int shortFromBytes(final byte[] data) {
+    public static int shortFromBytes(byte[] data) {
         if (data.length != 2) {
             throw new IllegalArgumentException(
                     "Expected an array of length 2, but found: " + data.length);

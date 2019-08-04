@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -18,7 +18,7 @@ package tools.observer;
  * Observer interface for when an object that already extends another
  * class can still become an observer.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  * @param <V> the value used for notifying observers.
  */
 public interface ObsInterface<T extends ObsInterface<T, V>, V> {
@@ -43,6 +43,8 @@ public interface ObsInterface<T extends ObsInterface<T, V>, V> {
      * This method should be invoked to notify all observers of a change.
      * 
      * @param arg the updated object.
+     * 
+     * @see #notifyObservers(Object)
      */
     default public void notifyObservers() {
         notifyObservers(null);

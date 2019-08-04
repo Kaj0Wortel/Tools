@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,93 +14,122 @@
 package tools.concurrent;
 
 
-// Tools imports
-import tools.log.Logger;
-import tools.observer.Observer;
-
-
 // Java imports
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 
 
+// Tools imports
+import tools.observer.Observer;
+
+
 /**
- * TODO: comments
- * 
- * This class provides a fair distribution over multiple schedulers.
+ * This class provides a fair time-wise distribution over multiple schedulers. <br>
  * To do so, it gives tasks to any scheduler which doesn't have a task yet.
  * If none available, then it queue's the task and schedules the task for
  * the first scheduler which comes available.
  * <br>
- * Assumes that the added schedulers implement the observer functions correctly
- * and use the right format, as described in {@link Scheduler.Event}.
- * <br>
- * Has support for easy scheduler creation.
+ * Has support for easy scheduler creation using reflection.
  * 
+ * @todo testing
+ * 
+ * @apiNote
+ * This class assumes that the added schedulers implement the observer functions
+ * correctly and use the right format, as described in {@link SchedulerEvent}.
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class SchedulerSet<S extends Scheduler>
         extends Scheduler {
     
-    final protected Deque<Runnable> requestQueue = new LinkedList<>();
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** Queue containing the requests to be executed. */
+    protected final Deque<Runnable> requestQueue = new LinkedList<>();
+    /** The schedulers to be used for scheduling tasks. */
     private S[] schedulers;
+    
+    /** The condition used to signal that all tasks might be finished. */
     private Condition tasksFinished = lock.newCondition();
+    /** The condition used to signal that all schedulers are terminated. */
+    private Condition allTerminated = lock.newCondition();
+    
+    /** Whether the scheduler set was started. */
     private boolean started = false;
+    /** Whether there are no more tasks available. */
+    private boolean isFinished = false;
+    /** Whether the scheduler set was terminated. */
     private boolean terminated = true;
     
-    
-    final private Observer schedulerObserver = (oi, arg) -> {
-        Event e = getEvent(arg);
+    /**
+     * The Observer used for observing when a scehduler has finished it's tasks.
+     * This Observer should be added to all schedulers which can be used
+     * for scheduling tasks by this class.
+     */
+    private final Observer<Scheduler, SchedulerEventObject> schedulerObserver = (s, e) -> {
+        if (terminated) return;
+        SchedulerEvent event = e.getEvent();
         
-        // Ignore start and terminate events.
-        if (e == Event.STARTED || e == Event.TERMINATED) {
+        // Ignore events.
+        if (event == null || event == SchedulerEvent.STARTED)  {
             return;
         }
         
-        lock.lock();
-        try {
-            boolean tasksAvailable = !requestQueue.isEmpty();
-            boolean isDone = isDone();
+        if (event == SchedulerEvent.OTHER) {
+            forceNotifyObservers(new SchedulerEventObject(this, e));
             
-            // If there are no more tasks running, notify waiting threads.
-            if (isDone) {
-                tasksFinished.signalAll();
-            }
-            
-            // Propagate event if needed.
-            if (e != Event.ALL_TASKS_FINISHED) {
-                forceNotifyObservers(arg);
+        } else if (event == SchedulerEvent.TERMINATED) {
+            lock.lock();
+            try {
+                for (int i = 0; i < schedulers.length; i++) {
+                    if (!schedulers[i].isTerminated()) return;
+                }
                 
-            } else if (isDone && !tasksAvailable) {
-                forceNotifyObservers(arg);
+                terminated = true;
+                allTerminated.signalAll();
+                
+            } finally {
+                lock.unlock();
             }
+            forceNotifyObservers(new SchedulerEventObject(this, SchedulerEvent.TERMINATED));
             
-            // Skip event if it is not of the right format or other event type.
-            if (e == null || e == Event.OTHER) return;
-            
-            // Skip if observable is not of the right class.
-            if (!(oi instanceof Scheduler)) return;
-            Scheduler s = (Scheduler) oi;
-            
-            // If the task was finished, no new task was available, and there
-            // are tasks left, then add a new task to the queue.
-            if (e == Event.ALL_TASKS_FINISHED && tasksAvailable) {
-                s.scheduleTask(requestQueue.pollFirst());
+        } else if (event == SchedulerEvent.TASK_FINISHED || event == SchedulerEvent.ALL_TASKS_FINISHED) {
+            boolean isDone = false;
+            lock.lock();
+            try {
+                isDone = isDone();
+                
+                // If there are no more tasks running, notify waiting threads.
+                if (isDone) {
+                    tasksFinished.signalAll();
+                }
+                
+                if (!requestQueue.isEmpty() && s != null && s.isDone()) {
+                    s.scheduleTask(requestQueue.pollFirst());
+                }
+                
+            } finally {
+                lock.unlock();
             }
+            forceNotifyObservers(new SchedulerEventObject(this, (isDone
+                    ? SchedulerEvent.ALL_TASKS_FINISHED
+                    : SchedulerEvent.TASK_FINISHED), e));
             
-        } finally {
-            lock.unlock();
+        } else {
+            throw new IllegalStateException();
         }
     };
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Constructors.
      * -------------------------------------------------------------------------
      */
@@ -108,10 +137,12 @@ public class SchedulerSet<S extends Scheduler>
      * Creates a scheduler set with {@code amt} schedulers
      * of type {@code clazz}.
      * 
-     * @param clazz the class of the schedulers to create.
-     * @param amt the amount of schedulers to create.
-     * @throws IllegalArgumentException is some exception occured during
-     *     the creation of the schedulers.
+     * @param clazz The class of the schedulers to create.
+     * @param amt The amount of schedulers to create.
+     * 
+     * @throws IllegalArgumentException If some exception occured during
+     *     the creation of the schedulers, or if the amount is less or equal
+     *     to {@code 0}.
      * 
      * @see #SchedulerSet(Class, int, Class[], Object[])
      */
@@ -125,16 +156,21 @@ public class SchedulerSet<S extends Scheduler>
      * of type {@code clazz}. Uses the constructor specified by {@code types}
      * and uses the arguments {@code args} to create the schedulers.
      * 
-     * @param clazz the class of the schedulers to create.
-     * @param amt the amount of schedulers to create.
-     * @param types the type values of the constructor to use.
-     * @param args the arguments to use in the constructor.
-     * @throws IllegalArgumentException is some exception occured during
-     *     the creation of the schedulers.
+     * @param clazz The class of the schedulers to create.
+     * @param amt The amount of schedulers to create. Must be at least {@code 1}.
+     * @param types The type values of the constructor to use.
+     * @param args The arguments to use in the constructor.
+     * 
+     * @throws IllegalArgumentException If some exception occured during
+     *     the creation of the schedulers, or if the amount is less or equal
+     *     to {@code 0}.
      */
-    public SchedulerSet(Class<S> clazz, int amt,
-            Class<?>[] types, Object[] args)
+    public SchedulerSet(Class<S> clazz, int amt, Class<?>[] types, Object[] args)
             throws IllegalArgumentException {
+        if (amt <= 0) {
+            throw new IllegalArgumentException(
+                    "Expected an amount > 1, but found: " + amt);
+        }
         schedulers = (S[]) Array.newInstance(clazz, amt);
         try {
             Constructor<S> c = clazz.getDeclaredConstructor(types);
@@ -152,45 +188,54 @@ public class SchedulerSet<S extends Scheduler>
     /**
      * Creates a scheduler set of the given schedulers.
      * 
-     * @param schedulers the schedulers for this scheduler set.
-     *     All elements must be non-null.
+     * @apiNote
+     * The array is cloned to prevent accidental outside modifications.
+     * 
+     * @param schedulers The schedulers for this scheduler set.
+     *     All elements must be non-null. Must have a length of at least 1.
+     * 
+     * @throws IllegalStateException If the length of the array is {@code 0}.
+     * @throws NullPointerException If the provided array or one of its
+     *     elements is {@code null}.
      */
-    public SchedulerSet(S... schedulers) {
+    public SchedulerSet(S... schedulers)
+            throws IllegalStateException, NullPointerException {
+        // Error checking.
+        if (schedulers == null) {
+            throw new NullPointerException("Schedulers array was null!");
+        }
+        if (schedulers.length == 0) {
+            throw new IllegalArgumentException(
+                    "Expected a length > 0, but found: " + schedulers.length);
+        }
+        
+        // Copy schedulers.
         schedulers = (S[]) new Scheduler[schedulers.length];
         for (int i = 0; i < schedulers.length; i++) {
+            // Error checking.
             if (schedulers[i] == null) {
-                Logger.write("Attempted to add null scheduler to "
-                        + "scheduler set!", Logger.Type.ERROR);
-                throw new NullPointerException();
+                throw new NullPointerException(
+                        "Scheduler " + (i + 0) + " was null!");
             }
+            
+            // Compy scheduler.
             this.schedulers[i] = schedulers[i];
+            // Add observer.
             schedulers[i].addObserver(schedulerObserver);
         }
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
-    /**
-     * @param arg argument to convert to an {@link Event}.
-     * @return the {@link Event} represented by {@code arg}, or {@code null}
-     *     if it cannot be converted.
-     */
-    private static Event getEvent(Object arg) {
-        if (arg instanceof Event) return (Event) arg;
-        
-        if (arg == null || !arg.getClass().isArray()) return null;
-        Object[] arr = (Object[]) arg;
-        if (arr.length < 1 || !(arr[0] instanceof Event)) return null;
-        return (Event) arr[0];
-    }
-    
     @Override
     public void scheduleTask(Runnable task) {
+        if (task == null) throw new NullPointerException();
         lock.lock();
         try {
+            isFinished = false;
             // Check if there is a free scheduler.
             for (int i = 0; i < schedulers.length; i++) {
                 Scheduler s = schedulers[i];
@@ -200,7 +245,7 @@ public class SchedulerSet<S extends Scheduler>
                 }
             }
             
-            // No directly available scheduler, so add to request queue
+            // No available scheduler, so add to request queue
             // and give to first free scheduler.
             requestQueue.addLast(task);
             
@@ -225,7 +270,8 @@ public class SchedulerSet<S extends Scheduler>
     }
     
     @Override
-    public void start() {
+    public void start()
+            throws IllegalStateException {
         lock.lock();
         try {
             int i = 0;
@@ -236,7 +282,7 @@ public class SchedulerSet<S extends Scheduler>
         } finally {
             started = true;
             lock.unlock();
-            forceNotifyObservers(Event.STARTED);
+            forceNotifyObservers(new SchedulerEventObject(this, SchedulerEvent.STARTED));
         }
     }
     
@@ -246,45 +292,33 @@ public class SchedulerSet<S extends Scheduler>
         lock.lock();
         try {
             for (S s : schedulers) {
-                s.terminate();
+                s.tryTerminate();
             }
+            allTerminated.await();
             
         } finally {
             terminated = true;
             lock.unlock();
-            forceNotifyObservers(Event.TERMINATED);
         }
     }
     
     @Override
     public boolean terminate(long timeout, TimeUnit tu)
             throws InterruptedException {
-        long timeStampPre = System.currentTimeMillis();
-        long timeStampPost;
-        long remTimeout = timeout;
         boolean rtn = true;
         
         lock.lock();
         try {
             // Notify all schedulers to terminate.
             for (S s : schedulers) {
-                s.terminate(0L, TimeUnit.MILLISECONDS);
+                s.tryTerminate();
             }
             
-            // Wait for all schedulers to terminate.
-            for (S s : schedulers) {
-                if (!s.terminate(remTimeout, tu)) rtn = false;
-                
-                timeStampPost = System.currentTimeMillis();
-                remTimeout = Math.max(0, remTimeout
-                        - (timeStampPost - timeStampPre));
-                timeStampPre = timeStampPost;
-            }
+            allTerminated.await(timeout, tu);
             
         } finally {
             terminated = true;
             lock.unlock();
-            forceNotifyObservers(Event.TERMINATED);
         }
         
         return rtn;
@@ -297,17 +331,26 @@ public class SchedulerSet<S extends Scheduler>
         try {
             // Notify all schedulers to terminate.
             for (S s : schedulers) {
-                s.terminate(0L, TimeUnit.MILLISECONDS);
-            }
-            
-            for (S s : schedulers) {
                 s.forceTerminate();
             }
             
         } finally {
-            terminated = true;
             lock.unlock();
-            forceNotifyObservers(Event.TERMINATED);
+        }
+    }
+    
+    @Override
+    public boolean tryTerminate() {
+        lock.lock();
+        try {
+            boolean directTerm = false;
+            for (Scheduler s : schedulers) {
+                if (!s.tryTerminate()) directTerm = false;
+            }
+            return directTerm;
+            
+        } finally {
+            lock.unlock();
         }
     }
     
@@ -335,11 +378,18 @@ public class SchedulerSet<S extends Scheduler>
     
     @Override
     public boolean isDone() {
-        int i = 0;
-        for (S s : schedulers) {
-            if (!s.isDone()) return false;
+        lock.lock();
+        try {
+            if (isFinished) return true;
+            if (!requestQueue.isEmpty()) return false;
+            for (int i = 0; i < schedulers.length; i++) {
+                if (!schedulers[i].isDone()) return false;
+            }
+            return true;
+            
+        } finally {
+            lock.unlock();
         }
-        return requestQueue.isEmpty();
     }
     
     @Override

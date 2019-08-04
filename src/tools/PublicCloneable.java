@@ -18,17 +18,18 @@ package tools;
  * A usefull interface that forces the implementer to have a public
  * clone method instead of the private clone method from {@link Object}.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public interface Cloneable
-        extends java.lang.Cloneable {
+public interface PublicCloneable
+        extends Cloneable {
     
     /**
      * @return A clone of {@code this}.
      * 
      * @see Object#clone()
      */
-    public Cloneable clone();
+    public PublicCloneable clone();
     
     
 }

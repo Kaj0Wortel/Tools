@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,32 +11,25 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.concurrent;
-
+package tools.data.array;
 
 /**
- * Enum for how to handle the frame rate for timers.
+ * Interface for classes which support the write function of the
+ * {@link AttributedArray} class.
  * 
- * @version 1.0
  * @author Kaj Wortel
  */
-public enum FPSState {
+public interface WriteArray<V> {
     
     /**
-     * The timer will attempt to execute the function once every interval.
-     * If the previous function was still running, then the current one
-     * will be placed in the queue. If there is already a function in
-     * the queue, then the current function will be discarded.
+     * Sets the given value at the given index.
+     * 
+     * @param value The new value of array.
+     * @param index The index of the value to set.
+     * 
+     * @return The previous value at the given location.
      */
-    MANUAL,
-    
-    /**
-     * The same as {@link #MANUAL}, but if the function was added to the
-     * queue or discarded, then the interval will be increased.
-     * If, after a while, no collisions occured, then the interval will be
-     * slowly reduced towards the original value.
-     */
-    AUTO;
+    public V set(final V value, final int index);
     
     
 }

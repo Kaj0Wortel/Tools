@@ -31,13 +31,12 @@ import tools.io.PartFile;
  * Contains a method to clean and compile an entire folder or file.
  * 
  * @todo
- * <ul>
- *   <li> Add functionality for commandline arguments in {@link #main(String[] args)}. </li>
- * </ul>
+ * - add functionality for commandline arguments in {@link #main(String[] args)}.
  * 
  * @apiNote
  * Only works when the application uses JDK, and <b>NOT</b> JRE!
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class CleanCompile {

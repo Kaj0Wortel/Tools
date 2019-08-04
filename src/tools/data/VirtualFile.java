@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -25,8 +25,15 @@ import java.nio.file.attribute.FileTime;
 
 /**
  * Class for representing a virtual file.
- * TODO: add "extends File"?
+ * This class should be used to temporarily store (meta) data about a file. <br>
+ * Emulates the data of the with the {@link InputStream} provided on creation.
+ * The input stream in this class can be used only once, and is therefore
+ * a one-use-cast-away-shell.
  * 
+ * @todo
+ * - Improve the single-use input stream to a mutli-use input stream.
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class VirtualFile {

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,12 +11,7 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.data;
-
-
-// Tools imports
-import tools.MultiTool;
-import tools.iterators.ArrayIterator;
+package tools.data.array;
 
 
 // Java imports
@@ -25,15 +20,25 @@ import java.util.List;
 import java.util.Objects;
 
 
+// Tools imports
+import tools.MultiTool;
+import tools.PublicCloneable;
+import tools.data.Wrapper;
+import tools.iterators.ArrayIterator;
+
 
 /**
- * Data class for making any array read-only.
+ * Base class for array extension classes. <br>
+ * The aim of this class is to simplify creating array-like data classes which
+ * allow certain read and/or write permission and differend kind of
+ * read and/or write operations.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class ReadOnlyArray<V>
-        implements Iterable<V>, tools.Cloneable {
-    
+public abstract class AttributedArray<V>
+        implements Iterable<V>, PublicCloneable {
+     
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
@@ -47,29 +52,37 @@ public class ReadOnlyArray<V>
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a read-only array from the given array.
+     * Creates an attributed array from the given array.
      * 
      * @param arr The backening array of any type.
      */
-    public ReadOnlyArray(final Object arr) {
+    public AttributedArray(final Object arr) {
         this(new Wrapper(arr));
     }
     
     /**
-     * Creates a read-only array from the given array.
+     * Creates a attributed array from the given array.
      * 
      * @param arr The backening array.
      */
-    public ReadOnlyArray(final V... arr) {
+    public AttributedArray(final V... arr) {
         this(new Wrapper<V[]>(arr));
     }
     
     /**
-     * Creates a read-only array from the given array.
+     * Creates a attributed array from the given array.
      * 
      * @param arr The backening array in a wrapper.
+     * 
+     * @throws NullPointerException If {@code arr == null}.
+     * @throws IllegalArgumentException If {@code arr} is not an array.
      */
-    public ReadOnlyArray(final Wrapper<V[]> arr) {
+    public AttributedArray(final Wrapper<V[]> arr) {
+        if (arr == null) throw new NullPointerException();
+        if (!arr.isArray()) {
+            throw new IllegalArgumentException("Expected an array, but found: "
+                    + arr.get().getClass().getName());
+        }
         this.arr = arr;
     }
     
@@ -79,17 +92,28 @@ public class ReadOnlyArray<V>
      * -------------------------------------------------------------------------
      */
     /**
+     * Gets the value at the given index.
+     * 
      * @param index The index of the element to return.
      * 
      * @return The element at the given index.
      */
-    public V get(final int index) {
+    protected V get(final int index) {
         return (V) arr.get(index);
     }
-
-    @Override
-    public Iterator<V> iterator() {
-        return new ArrayIterator<V>(arr);
+    
+    /**
+     * Sets the given value at the given index.
+     * 
+     * @param value The new value of array.
+     * @param index The index of the value to set.
+     * 
+     * @return The previous value at the given location.
+     */
+    protected V set(final V value, final int index) {
+        V old = (V) arr.get(index);
+        arr.set(value, index);
+        return old;
     }
     
     /**
@@ -100,9 +124,15 @@ public class ReadOnlyArray<V>
     }
     
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ReadOnlyArray) {
-            return Objects.deepEquals(arr, ((ReadOnlyArray) obj).arr);
+    public Iterator<V> iterator() {
+        return new ArrayIterator<V>(arr);
+    }
+    
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof AttributedArray) {
+            return Objects.deepEquals(arr, ((AttributedArray) obj).arr);
+            
         } else {
             return Objects.deepEquals(arr, obj);
         }
@@ -114,34 +144,43 @@ public class ReadOnlyArray<V>
     }
     
     @Override
-    public ReadOnlyArray<V> clone() {
-        return new ReadOnlyArray<V>(arr);
-    }
-    
-    @Override
     public String toString() {
         return arr.toString();
     }
     
+    @Override
+    public abstract AttributedArray clone();
+    
     
     /* -------------------------------------------------------------------------
-     * ArrayTools copy functions.
+     * Array copy functions.
      * -------------------------------------------------------------------------
      */
     /**
-     * Copies the read-only array to the given array of the same type. <br>
+     * Copies the array to the given array of the same type. <br>
      * If not enough space is available in the copy, then the last elements
      * are not copied. If too much space is available in the copy, then the
      * last elements in the copy remain unchanged.
      * 
      * @param copy The array to store the copy in.
+     * 
+     * @throws IllegalArgumentException If:
+     *     <ul>
+     *         <li> {@code offOrig < 0} </li>
+     *         <li> {@code offCopy < 0} </li>
+     *         <li> {@code offOrig + len >= length()} </li>
+     *         <li> {@code offCopy + len >= copy.length} </li>
+     *     </ul>
+     * 
+     * @see #copyOf(Object[], int, int, int)
      */
-    public V[] copyOf(final V[] copy) {
+    public V[] copyOf(final V[] copy)
+            throws IllegalArgumentException {
         return copyOf(copy, 0, 0, Math.min(arr.length(), copy.length));
     }
     
     /**
-     * Copies the read-only array to the given array of the same type. <br>
+     * Copies the array to the given array of the same type. <br>
      * If not enough space is available in the copy, then the last elements
      * are not copied. If too much space is available in the copy, then the
      * last elements in the copy remain unchanged.
@@ -159,15 +198,20 @@ public class ReadOnlyArray<V>
      *         <li> {@code offCopy + len >= copy.length} </li>
      *     </ul>
      */
-    public V[] copyOf(final V[] copy, final int offOrig, final int offCopy, final int len) {
+    public V[] copyOf(final V[] copy, final int offOrig, final int offCopy, final int len)
+            throws IllegalArgumentException {
         if (offOrig < 0)
-            throw new IllegalArgumentException("offOrig < 0: " + offOrig);
+            throw new IllegalArgumentException("offOrig(" + offOrig + ") < 0");
         if (offCopy < 0)
-            throw new IllegalArgumentException("offCopy < 0: " + offCopy);
-        if (offOrig + len > arr.length())
-            throw new IllegalArgumentException("offOrig + len > length()");
-        if (offOrig + len > copy.length)
-            throw new IllegalArgumentException("offCopy + len > copy.length");
+            throw new IllegalArgumentException("offCopy(" + offCopy + ") < 0");
+        if (offOrig + len > arr.length()) {
+            throw new IllegalArgumentException("offOrig(" + offOrig+ ") + len(" + len
+                    + ") > thislength(" + arr.length() + ")");
+        }
+        if (offOrig + len > copy.length) {
+            throw new IllegalArgumentException("offCopy(" + offCopy + ") + len(" + len
+                    + ") > copy.length(" + copy.length + ")");
+        }
         
         for (int i = 0; i < len; i++) {
             copy[i + offCopy] = (V) arr.get(i + offOrig);
@@ -177,19 +221,30 @@ public class ReadOnlyArray<V>
     }
     
     /**
-     * Copies the read-only array to the given Object array. <br>
+     * Copies the array to the given Object array. <br>
      * If not enough space is available in the copy, then the last elements
      * are not copied. If too much space is available in the copy, then the
      * last elements in the copy remain unchanged.
      * 
      * @param copy The array to store the copy in.
+     * 
+     * @throws IllegalArgumentException If:
+     *     <ul>
+     *         <li> {@code offOrig < 0} </li>
+     *         <li> {@code offCopy < 0} </li>
+     *         <li> {@code offOrig + len >= length()} </li>
+     *         <li> {@code offCopy + len >= copy.length} </li>
+     *     </ul>
+     * 
+     * @see #copyOf(Object, int, int, int)
      */
-    public <A> A copyOf(final A copy) {
-        return copyOf(copy, 0, 0, Math.min(arr.length(), ArrayTools.getLength(copy)));
+    public <A> A copyOf(final A copy)
+            throws IllegalArgumentException {
+        return copyOf(copy, 0, 0, Math.min(arr.length(), ArrayTools.length(copy)));
     }
     
     /**
-     * Copies the read-only array to the given Object array. <br>
+     * Copies the array to the given Object array. <br>
      * If not enough space is available in the copy, then the last elements
      * are not copied. If too much space is available in the copy, then the
      * last elements in the copy remain unchanged.
@@ -207,14 +262,15 @@ public class ReadOnlyArray<V>
      *         <li> {@code offCopy + len >= copy.length} </li>
      *     </ul>
      */
-    public <A> A copyOf(final A copy, final int offOrig, final int offCopy, final int len) {
+    public <A> A copyOf(final A copy, final int offOrig, final int offCopy, final int len)
+            throws IllegalArgumentException {
         if (offOrig < 0)
             throw new IllegalArgumentException("offOrig < 0: " + offOrig);
         if (offCopy < 0)
             throw new IllegalArgumentException("offCopy < 0: " + offCopy);
         if (offOrig + len >= arr.length())
             throw new IllegalArgumentException("offOrig + len >= length()");
-        if (offOrig + len >= ArrayTools.getLength(copy))
+        if (offOrig + len >= ArrayTools.length(copy))
             throw new IllegalArgumentException("offCopy + len >= copy.length");
         
         for (int i = 0; i < len; i++) {
@@ -236,11 +292,9 @@ public class ReadOnlyArray<V>
      * 
      * @return The given list.
      */
-    public List<V> asList(List<V> list) {
+    public List<V> asList(final List<V> list) {
         if (list == null) throw new NullPointerException();
-        for (V val : this) {
-            list.add(val);
-        }
+        list.addAll(asList());
         return list;
     }
     
@@ -248,7 +302,7 @@ public class ReadOnlyArray<V>
      * @return A list from the given array.
      */
     public List<V> asList() {
-        return ArrayTools.asList(arr.get().clone());
+        return ArrayTools.asList(arr.get());
     }
     
     
