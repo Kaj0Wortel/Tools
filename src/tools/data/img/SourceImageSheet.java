@@ -21,8 +21,7 @@ import java.awt.Image;
 /**
  * Image sheet class for using a raw image sheet as source.
  * 
- * @todo TESTING!
- * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class SourceImageSheet

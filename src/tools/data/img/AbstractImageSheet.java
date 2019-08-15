@@ -21,6 +21,7 @@ import java.awt.Image;
 /**
  * Abstract implementation of the {@link ImageSheet} interface.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public abstract class AbstractImageSheet
@@ -63,7 +64,7 @@ public abstract class AbstractImageSheet
      * 
      * @return An image with the given width and height, and scaled using the scaling hints.
      */
-    protected static Image scale(Image img, int width, int height, int scaleHints) {
+    protected final static Image scale(Image img, int width, int height, int scaleHints) {
         if (img == null || (width < 0 && height < 0)) return img;
         int imgWidth = img.getWidth(null);
         int imgHeight = img.getHeight(null);

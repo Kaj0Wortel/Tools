@@ -1,0 +1,2 @@
+Future stuff to add:
+- read-only collections.

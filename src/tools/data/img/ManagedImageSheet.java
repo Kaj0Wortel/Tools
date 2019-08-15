@@ -27,8 +27,7 @@ import tools.img.ImageManager;
 /**
  * Image sheet implementation which uses image sheet arrays from the {@link ImageManager} class.
  * 
- * @todo TESTING!
- * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ManagedImageSheet

@@ -17,6 +17,7 @@ package tools.data.img;
 /**
  * The default image sheet collection for GUI applications.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class DefaultGUIImageSheet

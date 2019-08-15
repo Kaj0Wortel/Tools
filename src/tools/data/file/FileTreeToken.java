@@ -25,6 +25,7 @@ import tools.MultiTool;
 /**
  * Class used to uniquely identify a file tree.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class FileTreeToken<C extends FileTree, T> {

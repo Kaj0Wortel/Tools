@@ -37,6 +37,7 @@ import tools.iterators.GeneratorIterator;
 /**
  * File tree implementation for a file tree starting at a root directory.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class DirFileTree

@@ -18,7 +18,6 @@ package tools.data.array;
 import tools.data.Wrapper;
 
 
-
 /**
  * Data class for making any array read-only.
  * 

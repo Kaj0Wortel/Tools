@@ -36,7 +36,9 @@ import tools.Var;
  * 
  * @todo
  * - Add implementation for zip files. (hint: copy-past parts of the jar-reader).
+ * - Add implementation for virtual files.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public abstract class FileTree {

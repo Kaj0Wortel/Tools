@@ -16,15 +16,14 @@ package tools.event;
 
 // Java imports
 import java.awt.event.InputEvent;
-
 import java.awt.event.KeyEvent;
 import java.text.ParseException;
 import javax.swing.KeyStroke;
-import tools.PublicCloneable;
 
 
 // Tools imports
 import tools.MultiTool;
+import tools.PublicCloneable;
 
 
 /**

@@ -36,6 +36,7 @@ import tools.iterators.GeneratorIterator;
 /**
  * File tree implementation for a file tree from a jar file.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class JarFileTree

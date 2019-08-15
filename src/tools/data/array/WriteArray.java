@@ -13,6 +13,7 @@
 
 package tools.data.array;
 
+
 /**
  * Interface for classes which support the write function of the
  * {@link AttributedArray} class.

@@ -22,6 +22,7 @@ import java.awt.Image;
  * Interface for image sheets. <br>
  * An image sheet consists of a 2D sheet of images, which can be addessed via coordinates.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public interface ImageSheet {

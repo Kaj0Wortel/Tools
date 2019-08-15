@@ -21,6 +21,7 @@ import tools.gui.GUIState;
 /**
  * Interface for an image sheet getter for the {@link tools.gui} package.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public interface GUIImageSheet {

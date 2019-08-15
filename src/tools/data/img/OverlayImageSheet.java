@@ -18,6 +18,8 @@ package tools.data.img;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -25,6 +27,10 @@ import java.awt.image.BufferedImage;
  * The first image in the array is drawn first, hence it will appear
  * on the bottom layer of the image.
  * 
+ * @todo
+ * In {@link #PROCESSOR}, figure out a way to add rendering hints.
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class OverlayImageSheet
@@ -46,6 +52,9 @@ public class OverlayImageSheet
             if (width == img.getWidth(null) && height == img.getHeight(null)) {
                 g2d.drawImage(img, 0, 0, null);
             } else {
+                // TODO: add rendering hints.
+                //Map<?, ?> hints = new HashMap<>();
+                //g2d.addRenderingHints(hints);
                 g2d.drawImage(img, 0, 0, width, height, null);
             }
         }

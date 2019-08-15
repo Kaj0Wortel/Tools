@@ -28,6 +28,7 @@ import java.util.Iterator;
  * for converting the {@link File} and {@link Path} arguments to {@link String}
  * arguments.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public abstract class AbstractFileTreeStringImpl

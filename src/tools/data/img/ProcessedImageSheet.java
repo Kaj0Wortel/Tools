@@ -21,8 +21,7 @@ import java.awt.Image;
 /**
  * Image sheets class which allows processing of multiple images.
  * 
- * @todo TESTING!
- * 
+ * @version 1.0
  * @version 0.0
  * @author Kaj Wortel
  */

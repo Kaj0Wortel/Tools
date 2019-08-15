@@ -21,6 +21,7 @@ import java.awt.Image;
 /**
  * Functional interface for processing an image in the {@link ProcessedImageSheet} class.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 @FunctionalInterface
@@ -42,8 +43,7 @@ public interface ImageProcessor {
      * 
      * @return The processed image.
      */
-    public Image process(int x, int y, int width, int height,
-            int scaleHints, Image[] imgs);
+    public Image process(int x, int y, int width, int height, int scaleHints, Image[] imgs);
     
     
 }
