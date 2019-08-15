@@ -22,8 +22,9 @@ import java.util.NoSuchElementException;
 /**
  * Class that iterates over multiple iterators consecutively.
  * 
- * @author Kaj Wortel (0991586)
- * @param <V> class value of the iterators.
+ * @author Kaj Wortel
+ * 
+ * @param <V> The type of the iterators.
  */
 public class MultiIterator<V>
         implements Iterator<V> {

@@ -150,10 +150,18 @@ public class ThreadTimer {
      * -------------------------------------------------------------------------
      */
     /** 
-     * Enum for denoting the current time state.
+     * Enum for denoting the state of the timer.
      */
     public enum TimerState {
-        RUNNING, PAUSED, CANCELED
+        /** Denotes that the timer is currently executing the run-wait cycle. */
+        RUNNING,
+        /** Denotes that the time is not executing the run-wait cycle, but
+         *  remembers how much time is remaining from the previous cycle and
+         *  the interval settings. */
+        PAUSED,
+        /** Denotes that the timer is not running, and can only be started
+         *  in this state. */
+        CANCELED
     }
     
     

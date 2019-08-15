@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,31 +11,29 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.gui.border;
+package tools.gui;
 
 
-// Tools imports
-
-
-// Java imports
-import java.awt.Insets;
-
-
-/**
- * Default border for the {@link tools.swing.EditField}.
- *
- * @author Kaj Wortel
- */
-public class EditFieldDefaultBorder
-        extends IOBorder {
-
-    public EditFieldDefaultBorder() {
-        this(new Insets(3, 3, 3, 3));
-    }
-
-    public EditFieldDefaultBorder(Insets in) {
-        super("DEFAULT_CORNERS", "DEFAULT_BARS", in);
-    }
-
-
+public enum GUIState {
+    
+    /**
+     * The default behaviour of the component.
+     */
+    DEFAULT,
+    
+    /**
+     * The mouse is over the component and the component is not being pressed.
+     */
+    ROLL_OVER,
+    
+    /**
+     * The component is pressed.
+     */
+    PRESSED,
+    /**
+     * The component is disabled.
+     */
+    DISABLED
+    
 }
+

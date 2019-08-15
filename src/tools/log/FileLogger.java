@@ -25,13 +25,12 @@ import java.io.PrintWriter;
 /**
  * Class for logging data to a file.
  * All functions are thread safe.
+ * 
+ * @todo
+ * ALL
  */
 public class FileLogger
         extends DefaultLogger {
-    // The default log file.
-    final protected static File DEFAULT_LOG_FILE
-        = new File(System.getProperty("user.dir") + "\\toolsX\\log\\log.log");
-    
     // The default log file to write to.
     protected File logFile;
     
@@ -55,11 +54,6 @@ public class FileLogger
      *     at initialization.
      * @throws IOException if the file could not be initialized.
      */
-    public FileLogger()
-            throws IOException {
-        this(DEFAULT_LOG_FILE);
-    }
-    
     public FileLogger(String fileName)
             throws IOException {
         this(new File(fileName));
@@ -78,6 +72,7 @@ public class FileLogger
     public FileLogger(File file, boolean append, boolean appendBeginOnly)
             throws IOException {
         this.logFile = file;
+        file.getParentFile().mkdirs();
         this.append = append;
         createWriter(appendBeginOnly);
         if (appendBeginOnly) writeHeader();

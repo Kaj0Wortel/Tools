@@ -11,12 +11,12 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.swing;
+package tools.gui;
 
 
 // Tools imports
-import tools.border.EditFieldErrorBorder;
-import tools.border.EditFieldDefaultBorder;
+import tools.gui.border.EditFieldErrorBorder;
+import tools.gui.border.EditFieldDefaultBorder;
 
 
 // Java imports

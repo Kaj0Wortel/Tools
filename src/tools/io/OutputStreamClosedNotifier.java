@@ -15,7 +15,6 @@ package tools.io;
 
 
 // Tools imports
-import tools.event.StreamClosedListener;
 
 
 // Java imports
@@ -32,12 +31,16 @@ import java.io.OutputStream;
 public class OutputStreamClosedNotifier
         extends OutputStream {
     
-    final private OutputStream os;
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    private final OutputStream os;
     private StreamClosedListener listener = null;
     private volatile boolean closed = false;
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Constructor.
      * -------------------------------------------------------------------------
      */
@@ -53,7 +56,7 @@ public class OutputStreamClosedNotifier
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
@@ -142,7 +145,7 @@ public class OutputStreamClosedNotifier
     /**
      * Notifies the listener about the closed stream.
      */
-    private void notifyListener(boolean gracefull) {
+    protected void notifyListener(boolean gracefull) {
         if (listener != null) listener.streamClosed(gracefull);
     }
     

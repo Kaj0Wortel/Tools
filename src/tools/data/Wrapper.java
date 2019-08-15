@@ -104,8 +104,8 @@ public class Wrapper<V>
     * 
     * @see ArrayTools#get(Object, int)
     */
-    public <T> T get(int index) {
-        return(T) ArrayTools.get(data, index);
+    public Object get(int index) {
+        return ArrayTools.get(data, index);
     }
     
     /**

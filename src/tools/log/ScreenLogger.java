@@ -14,13 +14,6 @@
 package tools.log;
 
 
-// Own imports
-import tools.MultiTool;
-import tools.Var;
-import tools.event.Key;
-import tools.font.FontLoader;
-
-
 // Java imports
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
@@ -43,7 +36,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
+
+
+// Tools imports
+import tools.MultiTool;
 import tools.Pair;
+import tools.Var;
+import tools.event.Key;
+import tools.font.FontLoader;
 
 
 /**
@@ -53,10 +53,10 @@ import tools.Pair;
  */
 public class ScreenLogger
         extends DefaultLogger {
-    // The spacing on the left side.
+    /** The spacing on the left side. */
     protected final static int SPACING = 5;
     
-    // Default title.
+    /** Default title. */
     protected final static String DEFAULT_TITLE = "Logger";
     
     // GUI needed for the logger.
@@ -129,8 +129,9 @@ public class ScreenLogger
         text.setForeground(Color.GREEN);
         
         SwingUtilities.invokeLater(() -> {
-            text.setFont(FontLoader.getLocalFont("cousine" + Var.FS
-                    + "Cousine-Regular.ttf").deriveFont(13F));
+            FontLoader.syncLoad();
+            //text.setFont(FontLoader.getLocalFont("cousine" + Var.FS
+            //        + "Cousine-Regular.ttf").deriveFont(13F));
         });
         
         scroll = new JScrollPane(text);

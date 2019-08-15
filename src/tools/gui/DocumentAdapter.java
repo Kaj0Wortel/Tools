@@ -11,7 +11,7 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.swing;
+package tools.gui;
 
 
 // Java imports

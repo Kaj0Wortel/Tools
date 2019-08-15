@@ -28,7 +28,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 
  * 
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  * @deprecated This implementation can be used for quick building up a model,
  * but will become slow when overused in too many classes. It also hasn't a
  * destruction handler, so this interface <b>cannot</b> be used for classes

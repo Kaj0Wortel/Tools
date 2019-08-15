@@ -36,7 +36,7 @@ public class PartFile
      */
     /**
      * Creates a new {@code PartFile} with the given starting directory
-     * and relative part file.
+     * and the file relative to this directory.
      * 
      * @param dir The name of the starting directory.
      * @param filePath The file path relative to the directory.
@@ -49,15 +49,28 @@ public class PartFile
     
     /**
      * Creates a new {@code PartFile} with the given starting directory
-     * file and relative part file.
+     * file relative to this directory.
      * 
      * @param dir The starting directory.
      * @param filePath The file path relative to the directory.
      */
     public PartFile(File dir, String filePath) {
-        super((dir == null ? "" : dir.getPath() + Var.FS) + filePath);
+        super((dir == null ? "" : dir.toString() + Var.FS) + filePath);
         this.dir = dir;
         this.filePath = filePath;
+    }
+    
+    /**
+     * Creates a new {@code PartFile} with the given starting directory
+     * file relative to this directory.
+     * 
+     * @param dir The starting directory.
+     * @param filePath The file path relative to the directory.
+     */
+    public PartFile(File dir, File file) {
+        super((dir == null ? "" : dir.toString() + Var.FS) + file.toString());
+        this.dir = dir;
+        this.filePath = file.toString();
     }
     
     
@@ -89,7 +102,7 @@ public class PartFile
     /**
      * @return The string representation of the relative file path of the file part.
      */
-    public String getRelativeFilePath() {
+    public String getRelativeFileName() {
         return filePath;
     }
     

@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -184,10 +185,10 @@ public class FileTools {
                 if (listDirs) output.add(pf);
                 for (File f : pf.listFiles()) {
                     if (f.isFile()) {
-                        output.add(new PartFile(root, pf.getRelativeFilePath() + f.getName()));
+                        output.add(new PartFile(root, pf.getRelativeFileName() + f.getName()));
                         
                     } else {
-                        dirStack.push(new PartFile(root, pf.getRelativeFilePath() + f.getName() + Var.FS));
+                        dirStack.push(new PartFile(root, pf.getRelativeFileName() + f.getName() + Var.FS));
                     }
                 }
             }
@@ -203,7 +204,7 @@ public class FileTools {
      * 
      * @return An {@link InputStream} which generates a tree structure from the given root directory.
      */
-    public static InputStream listFiles(File root) {
+    public static InputStream listFileTree(File root) {
         return new FileLister(root);
     }
     
@@ -311,11 +312,11 @@ public class FileTools {
                     for (File f : dir.listFiles()) {
                         if (f.isFile()) {
                             files.addLast(new PartFile(
-                                    root, dir.getRelativeFilePath() + f.getName()));
+                                    root, dir.getRelativeFileName() + f.getName()));
                             
                         } else {
                             newDirs.addLast(new PartFile(
-                                    root, dir.getRelativeFilePath() + f.getName() + Var.FS));
+                                    root, dir.getRelativeFileName() + f.getName() + Var.FS));
                         }
                     }
                     

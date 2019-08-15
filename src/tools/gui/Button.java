@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) May 2019 by Kaj Wortel - all rights reserved                *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,12 +11,7 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.swing;
-
-
-// Tools imports
-import tools.img.ImageManager;
-import tools.observer.HashObservableInterface;
+package tools.gui;
 
 
 // Java imports
@@ -38,10 +33,16 @@ import javax.swing.JFrame;
 import javax.swing.border.Border;
 
 
+// Tools imports
+import tools.gui.border.IOBorder;
+import tools.img.ImageManager;
+import tools.observer.HashObservableInterface;
+
+
 /**
  * 
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  */
 public class Button
         extends AbstractButton

@@ -30,7 +30,7 @@ import tools.data.array.ArrayTools;
  * Iterator class for returning all elements in a collection or an
  * iterable at random.
  * 
- * @author Kaj Wortel (0991586)
+ * @author Kaj Wortel
  * @param <V> the type of the returned classes.
  */
 public  class RandomIterator<V>

@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,14 +11,14 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.event;
+package tools.io;
 
 
 // Java imports
 import java.util.EventListener;
 
 
-/**DONE
+/**
  * Listener class for capturing stream closures.
  * 
  * @author Kaj Wortel

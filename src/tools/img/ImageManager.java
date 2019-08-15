@@ -91,13 +91,13 @@ public class ImageManager {
     /**
      * Registers a image sheet for later use.
      * 
-     * Note: when there already exists an id with the same name,
-     * but a different token, the previous token <b>WILL BE OVERWRITTEN</b>!
-     * Choose your ID's with caution!
+     * @implNote
+     * When there already exists an ID with the same name, but a different token,
+     * the previous token <b>WILL BE OVERWRITTEN</b>! Choose your ID's with caution!
      * 
      * @param shortFileName The short file name of the image sheet
      *     (e.g. starting at the {@code img} directory).
-     * @param idName The name that can be used for later refference.
+     * @param idName The name that can be used for later reference.
      * @param width  The width of each subimage.
      * @param height The height of each subimage.
      * 
@@ -111,12 +111,12 @@ public class ImageManager {
     /**
      * Registers a image sheet for later use.
      * 
-     * Note: when there already exists an id with the same name,
-     * but a different token, the previous token <b>WILL BE OVERWRITTEN</b>!
-     * Choose your ID's with caution!
+     * @implNote
+     * When there already exists an ID with the same name, but a different token,
+     * the previous token <b>WILL BE OVERWRITTEN</b>! Choose your ID's with caution!
      * 
      * @param shortFileName The local image file name.
-     * @param idName The name that can be used for later refference.
+     * @param idName The name that can be used for later reference.
      * @param startX The pixel x-coordinate of the start location in the image. (incl.)
      * @param startY The pixel y-coordinate of the start location in the image. (incl.)
      * @param endX The pixel x-coordinate of the end location of the image. (excl.)
@@ -143,7 +143,7 @@ public class ImageManager {
      * Choose your ID's with caution!
      * 
      * @param shortFileName The local image file name.
-     * @param idName The name that can be used for later refference.
+     * @param idName The name that can be used for later reference.
      * @param recs The locations and sizes of the images to load.
      * 
      * @see Var#IMG_DIR
@@ -299,12 +299,12 @@ public class ImageManager {
                             + ". idName=" + idName);
         }
         
-        if (x > width) {
+        if (x >= width) {
             throw new IllegalArgumentException(
                     "Expected an x-coord less or equal to the width(" + width
                             + "), but found x-coord " + x + ". idName=" + idName);
         }
-        if (y > height) {
+        if (y >= height) {
             throw new IllegalArgumentException(
                     "Expected an y-coord less or equal to the height(" + height
                             + "), but found y-coord " + y + ". idName=" + idName);
@@ -322,19 +322,14 @@ public class ImageManager {
     
     /**
      * @param idName The id name of the sheet.
-     * @return The width of the sheet, counted as the number of images.
      * 
-     * @throws UnsupportedOperationException Iff corresponding image is unequal.
+     * @return The width of the sheet, counted as the number of images,
+     *     or {@code -1} if this function is not supported.
      */
     public static int getNumImgWidth(String idName) {
         Token token = tokenMap.get(idName);
-        if (token instanceof EqualToken) {
-            return ((EqualToken) token).getNumImgWidth();
-            
-        } else {
-            throw new UnsupportedOperationException(
-                    "Operation is not supported for unequal distributed images.");
-        }
+        if (token instanceof EqualToken) return ((EqualToken) token).getNumImgWidth();
+        return -1;
     }
     
     /**
@@ -355,6 +350,7 @@ public class ImageManager {
     
     /**
      * @param idName The id name of the sheet.
+     * 
      * @return The total number of images in the sheet.
      */
     public static int getNumImg(String idName) {

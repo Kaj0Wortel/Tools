@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -34,20 +34,30 @@ import tools.Var;
 import tools.io.PartFile;
 
 
-/**DONE (line 125?)
+/**
  * Auto-loads all the nessecary FONTS for the application at start-up.
  * 
+ * @todo
+ * - decide on which types of files to load (jar vs dev vs class).
+ * - Implement tje tool.data.file classes and use them here.
+ * 
+ * @version 0.0
  * @author Kaj Wortel
  */
 public class FontLoader {
     
     /* -------------------------------------------------------------------------
-     * Variables.
+     * Constants.
      * -------------------------------------------------------------------------
      */
     /** Map for storing the fonts. */
     public static final Map<String, Font> FONTS = new HashMap<>();
     
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
     /** The default font. */
     private static Font defaultFont = (Font) UIManager.get("Label.font");
     

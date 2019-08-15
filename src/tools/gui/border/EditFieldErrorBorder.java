@@ -11,11 +11,10 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.border;
+package tools.gui.border;
 
 
 // Tools imports
-import tools.swing.IOBorder;
 
 
 // Java imports

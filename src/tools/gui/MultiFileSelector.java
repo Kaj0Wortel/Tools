@@ -11,7 +11,7 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 //todo
-package tools.swing;
+package tools.gui;
 
 
 // Tools imports
@@ -697,7 +697,7 @@ class FileEntryHeader {
 
 
 
-
+// TODO
 enum FieldData {
     FILE_PATH, FILE_PATH_AND_NAME, FILE_NAME, FILE_SIZE, IS_FILE, IS_DIRECTORY, IS_OTHER,
         IS_REGULAR_FILE, IS_SYMBOLIC_LINK, IS_HIDDEN, CREATION_TIME, LAST_MODIFIED_TIME,
