@@ -36,7 +36,7 @@ import tools.iterators.GeneratorIterator;
 /**
  * File tree implementation for a file tree from a jar file.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public class JarFileTree
@@ -164,12 +164,7 @@ public class JarFileTree
      */
     public static JarFileTree getTree(Class<?> c)
             throws IllegalStateException, IOException {
-        try {
-            return getTree(getProjectSourceFile(c));
-            
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
+        return getTree(getProjectSourceFile(c));
     }
     
     
@@ -256,6 +251,12 @@ public class JarFileTree
     public byte[] readAllBytes(String path)
             throws IOException, OutOfMemoryError, SecurityException {
         return getStream(path).readAllBytes();
+    }
+    
+    @Override
+    public boolean isDirectory(String path)
+            throws IOException {
+        return getEntry(path).isDirectory();
     }
     
     

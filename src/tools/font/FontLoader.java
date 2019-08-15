@@ -21,17 +21,20 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.UIManager;
-import tools.io.FileTools;
 
 
 // Tools packages
+import tools.MultiTool;
 import tools.log.Logger;
 import tools.Var;
-import tools.io.PartFile;
+import tools.data.file.FileTree;
 
 
 /**
@@ -41,17 +44,17 @@ import tools.io.PartFile;
  * - decide on which types of files to load (jar vs dev vs class).
  * - Implement tje tool.data.file classes and use them here.
  * 
- * @version 0.0
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class FontLoader {
+public final class FontLoader {
     
     /* -------------------------------------------------------------------------
      * Constants.
      * -------------------------------------------------------------------------
      */
     /** Map for storing the fonts. */
-    public static final Map<String, Font> FONTS = new HashMap<>();
+    public static final Map<Object, Font> FONTS = new HashMap<>();
     
     
     /* -------------------------------------------------------------------------
@@ -69,6 +72,10 @@ public class FontLoader {
     /**
      * This is a singleton class. No instances should be made.
      * 
+     * @implNote
+     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
+     * used in swing environments.
+     * 
      * @deprecated No instances should be made.
      */
     @Deprecated
@@ -80,10 +87,94 @@ public class FontLoader {
      * -------------------------------------------------------------------------
      */
     /**
+     * Use this function to invoke and wait until all default additional fonts have been loaded.
+     */
+    public static void syncLoad() { }
+    public static int X = 1;
+    
+    /**
+     * Loads the font with the given key from the file in the given file tree
+     * with the given path. If the key already exists in the font mapping, then
+     * the old font will be replaced by the new font if it is loaded successfully.
+     * 
+     * @param fileTree 
+     * @param path 
+     * @param key 
+     * @param style 
+     * 
+     * @return The loaded font if successfull. {@code null} otherwise.
+     */
+    public static Font loadFont(FileTree fileTree, String path, int style) {
+        return loadFont(fileTree, path, style, Font.TRUETYPE_FONT);
+    }
+    
+    public static Font loadFont(FileTree fileTree, String path, int style, int type) {
+        try (InputStream stream = fileTree.getStream(path)) {
+            return loadFont(stream, path, style, type);
+            
+        } catch (FontFormatException | IOException e) {
+            Logger.write(e);
+            return null;
+        }
+    }
+    
+    /**
+     * TODO
+     * Loads a font from an input stream. Assumes that the input stream comes from the given path.
+     * 
+     * @implNote
+     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
+     * used in swing environments.
+     * 
+     * @param stream
+     * @param path
+     * @param style
+     * @param type
+     * 
+     * @return
+     * 
+     * @throws FontFormatException
+     * @throws IOException 
+     */
+    public static Font loadFont(InputStream stream, String path, int style, int type)
+        throws FontFormatException, IOException {
+        Font font = Font.createFont(type, stream);
+        FONTS.put(new File(path).getName(), font);
+        return font;
+    }
+    
+    
+    
+    
+    
+    
+    
+    /**
+     * (Re-)loads a font from a file from the tool package.
+     * 
+     * @implNote
+     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
+     * used in swing environments.
+     * 
+     * @param localPath
+     * @param style
+     * 
+     * @return 
+     *//*
+    public static Font loadLocalFont(String localPath, int style) {
+        return loadLocalFont(localPath, style, Font.TRUETYPE_FONT);
+    }
+    
+    /**
+     * TODO
      * (Re-)loads a font from a file.
      * 
-     * @param localPath the path of the font file relative to the font directoy.
-     * @param style the style of the font. Should be one of:
+     * @implNote
+     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
+     * used in swing environments.
+     * 
+     * @param localPath The (local) path of the font file inside the package.
+     * @param style The style of the font. Should be one of:
      *     <ul>
      *       <li>{@link Font.PLAIN} </li>
      *       <li>{@link Font.ITALIC} </li>
@@ -91,41 +182,59 @@ public class FontLoader {
      *       <li>{@link Font.BOLD} | {@link Font.ITALIC} </li>
      *     </ul>
      * 
+     * @return The local font from the file with the given path, and with the given style and type.
+     * 
      * @see Var#FONT_DIR
-     */
-    public static Font loadLocalFont(String localPath, int style) {
-        return loadFont(Var.FONT_DIR + localPath, style);
+     *//*
+    public static Font loadLocalFont(String localPath, int style, int type) {
+        try (InputStream stream = FileTree.getLocalFileTree().getStream(localPath)) {
+            return loadFont(stream, localPath, style, type);
+            
+        } catch (FontFormatException | IOException e) {
+            Logger.write(e);
+            return null;
+        }
     }
     
     /**
-     * (Re-)loads a font from a file.
+     * (Re-)loads a font from a file with the given absolute path. It is certain that
+     * this file is an outside resource.
      * 
-     * @param path the path to the font file.
-     * @param style the style of the font. Should be one of:
+     * @implNote
+     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
+     * used in swing environments.
+     * 
+     * @param path The absolute path to the font file.
+     * @param style The style of the font. Must be one of:
      *     <ul>
-     *       <li>{@link Font.PLAIN}</li>
-     *       <li>{@link Font.ITALIC}</li>
-     *       <li>{@link Font.BOLD}</li>
-     *       <li>{@link Font.BOLD} | {@link Font.ITALIC}</li>
+     *       <li> {@link Font#PLAIN} </li>
+     *       <li> {@link Font#ITALIC} </li>
+     *       <li> {@link Font#BOLD} </li>
+     *       <li> {@link Font#BOLD} | {@link Font#ITALIC}</li>
      *     </ul>
-     */
-    public static Font loadFont(String path, int style) {
+     *//*
+    public static Font loadAbsoluteFont(String path, int style) {
         return loadFont(path, style, Font.TRUETYPE_FONT);
     }
     
     /**
-     * (Re-)loads a font from a file.
+     * (Re-)loads a font from a file with the given absolute path. It is certain that
+     * this file is an outside resource.
+     * 
+     * @implNote
+     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
+     * used in swing environments.
      * 
      * @param path the path to the font file.
-     * @param style the style of the font. Should be one of:
+     * @param style the style of the font. Must be one of:
      *     <ul>
-     *       <li>{@link Font.PLAIN}</li>
-     *       <li>{@link Font.ITALIC}</li>
-     *       <li>{@link Font.BOLD}</li>
-     *       <li>{@link Font.BOLD} | {@link Font.ITALIC}</li>
+     *       <li> {@link Font#PLAIN} </li>
+     *       <li> {@link Font#ITALIC} </li>
+     *       <li> {@link Font#BOLD} </li>
+     *       <li> {@link Font#BOLD} | {@link Font#ITALIC}</li>
      *     </ul>
-     * @param type The font type. Should always be {@link Font.TRUETYPE_FONT}.
-     */
+     * @param type The font type. Should always be {@link Font#TRUETYPE_FONT}.
+     *//*
     protected static Font loadFont(String path, int style, int type) {
         Font font = null;
         
@@ -143,6 +252,7 @@ public class FontLoader {
     }
     
     /**
+     * TODO
      * @param localPath The local path of the font file.
      * @return The local font from the given path if it was loaded. {@code null} otherwise.
      * 
@@ -153,6 +263,7 @@ public class FontLoader {
     }
     
     /**
+     * TODO
      * @param path The path of the font file.
      * @return The font from the given path if it was loaded. {@code null} otherwise.
      */
@@ -162,7 +273,7 @@ public class FontLoader {
     
     /**
      * Registers the given font. <br>
-     * When successfull, the font can be used in the application for e.g. html code.
+     * When successfull, the font can be used in the application for e.g. swing applications.
      * 
      * @param font The font to be registered
      * @return {@code true} if the font was added successfully. {@code false} otherwise.
@@ -179,7 +290,6 @@ public class FontLoader {
      */
     public static void setDefaultFont(Font font) {
         defaultFont = font;
-        
         UIManager.put("Button.font", font);
         UIManager.put("ToggleButton.font", font);
         UIManager.put("RadioButton.font", font);
@@ -214,6 +324,32 @@ public class FontLoader {
     }
     
     /**
+     * Determines the font style from the file name.
+     * 
+     * @apiNote
+     * The style is determined with an educated guess about how font-files are constructred.
+     * 
+     * @param fileName The name of the file to determine the font style of.
+     * 
+     * @return The style of the font.
+     */
+    public static int getStyle(String fileName) {
+        String[] split = fileName.toLowerCase().split("\\.");
+        String name = split[Math.max(0, split.length - 2)];
+        
+        boolean isBold = name.contains("bold") ||
+                name.endsWith("b") ||
+                name.endsWith("bi") ||
+                name.endsWith("ib");
+        boolean isItalic = name.contains("italic") ||
+                name.contains("it") ||
+                name.endsWith("i") ||
+                name.endsWith("bi") ||
+                name.endsWith("ib");
+        return (isBold ? Font.BOLD : 0) | (isItalic ? Font.ITALIC : 0);
+    }
+    
+    /**
      * @return the default font.
      */
     public static Font getDefaultFont() {
@@ -221,91 +357,83 @@ public class FontLoader {
     }
     
     /**
-     * Use this function to sync the loading of the static class.
+     * Loads an entire file tree of fonts.
+     * 
+     * @param fileTree The file tree to load from.
+     * @param fontPath The path of the root directory to load from.
      */
-    public static void syncLoad() { }
+    public static void loadFileTree(FileTree fileTree, String fontPath) {
+        Logger.write(new String[] {
+            "",
+            "------ START LOADING FONTS ------",
+            "Path: " + fileTree.toAbsolutePath(fontPath),
+            ""
+        }, Logger.Type.INFO);
+        
+        try {
+            Set<Font> allFonts = new HashSet<>(Arrays.asList(GraphicsEnvironment
+                    .getLocalGraphicsEnvironment().getAllFonts()));
+            
+            for (Path path : MultiTool.toIterable(fileTree.walk(fontPath))) {
+                if (fileTree.isDirectory(path)) continue;
+                String fontLoc = fileTree.toAbsolutePath(path.toString());
+                
+                if (fontLoc.toLowerCase().endsWith(".ttf")) {
+                    Font font = loadFont(fileTree, fontLoc, getStyle(fontLoc), Font.TRUETYPE_FONT);
+                    if (font == null) {
+                        Logger.write("A null font has been created: " + fontLoc, Logger.Type.ERROR);
+                        
+                    } else if (!registerFont(font)) {
+                        if (allFonts.contains(font)) {
+                            Logger.write("Font was already registered: " + fontLoc, Logger.Type.WARNING);
+                            
+                        } else {
+                            Logger.write("Could not register font: " + fontLoc, Logger.Type.ERROR);
+                        }
+                        
+                    } else {
+                        allFonts.add(font);
+                        Logger.write("Successfully loaded font: " + fontLoc, Logger.Type.INFO);
+                    }
+                    
+                } else {
+                    Logger.write("Ignored file: " + fontLoc, Logger.Type.INFO);
+                }
+            }
+            
+        } catch (IOException e) {
+            Logger.write(e);
+            
+        } finally {
+            Logger.write(new String[] {
+                "------ FINISHED LOADING FONTS ------",
+                ""
+            }, Logger.Type.INFO);
+        }
+    }
     
     /**
      * Registers all fonts in the fonts folder.
      * See registerFont(Font) for more info about registering a font.
      */
     static {
-        Font[] allFonts = null;
-        
         Logger.write(new String [] {
             "",
-            "========== START LOADING FONTS =========="
+            "========== START LOADING DEFAULT FONTS =========="
         }, Logger.Type.INFO);
-        List<PartFile> files = FileTools.getFileList(new File(Var.FONT_DIR), false);
-        
-        for (PartFile file : files) {
-            String fontLoc = file.toString();
-            String fontString = fontLoc.toLowerCase();
+        try {
+            Logger.write("load file tree");
+            loadFileTree(FileTree.getLocalFileTree(), Var.L_FONT_DIR);
             
-            if (fontString.endsWith(".ttf")) {
-                
-                int style = (fontString.contains("bold") ||
-                             fontString.endsWith("b.ttf") ||
-                             fontString.endsWith("bi.ttf") ||
-                             fontString.endsWith("ib.ttf") ? Font.BOLD : 0) |
-                    (fontString.contains("italic") ||
-                     fontString.contains("it") ||
-                     fontString.endsWith("i.ttf") ||
-                     fontString.endsWith("bi.ttf") ||
-                     fontString.endsWith("ib.ttf") ? Font.ITALIC : 0);
-                if (style == 0) style = Font.PLAIN;
-                /*
-                System.out.println(style == Font.PLAIN ? "PLAIN"
-                        : style == Font.BOLD ? "BOLD"
-                                : style == Font.ITALIC ? "ITALIC"
-                                        : style == (Font.BOLD | Font.ITALIC)
-                                                ? "BOLD + ITALIC"
-                                                : "ERROR!");
-                */
-                
-                Font font = loadFont(fontLoc, style, Font.TRUETYPE_FONT);
-                if (font == null) {
-                    Logger.write("A null font has been created: "
-                            + fontLoc, Logger.Type.ERROR);
-                    
-                } else if (!registerFont(font)) {
-                    if (allFonts == null) {
-                        allFonts = GraphicsEnvironment
-                                .getLocalGraphicsEnvironment().getAllFonts();
-                    }
-                    
-                    boolean isRegistered = false;
-                    for (Font checkFont : allFonts) {
-                        if (checkFont.getName().equals(font.getName())) {
-                            isRegistered = true;
-                            break;
-                        }
-                    }
-                    
-                    if (isRegistered) {
-                        Logger.write("Font was already registered: "
-                                + fontLoc, Logger.Type.WARNING);
-                        
-                    } else {
-                        Logger.write("Could not register font: "
-                                + fontLoc, Logger.Type.ERROR);
-                    }
-                    
-                } else {
-                    Logger.write("Successfully loaded font: "
-                            + fontLoc, Logger.Type.INFO);
-                }
-            } else {
-                Logger.write("Ignored file: " 
-                        + fontLoc, Logger.Type.INFO);
-            }
+        } catch (IOException e) {
+            Logger.write(e);
             
+        } finally {
+            Logger.write(new String[] {
+                "========== FINISHED LOADING DEFAULT FONTS ==========", 
+                ""
+            }, Logger.Type.INFO);
         }
-        
-        Logger.write(new String[] {
-            "========== FINISHED LOADING FONTS ==========", 
-            ""
-        }, Logger.Type.INFO);
     }
     
     

@@ -28,7 +28,7 @@ import java.util.Iterator;
  * for converting the {@link File} and {@link Path} arguments to {@link String}
  * arguments.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public abstract class AbstractFileTreeStringImpl
@@ -93,6 +93,18 @@ public abstract class AbstractFileTreeStringImpl
     public byte[] readAllBytes(File file)
             throws IOException, OutOfMemoryError, SecurityException {
         return readAllBytes(file.toString());
+    }
+    
+    @Override
+    public boolean isDirectory(Path path)
+            throws IOException {
+        return isDirectory(path.toString());
+    }
+    
+    @Override
+    public boolean isDirectory(File file)
+            throws IOException {
+        return isDirectory(file.toString());
     }
     
     

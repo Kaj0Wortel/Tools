@@ -38,7 +38,7 @@ import tools.Var;
  * - Add implementation for zip files. (hint: copy-past parts of the jar-reader).
  * - Add implementation for virtual files.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public abstract class FileTree {
@@ -68,11 +68,11 @@ public abstract class FileTree {
      * 
      * @return The local file tree of this class.
      * 
+     * @throws IllegalStateException If the execution folder does not exists.
      * @throws IOException If the file tree could not be read.
-     * @throws URISyntaxException If the generated URI is invalid.
      */
     public static FileTree getLocalFileTree()
-            throws IOException, URISyntaxException {
+            throws IllegalArgumentException, IOException {
         return FileTree.getLocalFileTree(FileTree.class);
     }
     
@@ -88,11 +88,11 @@ public abstract class FileTree {
      * 
      * @return The local file tree for the given class.
      * 
+     * @throws IllegalStateException If the execution folder does not exists.
      * @throws IOException If the file tree could not be read.
-     * @throws URISyntaxException If the generated URI is invalid.
      */
     public static FileTree getLocalFileTree(Class<?> c)
-            throws IOException, URISyntaxException {
+            throws IllegalArgumentException, IOException {
         String path = getProjectSourceFile(c);
         if (path.endsWith(".jar")) {
             return JarFileTree.getTree(path);
@@ -129,13 +129,18 @@ public abstract class FileTree {
      * 
      * @return The project root file of the given class (e.g. the execution directory).
      * 
-     * @throws URISyntaxException If the execution folder does not exists.
+     * @throws IllegalStateException If the execution folder does not exists.
      */
     public static String getProjectSourceFile(Class<?> c)
-            throws URISyntaxException {
-        // DO NOT REMOVE THIS LINE:
-        //return new File(c.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-        return c.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            throws IllegalStateException {
+        try {
+            // DO NOT REMOVE THIS LINE:
+            //return new File(c.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+            return c.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException(e);
+        }
     }
     
     
@@ -370,6 +375,56 @@ public abstract class FileTree {
      */
     public abstract byte[] readAllBytes(File file)
             throws IOException, OutOfMemoryError, SecurityException;
+    
+    /**
+     * Checks whether the file with the given path name is a directory.
+     * 
+     * @implNote
+     * If the file denoted by this path name does not exist, then this function will
+     * return {@code false}.
+     * 
+     * @param path The path to check.
+     * 
+     * @return {@code true} if the file with the given path name is a directory.
+     *     {@code false} otherwise.
+     * 
+     * @throws IOException If some I/O error occured.
+     */
+    public abstract boolean isDirectory(String path)
+            throws IOException;
+    
+    /**
+     * Checks whether the file with the given path is a directory.
+     * 
+     * @implNote
+     * If the file denoted by this path does not exist, then this function will
+     * return {@code false}.
+     * 
+     * @param path The path to check.
+     * 
+     * @return {@code true} if the file with the given path is a directory.
+     *     {@code false} otherwise.
+     * 
+     * @throws IOException If some I/O error occured.
+     */
+    public abstract boolean isDirectory(Path path)
+            throws IOException;
+    
+    /**
+     * Checks whether the given file is a directory.
+     * 
+     * @implNote
+     * If the file does not exist, then this function will return {@code false}.
+     * 
+     * @param path The path to check.
+     * 
+     * @return {@code true} if the given file is a directory.
+     *     {@code false} otherwise.
+     * 
+     * @throws IOException If some I/O error occured.
+     */
+    public abstract boolean isDirectory(File file)
+            throws IOException;
     
     
 }

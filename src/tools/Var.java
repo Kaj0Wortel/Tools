@@ -22,7 +22,10 @@ import java.util.Random;
 /**
  * Interface for storing the constants used in the tools package.
  * 
- * @version 1.0
+ * @todo
+ * Revise constant values and naming.
+ * 
+ * @version 0.0
  * @author Kaj Wortel
  */
 public interface Var {
@@ -57,6 +60,13 @@ public interface Var {
     
     /** The number of available CPU cores. */
     public static final int CORES = Runtime.getRuntime().availableProcessors();
+    
+    
+    
+    
+    // TODO
+    /** The local font directory. */
+    public static final String L_FONT_DIR = "font" + FS;
     
     
 }

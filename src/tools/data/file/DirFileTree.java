@@ -37,7 +37,7 @@ import tools.iterators.GeneratorIterator;
 /**
  * File tree implementation for a file tree starting at a root directory.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public class DirFileTree
@@ -62,11 +62,11 @@ public class DirFileTree
      * 
      * @param root The root directory of the file tree.
      * 
-     * @throws IOException If the given root file doesn't exist.
      * @throws IllegalArgumentException If the given file isn't a directory.
+     * @throws IOException If the given root file doesn't exist.
      */
     protected DirFileTree(File root)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException, IOException {
         if (!root.exists()) {
             throw new FileNotFoundException("The file '" + root.toString() + "' does not exist!");
         }
@@ -99,7 +99,7 @@ public class DirFileTree
      * @throws IOException If the root directory could not be accessed.
      */
     public static DirFileTree getTree(String path)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException, IOException {
         return getTree(new File(path));
     }
     
@@ -118,7 +118,7 @@ public class DirFileTree
      * @throws IOException If the root directory could not be accessed.
      */
     public static DirFileTree getTree(Path path)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException, IOException {
         return getTree(path.toFile());
     }
     
@@ -137,7 +137,7 @@ public class DirFileTree
      * @throws IOException If the root directory could not be accessed.
      */
     public static DirFileTree getTree(File file)
-            throws IOException, IllegalArgumentException {
+            throws IllegalArgumentException, IOException {
         FileTreeToken<DirFileTree, File> token = new FileTreeToken<>(
                 DirFileTree.class, file);
         DirFileTree tree = (DirFileTree) FILE_TREE_MAP.get(token);
@@ -165,12 +165,7 @@ public class DirFileTree
      */
     public static DirFileTree getTree(Class<?> c)
             throws IllegalStateException, IOException {
-        try {
-            return getTree(getProjectSourceFile(c));
-            
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e);
-        }
+        return getTree(getProjectSourceFile(c));
     }
     
     @Override
@@ -219,6 +214,13 @@ public class DirFileTree
     public byte[] readAllBytes(File file)
             throws IOException, OutOfMemoryError, SecurityException {
         return Files.readAllBytes((new File(toAbsolutePath(file.toString()))).toPath());
+    }
+    
+    @Override
+    public boolean isDirectory(File file)
+            throws IOException {
+        //System.out.println(file.isDirectory());
+        return file.isDirectory();
     }
     
     
