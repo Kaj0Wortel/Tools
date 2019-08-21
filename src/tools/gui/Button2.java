@@ -14,32 +14,41 @@
 package tools.gui;
 
 
-// Tools imports
-import tools.io.LoadImages2;
-
-
 // Java imports
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
-
 import java.io.IOException;
-
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
+
+
+// Tools imports
 import tools.Var;
-import static tools.Var.IMG_DIR;
+import tools.data.file.FileTree;
+import tools.io.ImageSheetLoader;
 
 
 /**
  * Customizable button class via images.
+ * 
+ * @todo everything
+ * 
+ * @author Kaj Wortel
+ * 
+ * @deprecated
+ * This class relies heavily on {@link ImageManager}, which was completely refactored,
+ * and behaviour of this class has not yet been tested with the new implementation. <br>
+ * Button-like users should use {@link SheetButton} instead, as the dependancy
+ * with the {@link ImageManager} is completely removed there.
  */
+@Deprecated
 public class Button2
     extends AbstractButton {
     // The conditions of the button.
@@ -111,10 +120,11 @@ public class Button2
         this(0, 0, barSize);
     }
     
-    public Button2(int sizeX, int sizeY, int barSize) throws IOException {
+    public Button2(int sizeX, int sizeY, int barSize)
+            throws IOException {
         this(sizeX, sizeY, barSize,
-             LoadImages2.ensureLoadedAndGetImage(Var.IMG_DIR
-                     + "button2_img_TYPE_001.png", 16, 16),
+             ImageSheetLoader.ensureLoadedAndGetImage(FileTree.getLocalFileTree(),
+                     Var.L_IMG_DIR + "button2_img_TYPE_001.png", 16, 16),
              Button2.TYPE_TURNED);
     }
     
@@ -126,8 +136,8 @@ public class Button2
     public Button2(int sizeX, int sizeY, int barSize, String text)
         throws IOException {
         this(sizeX, sizeY, barSize,
-                LoadImages2.ensureLoadedAndGetImage(Var.IMG_DIR
-                        + "button2_img_TYPE_001.png", 16, 16),
+                ImageSheetLoader.ensureLoadedAndGetImage(FileTree.getLocalFileTree(),
+                        Var.L_IMG_DIR + "button2_img_TYPE_001.png", 16, 16),
                 Button2.TYPE_TURNED, text);
     }
     
@@ -861,9 +871,5 @@ public class Button2
             + ", noChangeType=" + noChangeType + "]";
     }
     
-    // tmp
-    public static void main(String[] args) {
-        System.out.println(IMG_DIR);
-    }
     
 }

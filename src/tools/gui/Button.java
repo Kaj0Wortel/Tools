@@ -28,14 +28,16 @@ import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import javax.swing.AbstractButton;
 import javax.swing.JFrame;
 import javax.swing.border.Border;
 
 
 // Tools imports
+import tools.data.file.FileTree;
 import tools.gui.border.IOBorder;
-import tools.img.ImageManager;
+import tools.data.img.managed.ImageManager;
 import tools.observer.HashObservableInterface;
 
 
@@ -43,7 +45,14 @@ import tools.observer.HashObservableInterface;
  * 
  * 
  * @author Kaj Wortel
+ * 
+ * @deprecated
+ * This class relies heavily on {@link ImageManager}, which was completely refactored,
+ * and behaviour of this class has not yet been tested with the new implementation. <br>
+ * Button-like users should use {@link SheetButton} instead, as the dependancy
+ * with the {@link ImageManager} is completely removed there.
  */
+@Deprecated
 public class Button
         extends AbstractButton
         implements HashObservableInterface {
@@ -485,40 +494,6 @@ public class Button
                 (int) ((getWidth() - textWidth) / 2),
                 (int) ((getHeight() - textHeight) / 2 + ascent));
         
-    }
-    
-    // tmp
-    public static void main(String[] args) {
-        // Register image sheets.
-        final String FS = System.getProperty("file.separator");
-        
-        ImageManager.registerSheet("menu" + FS
-                + "IOBorder_img_TYPE_001.png", "MENU_CORNERS",
-                0, 0, 64, 32, 16, 16);
-        ImageManager.registerSheet("menu" + FS
-                + "IOBorder_img_TYPE_001.png", "MENU_SIDES",
-                0, 32, 64, 64, 16, 16);
-        ImageManager.registerSheet("menu" + FS
-                + "button_background.png", "BUTTON_BACK",
-                16, 16);
-        
-        JFrame frame = new JFrame("button test frame");
-        frame.setLayout(null);
-        frame.setSize(700, 700);
-        frame.getContentPane().setBackground(Color.RED);
-        
-        Button button = new Button("test", null, "BUTTON_BACK", new IOBorder(
-                "MENU_CORNERS", "MENU_SIDES", new Insets(5, 5, 5, 5)
-        ));
-        button.setLocation(50, 50);
-        button.setSize(200, 150);
-        frame.add(button);
-        button.addActionListener((e) -> {
-            System.out.println("pressed");
-        });
-        
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
     }
     
     

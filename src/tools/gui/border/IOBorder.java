@@ -14,12 +14,7 @@
 package tools.gui.border;
 
 
-// Tools imports
-import tools.img.ImageManager;
-
-
 // Java imports
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -27,21 +22,36 @@ import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+
+
+// Tools imports
 import tools.PublicCloneable;
+import tools.data.img.managed.ImageManager;
 
 
 /**
+ * @todo
+ * Complete refectoring.
  * 
+ * @author Kaj Wortel
  * 
- * @author Kaj Wortel (0991586)
+ * @deprecated
+ * This class relies heavily on {@link ImageManager}, which was completely refactored,
+ * and behaviour of this class has not yet been tested with the new implementation. <br>
+ * Border-like users should use {@link SheetBorder} instead, as the dependancy
+ * with the {@link ImageManager} is completely removed there.
  */
+@Deprecated
 public class IOBorder
         implements Border, PublicCloneable {
-    /**
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    /**TODO
      * The states of the border.
      * Note that, if necessary added.
      * These values are used for the determining the images to choose
@@ -57,6 +67,10 @@ public class IOBorder
     final public static int DISABLED = 3;
     
     
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
     protected int state = DEFAULT;
     protected String cornerID;
     protected String sideID;
@@ -64,10 +78,27 @@ public class IOBorder
     protected boolean isOpaque = false;
     
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * TODO
+     * 
+     * @param cornerID
+     * @param sideID 
+     */
     public IOBorder(String cornerID, String sideID) {
         this(cornerID, sideID, new Insets(10, 10, 10, 10));
     }
     
+    /**
+     * TODO
+     * 
+     * @param cornerID
+     * @param sideID
+     * @param in 
+     */
     public IOBorder(String cornerID, String sideID, Insets in) {
         this.in = in;
         this.cornerID = cornerID;
@@ -75,6 +106,10 @@ public class IOBorder
     }
     
     
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     public void paintBorder(Component c, Graphics g,
             int x, int y, int width, int height) {
@@ -290,48 +325,6 @@ public class IOBorder
         
         c.addMouseListener(ml);
         return ml;
-    }
-    
-    
-    // tmp
-    public static void main(String[] args) {
-        /*
-        ImageManager.registerSheet("IOBorder_img_TYPE_001.png", "CORNERS",
-            0, 0, 64, 32, 16, 16);
-        ImageManager.registerSheet("IOBorder_img_TYPE_001.png", "SIDES",
-            0, 32, 64, 64, 16, 16);
-        /**/
-        /*
-        ImageManager.registerSheet("IOBorder_img_TYPE_002.png", "CORNERS",
-            0, 0, 64, 16, 16, 16);
-        ImageManager.registerSheet("IOBorder_img_TYPE_002.png", "SIDES",
-            0, 16, 64, 32, 16, 16);
-        /**/
-        ImageManager.registerSheet("IOBorder_img_TYPE_003.png", "CORNERS",
-            0, 0, 64, 48, 16, 16);
-        ImageManager.registerSheet("IOBorder_img_TYPE_003.png", "SIDES",
-            0, 48, 64, 96, 16, 16);
-        /**/
-        
-        IOBorder border = new IOBorder("CORNERS", "SIDES",
-                new Insets(50, 300, 200, 100));
-        
-        JFrame frame = new JFrame("IOBorder test frame");
-        frame.setLayout(null);
-        frame.setSize(1000, 1000);
-        
-        JPanel panel = new JPanel(null);
-        frame.add(panel);
-        panel.setLocation(10, 10);
-        panel.setSize(900, 900);
-        panel.setBorder(border);
-        panel.setBackground(Color.WHITE);
-        border.addDefaultMouseListener(panel, true);
-        
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        
-        System.out.println(border.getBorderInsets(null));
     }
     
     

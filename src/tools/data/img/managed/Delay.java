@@ -11,11 +11,7 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.img;
-
-
-// Tools imports
-import tools.MultiTool;
+package tools.data.img.managed;
 
 
 // Java imports
@@ -23,21 +19,31 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 
-/**DONE
+// Tools imports
+import tools.MultiTool;
+
+
+/**
  * Class for keeping track of the delay for a {@link Token} object.
  *
+ * @version 1.0
  * @author Kaj Wortel
  */
 class Delay
         implements Delayed {
     
     /* -------------------------------------------------------------------------
-     * Variables.
+     * Constants.
      * -------------------------------------------------------------------------
      */
     /** The time unit of the delay. */
     private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
     
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
     /** The delay in the time unit {@link #TIME_UNIT}. */
     private final long delay;
     /** The token to time for. */
@@ -78,7 +84,7 @@ class Delay
     }
 
     /**
-     * @return the token represented by this delay class.
+     * @return the token represented by this instance.
      */
     public Token getToken() {
         return token;

@@ -35,8 +35,10 @@ import tools.Var;
  * Every file tree has a single root file/directory.
  * 
  * @todo
+ * - Implement equals and hash code functions.
  * - Add implementation for zip files. (hint: copy-past parts of the jar-reader).
  * - Add implementation for virtual files.
+ * - Add methods to get a file tree which return {@code null} upon failure instead of an exception.
  * 
  * @version 1.1
  * @author Kaj Wortel

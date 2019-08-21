@@ -21,20 +21,25 @@ package tools.data.img;
  * @author Kaj Wortel
  */
 public class DefaultGUIImageSheet
-        implements GUIImageSheet {
+        extends GUIImageSheet {
      
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
     /** The image sheet used for the default state. */
-    private final ImageSheet def;
+    private final BoundedImageSheet def;
     /** The image sheet used for the roll over state. */
-    private final ImageSheet rollOver;
+    private final BoundedImageSheet rollOver;
     /** The image sheet used for the pressed state. */
-    private final ImageSheet pressed;
+    private final BoundedImageSheet pressed;
     /** The image sheet used for the disabled state. */
-    private final ImageSheet disabled;
+    private final BoundedImageSheet disabled;
+    
+    /** The minimum width of all sheets. */
+    private final int minWidth;
+    /** The minimum height of all sheets. */
+    private final int minHeight;
     
     
     /* -------------------------------------------------------------------------
@@ -50,12 +55,15 @@ public class DefaultGUIImageSheet
      * @param pressed The image sheet used for when the button is pressed.
      * @param disabled The image sheet used for when the button is disabled.
      */
-    public DefaultGUIImageSheet(ImageSheet def, ImageSheet rollOver,
-            ImageSheet pressed, ImageSheet disabled) {
+    public DefaultGUIImageSheet(BoundedImageSheet def, BoundedImageSheet rollOver,
+            BoundedImageSheet pressed, BoundedImageSheet disabled) {
         this.def = def;
         this.rollOver = rollOver;
         this.pressed = pressed;
         this.disabled = disabled;
+        
+        this.minWidth = super.getMinWidth();
+        this.minHeight = super.getMinHeight();
     }
     
     
@@ -64,23 +72,33 @@ public class DefaultGUIImageSheet
      * -------------------------------------------------------------------------
      */
     @Override
-    public ImageSheet getDefault() {
+    public BoundedImageSheet getDefault() {
         return def;
     }
     
     @Override
-    public ImageSheet getRollOver() {
+    public BoundedImageSheet getRollOver() {
         return rollOver;
     }
     
     @Override
-    public ImageSheet getPressed() {
+    public BoundedImageSheet getPressed() {
         return pressed;
     }
     
     @Override
-    public ImageSheet getDisabled() {
+    public BoundedImageSheet getDisabled() {
         return disabled;
+    }
+    
+    @Override
+    public int getMinWidth() {
+        return minWidth;
+    }
+    
+    @Override
+    public int getMinHeight() {
+        return minHeight;
     }
     
     

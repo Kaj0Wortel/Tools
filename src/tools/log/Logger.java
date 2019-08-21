@@ -25,14 +25,18 @@ import java.util.concurrent.locks.Lock;
 /**
  * Abstract class for log classes.
  * 
- * All log classes should use the singleton design pattern, and therefore
- * include the static method {@code getInstance}.
+ * @todo
+ * - Cleanup
+ * - Add class based-logging.
+ * - Add group logging (invent what and how first).
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
  */
 public abstract class Logger {
     /** Constants. */
     // The default date format
-    final protected static DateFormat DEFAULT_DATE_FORMAT
-        = new SimpleDateFormat("HH:mm:ss.SSS");
+    final protected static DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
     
     /** Static variables. */
     // The terminal message and type.

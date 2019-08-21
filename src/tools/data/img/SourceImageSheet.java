@@ -20,12 +20,17 @@ import java.awt.Image;
 
 /**
  * Image sheet class for using a raw image sheet as source.
+ * If the width and height are not specified, then the width and height
+ * of the underlying array are used. <br>
+ * If the height of the given array is not equal for all sub-arrays, then the
+ * maximum height is used as height, and the un-indexed areas will return
+ * {@code null} when probed.
  * 
- * @version 1.0
+ * @version 1.2
  * @author Kaj Wortel
  */
 public class SourceImageSheet
-        extends AbstractImageSheet {
+        extends BoundedImageSheet {
      
     /* -------------------------------------------------------------------------
      * Variables.
@@ -33,6 +38,11 @@ public class SourceImageSheet
      */
     /** The images used as source for this sheet. */
     private final Image[][] images;
+    
+    /** The width of the sheet. */
+    private final int sheetWidth;
+    /** The height of the sheet. */
+    private final int sheetHeight;
     
     
     /* -------------------------------------------------------------------------
@@ -42,11 +52,52 @@ public class SourceImageSheet
     /**
      * Creates a new image sheet from a 2D array of images.
      * 
+     * @apiNote
+     * The images inside the sheet are <b>NOT</b> copied to a new array to save
+     * memory and object creation speed. This does also mean that the backening
+     * image array should not be modified. If it is modified after the constructor
+     * has been called, then the behaviour of any function is undefined.
+     * 
      * @param images The source images for this sheet.
      */
     public SourceImageSheet(Image[][] images) {
         if (images == null) throw new NullPointerException();
         this.images = images;
+        sheetWidth = images.length;
+        if (sheetWidth == 0) {
+            sheetHeight = 0;
+            
+        } else {
+            int maxHeight = 0;
+            for (Image[] imgs : images) {
+                maxHeight = Math.max(maxHeight, imgs.length);
+            }
+            sheetHeight = maxHeight;
+        }
+    }
+    
+    /**
+     * Creates a new image sheet with the given width and height from a 2D array of images.
+     * 
+     * @apiNote
+     * The images inside the sheet are <b>NOT</b> copied to a new array to save
+     * memory and object creation speed. This does also mean that the backening
+     * image array should not be modified. If it is modified after the constructor
+     * has been called, then the behaviour of any function is undefined.
+     * 
+     * @param images The source images for this sheet.
+     * @param width The width of the image sheet.
+     * @param height The height of the image sheet.
+     */
+    public SourceImageSheet(Image[][] images, int sheetWidth, int sheetHeight) {
+        if (sheetWidth < 0 || sheetHeight < 0) {
+            throw new IllegalArgumentException(
+                    "Expected a width(" + sheetWidth + ") and height(" + sheetHeight
+                            + ") bigger or equal to 0!");
+        }
+        this.images = images;
+        this.sheetWidth = sheetWidth;
+        this.sheetHeight = sheetHeight;
     }
     
     
@@ -60,19 +111,21 @@ public class SourceImageSheet
     }
     
     @Override
-    public Image get(int x, int y, int width, int height, int scaleHints) {
-        return scale(images[x][y], width, height, scaleHints);
+    public Image get(int x, int y) {
+        checkBounds(x, y);
+        Image[] row = getSheet()[x];
+        if (y < row.length) return row[y];
+        else return null;
     }
     
     @Override
-    public int getNumWidth() {
-        return images.length;
+    public int getWidth() {
+        return sheetWidth;
     }
     
     @Override
-    public int getNumHeight() {
-        if (images.length == 0) return 0;
-        return images[0].length;
+    public int getHeight() {
+        return sheetHeight;
     }
     
     

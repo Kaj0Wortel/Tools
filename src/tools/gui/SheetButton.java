@@ -16,6 +16,7 @@ package tools.gui;
 
 // Java imports
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
@@ -31,10 +32,34 @@ import tools.gui.border.SheetBorder;
 
 /**
  * A button which can be customized by using image sheets.
+ * The image sheets must follow the following coordinate scheme:
+ * <table border='1'>
+ *   <tr><td> 0, 0 </td> <td> 1, 0 </td> <td> 2, 0 </td></tr>
+ *   <tr><td> 0, 1 </td> <td> 1, 1 </td> <td> 2, 1 </td></tr>
+ *   <tr><td> 0, 2 </td> <td> 1, 2 </td> <td> 2, 2 </td></tr>
+ * </table>
+ * <br>
+ * Description per coordinate:<br>
+ * <table border='1'>
+ *   <tr><th> x </th> <th> y </th> <th> Description </th></tr>
+ *   <tr><td> 0 </td> <td> 0 </td> <td> Upper left corner </td></tr>
+ *   <tr><td> 1 </td> <td> 0 </td> <td> Upper side </td></tr>
+ *   <tr><td> 2 </td> <td> 0 </td> <td> Upper right corner </td></tr>
+ *   <tr><td> 0 </td> <td> 1 </td> <td> Left side </td></tr>
+ *   <tr><td> 1 </td> <td> 1 </td> <td> Center </td></tr>
+ *   <tr><td> 1 </td> <td> 2 </td> <td> Right side </td></tr>
+ *   <tr><td> 2 </td> <td> 0 </td> <td> Lower left corner </td></tr>
+ *   <tr><td> 2 </td> <td> 1 </td> <td> Lower side </td></tr>
+ *   <tr><td> 2 </td> <td> 2 </td> <td> Lower right corner </td></tr>
+ * </table>
  * 
+ * @todo
+ * Add to string function for debugging.
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class ContentButton
+public class SheetButton
         extends AbstractButton {
      
     /* -------------------------------------------------------------------------
@@ -45,6 +70,8 @@ public class ContentButton
     private GUIState state = GUIState.DEFAULT;
     /** The sheet to get the images from. */
     private GUIImageSheet sheet;
+    /** The scaling type of the button. */
+    private int scaleType = Image.SCALE_DEFAULT;
     
     
     /* -------------------------------------------------------------------------
@@ -52,23 +79,19 @@ public class ContentButton
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a new content button.
-     * 
-     * @implNote
-     * The size of the image sheet must be at least {@code 3x3}.
-     * The images in the sheet must be such that they are organized in the following way:
-     * <pre>{@code
-     * (0,0) ---- (1,0) ---- (2,0)
-     *   |                     |
-     * (0,1)      (1,1)      (2,1)
-     *   |                     |
-     * (0,2) ---- (1,2) ---- (2,2)
-     * }</pre>
+     * Creates a new content button. <br>
+     * The size of the image sheets must be at least {@code 3x3},
+     * and must follow the following coordinate scheme:
+     * <table border='1'>
+     *   <tr><td> 0, 0 </td> <td> 1, 0 </td> <td> 2, 0 </td></tr>
+     *   <tr><td> 0, 1 </td> <td> 1, 1 </td> <td> 2, 1 </td></tr>
+     *   <tr><td> 0, 2 </td> <td> 1, 2 </td> <td> 2, 2 </td></tr>
+     * </table>
      * 
      * @param in The insets of the border.
-     * @param sheet The image sheet to use. The image sheet must have a size of at least {@code 3x3}.
+     * @param sheet The image sheets to use.
      */
-    public ContentButton(Insets in, GUIImageSheet sheet) {
+    public SheetButton(Insets in, GUIImageSheet sheet) {
         setImageSheet(sheet);
         setBorder(new SheetBorder(in, sheet));
         
@@ -136,10 +159,89 @@ public class ContentButton
         if (state == null) throw new NullPointerException();
         this.state = state;
         Border border = getBorder();
-        if (getBorder() instanceof SheetBorder) {
+        if (border instanceof SheetBorder) {
             ((SheetBorder) border).setState(state);
         }
         repaint();
+    }
+    
+    /**
+     * Returns the center scaling type.
+     * The returned value will be one of the following:
+     * <ul>
+     *   <li> {@link Image#SCALE_DEFAULT} </li>
+     *   <li> {@link Image#SCALE_FAST} </li>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_REPLICATE} </li>
+     *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
+     * </ul>
+     * 
+     * @return The scaling type used to scale the center of the button.
+     */
+    public int getScaleType() {
+        return scaleType;
+    }
+    
+    /**
+     * Sets the scaling type of the center of the button.
+     * The new scaling type must be one of the following values:
+     * <ul>
+     *   <li> {@link Image#SCALE_DEFAULT} </li>
+     *   <li> {@link Image#SCALE_FAST} </li>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_REPLICATE} </li>
+     *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
+     * </ul>
+     * 
+     * @param scaleType The new scaling type.
+     */
+    public void setScaleType(int scaleType) {
+        this.scaleType = scaleType;
+    }
+    
+    /**
+     * Returns the border scaling type.
+     * The returned value will be one of the following:
+     * <ul>
+     *   <li> {@link Image#SCALE_DEFAULT} </li>
+     *   <li> {@link Image#SCALE_FAST} </li>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_REPLICATE} </li>
+     *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
+     *   <li> {@code 0} </li>
+     * </ul>
+     * Where {@code 0} is only returned is the does not have a scaling type.
+     * 
+     * @return The scaling type used to scale the border of the button.
+     * 
+     * @see SheetBorder#setScaleType(int)
+     */
+    public int getBorderScaleType() {
+        Border border = getBorder();
+        if (!(border instanceof SheetBorder)) return 0;
+        return ((SheetBorder) border).getScaleType();
+    }
+    
+    /**
+     * Sets the scaling type of the border of the button.
+     * The new scaling type must be one of the following values:
+     * <ul>
+     *   <li> {@link Image#SCALE_DEFAULT} </li>
+     *   <li> {@link Image#SCALE_FAST} </li>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_REPLICATE} </li>
+     *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
+     * </ul>
+     * 
+     * @param scaleType The new scaling type.
+     * 
+     * @see SheetBorder#getScaleType()
+     */
+    public void setBorderScaleType(int scaleType) {
+        Border border = getBorder();
+        if (border instanceof SheetBorder) {
+            ((SheetBorder) border).setScaleType(scaleType);
+        }
     }
     
     /**
@@ -149,6 +251,7 @@ public class ContentButton
      * Repaints the image sheet only if the actual sheet changes.
      * 
      * @param sheet The new image sheet to use for rendering the button.
+     *     Must be non-null.
      */
     public void setImageSheet(GUIImageSheet sheet) {
         if (sheet == null) throw new NullPointerException();
@@ -157,6 +260,9 @@ public class ContentButton
         if (!equal) repaint();
     }
     
+    /**
+     * @return The image sheet used for this button.
+     */
     public GUIImageSheet getImageSheet() {
         return sheet;
     }
@@ -164,10 +270,12 @@ public class ContentButton
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
         Insets in = getInsets();
         int w = getWidth() - in.left - in.right;
         int h = getHeight() - in.top - in.bottom;
-        g.drawImage(sheet.get(state).get(1, 1, w, h, Image.SCALE_DEFAULT), in.left, in.right, null);
+        
+        sheet.get(state).draw(g2d, 1, 1, in.left, in.top, w, h, scaleType);
     }
     
     

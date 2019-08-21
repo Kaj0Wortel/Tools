@@ -21,10 +21,10 @@ import tools.gui.GUIState;
 /**
  * Interface for an image sheet getter for the {@link tools.gui} package.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
-public interface GUIImageSheet {
+public abstract class GUIImageSheet {
     
     /**
      * Returns the image sheet corresponding with the given state.
@@ -33,7 +33,7 @@ public interface GUIImageSheet {
      * 
      * @return The image sheet corresponding with the state.
      */
-    public default ImageSheet get(GUIState state) {
+    public BoundedImageSheet get(GUIState state) {
         switch(state) {
             case DEFAULT:
                 return getDefault();
@@ -53,28 +53,50 @@ public interface GUIImageSheet {
      * 
      * @return The default image sheet.
      */
-    public ImageSheet getDefault();
+    public abstract BoundedImageSheet getDefault();
     
     /**
      * Returns the image sheet which is used for the roll over state.
      * 
      * @return The roll over image sheet.
      */
-    public ImageSheet getRollOver();
+    public abstract BoundedImageSheet getRollOver();
     
     /**
      * Returns the image sheet which is used for the pressed state.
      * 
      * @return The pressed image sheet.
      */
-    public ImageSheet getPressed();
+    public abstract BoundedImageSheet getPressed();
     
     /**
      * Returns the image sheet which is used for the disabled state.
      * 
      * @return The disable image sheet.
      */
-    public ImageSheet getDisabled();
+    public abstract BoundedImageSheet getDisabled();
+    
+    /**
+     * @return The miniumum width of all sheets.
+     */
+    public int getMinWidth() {
+        int min =Integer.MAX_VALUE;
+        for (GUIState s : GUIState.values()) {
+            min = Math.min(min, get(s).getWidth());
+        }
+        return min;
+    }
+    
+    /**
+     * @return The minimum height of all sheets.
+     */
+    public int getMinHeight() {
+        int min =Integer.MAX_VALUE;
+        for (GUIState s : GUIState.values()) {
+            min = Math.min(min, get(s).getHeight());
+        }
+        return min;
+    }
     
     
 }

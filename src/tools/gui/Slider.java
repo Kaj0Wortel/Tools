@@ -17,10 +17,10 @@ package tools.gui;
 // Tools imports
 import tools.Var;
 import tools.ImageTools;
-import tools.io.LoadImages2;
 
 
 // Java imports
+import tools.io.ImageSheetLoader;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -37,26 +37,26 @@ import javax.swing.JPanel;
 
 // tmp
 import javax.swing.JFrame;
+import tools.data.file.FileTree;
 
 
 /**
  * Provides a customizable slider via images.
  * 
- * Todo:
+ * @todo
+ * complete refactoring
+ * old:
  * - implement "good" rescaling images by rescaling them in the repaint
  *   method instead of the setBounds.
  */
 public class Slider
         extends JPanel {
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
     private static double SPACING_FACTOR = 0.25;
-    private int spacing = 0;
-    
-    final private BufferedImage[] source;
-    private Image[] show = null;
-    
-    private int value = 0;
-    private int minValue = 0;
-    private int maxValue = 100;
     
     // Denotes whether the raised or lowered slider should be used.
     final public static int RAISED_SLIDER = 0;
@@ -67,11 +67,24 @@ public class Slider
     final public static int LOWERED_BUTTON = 1;
     
     
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Constructor
-     * ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
      */
-    /* 
+    private int spacing = 0;
+    private int value = 0;
+    private int minValue = 0;
+    private int maxValue = 100;
+    private Image[] show = null;
+    
+    private final BufferedImage[] source;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
      * Creates a Slider using LOWERED_SLIDER and RAISED_BUTTON as types for
      *     resp. the slider and the button.
      */
@@ -79,7 +92,7 @@ public class Slider
         this(LOWERED_SLIDER, RAISED_BUTTON);
     }
     
-    /* 
+    /**
      * Creates a lowered or a raised slider.
      * 
      * @param type denotes the slider and button type. Must be either
@@ -89,7 +102,7 @@ public class Slider
         this(type, type);
     }
     
-    /* 
+    /**
      * Creates a Slider using the predefined image sheet.
      * 
      * @param st denotes the slider type. Must be either RAISED_SLIDER
@@ -98,41 +111,38 @@ public class Slider
      *     or LOWERED_BUTTON.
      */
     public Slider(final int st, final int bt) throws IOException {
-        this(// leftEnd
-             LoadImages2.ensureLoadedAndGetImage
-                 (Var.IMG_DIR + "slider_img_TYPE_00" + st + ".png", // File loc
-                  Var.IMG_DIR + "slider_img_TYPE_00" + st
-                      + ".png_left_right_end", // Name
-                  0, 0,   // Start X/Y
-                  12, 48, // End X/Y
-                  12, 24  // Size X/Y per image
-                 )[0][0],
-             // middle
-             LoadImages2.ensureLoadedAndGetImage
-                 (Var.IMG_DIR + "slider_img_TYPE_00" + st + ".png",  // File loc
-                  Var.IMG_DIR + "slider_img_TYPE_00" + st
-                      + ".png_middle_bar", // Name
-                  12, 0,  // Start X/Y
-                  36, 24, // End X/Y
-                  24, 24  // Size X/Y per image
-                 )[0][0],
-             // rightEnd
-             LoadImages2.ensureLoadedAndGetImage
-                 (Var.IMG_DIR + "slider_img_TYPE_00" + st
-                      + ".png_left_right_end")[0][1], // Name
-             // button
-             LoadImages2.ensureLoadedAndGetImage
-                 (Var.IMG_DIR + "slider_img_TYPE_00" + bt + ".png", // File loc
-                  Var.IMG_DIR + "slider_img_TYPE_00" + bt
-                      + ".png_middle_button", // name
-                  12, 24,  // Start X/Y
-                  36, 48, // End X/Y
-                  24, 24  // Size X/Y per image
-                 )[0][0]
-            );
+        this(   // leftEnd
+                ImageSheetLoader.ensureLoadedAndGetImage(FileTree.getLocalFileTree(),
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + st + ".png", // File loc
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + st + ".png_left_right_end", // Name
+                        0, 0,   // Start X/Y
+                        12, 48, // End X/Y
+                        12, 24  // Size X/Y per image
+                )[0][0],
+                // middle
+                ImageSheetLoader.ensureLoadedAndGetImage(
+                        FileTree.getLocalFileTree(),
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + st + ".png",  // File loc
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + st + ".png_middle_bar", // Name
+                        12, 0,  // Start X/Y
+                        36, 24, // End X/Y
+                        24, 24  // Size X/Y per image
+                )[0][0],
+                // rightEnd
+                ImageSheetLoader.ensureLoadedAndGetImage(FileTree.getLocalFileTree(),
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + st + ".png_left_right_end")[0][1], // Name
+                // button
+                ImageSheetLoader.ensureLoadedAndGetImage(FileTree.getLocalFileTree(),
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + bt + ".png", // File loc
+                        Var.L_IMG_DIR + "slider_img_TYPE_00" + bt + ".png_middle_button", // name
+                        12, 24,  // Start X/Y
+                        36, 48, // End X/Y
+                        24, 24  // Size X/Y per image
+                )[0][0]
+        );
     }
     
-    /* 
+    /**
      * Creates a Slider with the given images.
      * First stores the images in the array source to prevent quality loss after 
      * multiple scalings.

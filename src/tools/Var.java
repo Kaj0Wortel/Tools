@@ -38,21 +38,29 @@ public interface Var {
     public static final String LS_REGEX = "\n\r|\r\n|\n|\r";
     
     /** The global project working directory. */
+    @Deprecated
     public static final String WORKING_DIR = System.getProperty("user.dir") + FS + "src" + FS;
     /** The global project test directory. */
+    @Deprecated
     public static final String TEST_DIR = System.getProperty("user.dir") + FS + "test" + FS;
     /** The global project log directory. */
+    @Deprecated
     public static final String LOG_DIR = System.getProperty("user.dir") + FS + "log" + FS;
     
     /** The directory of the tool package. */
+    @Deprecated
     public static final String TOOL_DIR = WORKING_DIR + "tools" + FS;
     /** The font directory. */
+    @Deprecated
     public static final String FONT_DIR = WORKING_DIR + "font" + FS;
     /** The image directory. */
+    @Deprecated
     public static final String IMG_DIR = WORKING_DIR + "img" + FS;
     /** The data direcotry. */
+    @Deprecated
     public static final String DATA_DIR = WORKING_DIR + "data" + FS;
     /** The default log file. */
+    @Deprecated
     public static final File LOG_FILE = new File(LOG_DIR + "log.log");
     
     /** Random number generator. */
@@ -67,6 +75,8 @@ public interface Var {
     // TODO
     /** The local font directory. */
     public static final String L_FONT_DIR = "font" + FS;
+    /** The local image directory. */
+    public static final String L_IMG_DIR = "img" + FS;
     
     
 }

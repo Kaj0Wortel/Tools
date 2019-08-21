@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) July 2019 by Kaj Wortel - all rights reserved               *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -11,34 +11,40 @@
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-package tools.img;
-
-
-// Tools imports
-import tools.io.LoadImages2;
-import tools.log.Logger;
+package tools.data.img.managed;
 
 
 // Java imports
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import tools.data.file.FileTree;
 
 
-/**DONE
+// Tools imports
+import tools.io.ImageSheetLoader;
+
+
+/**
  * Token class for unequally divided images on a sheet. <br>
- * Uses {@link LoadImages2#loadImage(String, String, Rectangle[][])} for reading the images.
+ * Uses {@link ImageSheetLoader#loadImage(String, String, Rectangle[][])} for reading the images.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-class UnequalToken
+public class UnequalToken
         extends Token {
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
     /** The locations and sizes of the images to crop. */
-    final private Rectangle[][] recs;
+    private final Rectangle[][] recs;
+    
+    /** The number of images in the width of the sheet. */
+    private final int numImgWidth;
+    /** The number of images in the height of the sheet. */
+    private final int numImgHeight;
     
     
     /* -------------------------------------------------------------------------
@@ -46,15 +52,22 @@ class UnequalToken
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * Creates a new token wich can load unequally sized images in a sheet.
      * 
-     * @param shortFileName The local image file.
+     * @param fileTree The file tree to use.
+     * @param path The path of the file inside the file tree.
      * @param idName The id used for referencing.
      * @param recs The bounds of the sub-images.
      */
-    UnequalToken(String shortFileName, String idName, Rectangle[][] recs) {
-        super(shortFileName, idName);
-        this.recs = recs;
+    UnequalToken(FileTree fileTree, String path, String idName, Rectangle[][] recs) {
+        super(fileTree, path, idName);
+        
+        numImgWidth = recs.length;
+        int maxHeight = 0;
+        for (Rectangle[] row : this.recs = recs) {
+            maxHeight = Math.max(maxHeight, row.length);
+        }
+        numImgHeight = maxHeight;
     }
     
     
@@ -63,16 +76,21 @@ class UnequalToken
      * -------------------------------------------------------------------------
      */
     @Override
-    public BufferedImage[][] getSheet() {
-        try {
-            return LoadImages2.ensureLoadedAndGetImage(
-                    getFileName(), getIDName(), recs
-            );
-            
-        } catch (IOException | IllegalArgumentException e) {
-            Logger.write(e);
-            return null;
-        }
+    public BufferedImage[][] getSheet()
+            throws IOException {
+        return ImageSheetLoader.ensureLoadedAndGetImage(
+                getFileTree(), getPath(), getIdName(), recs
+        );
+    }
+    
+    @Override
+    public int getNumImgWidth() {
+        return numImgWidth;
+    }
+    
+    @Override
+    public int getNumImgHeight() {
+        return numImgHeight;
     }
     
     

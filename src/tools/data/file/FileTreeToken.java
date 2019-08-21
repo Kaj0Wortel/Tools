@@ -35,9 +35,9 @@ public class FileTreeToken<C extends FileTree, T> {
      * -------------------------------------------------------------------------
      */
     /** The type of the file tree. */
-    protected final Class<C> c;
+    private final Class<C> c;
     /** The token to uniquely identify a file tree of this type. */
-    protected final T token;
+    private final T token;
     
     
     /* -------------------------------------------------------------------------
