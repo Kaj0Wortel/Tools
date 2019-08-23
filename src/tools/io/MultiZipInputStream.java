@@ -17,7 +17,6 @@ package tools.io;
 // Java imports
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -30,11 +29,19 @@ import tools.MultiTool;
 
 
 /**
- * TODO: check all cases!
+ * Input stream for multiple zip files.
+ * It uses the {@link ZipInputStream} class to obtain data from a single zip file.
+ * Additionally, multiple zip files can be read as if they are one big file.<br>
+ * <br>
+ * Accepts files in the same format as produced by {@link MultiZipOutputStream}.
  * 
+ * @todo
+ * - Check all cases!
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class ZipReader
+public class MultiZipInputStream
         extends InputStream
         implements ExceptionInputStream {
     
@@ -42,15 +49,23 @@ public class ZipReader
      * Variables.
      * -------------------------------------------------------------------------
      */
+    /** The prefix of a series of zip files. */
     private final String filePrefix;
+    /** Whether the data is spread over more than one file. */
     private final boolean parted;
     
     // Counters and state variables.
+    /** Counter keeping track of which zip file currently is being read. */
     private int fileCounter = 0;
+    /** The underlying zip input stream for the current zip file. */
     private ZipInputStream zis;
+    /** The zip entry of the current zip file. */
     private ZipEntry curEntry = null;
+    /** Whether the current entry is finished. */
     private boolean entryFinished = false;
+    /** Denotes whether the file has been read if the data is parted. */
     private boolean readSingleFile = false;
+    /** Denotes whether the reader is closed. */
     private boolean closed = false;
     
     
@@ -59,11 +74,37 @@ public class ZipReader
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * Creates a new zip reader with the path. <br>
+     * If {@code parted == true}, then the reader will read multiple files with the same
+     * prefix, but a different part number. <br>
+     * <br>
+     * Example 1: <br>
+     * Input files:
+     * <ul>
+     *   <li> /some/path/data.zip </li>
+     * </ul>
+     * Then read all the contents of the zip file via:<br>
+     * {@code new ZipReader("/some/path/data.zip", false)} <br>
+     * <br>
+     * Example 2: <br>
+     * Input files:
+     * <ul>
+     *   <li> /some/path/data.zip.part000 </li>
+     *   <li> /some/path/data.zip.part001 </li>
+     *   <li> /some/path/data.zip.part002 </li>
+     *   <li> /some/path/data.zip.part003 </li>
+     * </ul>
+     * Then read all the contents of the zip files via:<br>
+     * {@code new ZipReader("/some/path/data.zip", true)} <br>
+     * 
+     * @param path The 
+     * @param parted
+     * 
+     * @throws IOException If the first file does not exist, or if some IO error occured.
      */
-    public ZipReader(String filePrefix, boolean parted)
-            throws FileNotFoundException, IOException {
-        this.filePrefix = filePrefix;
+    public MultiZipInputStream(String path, boolean parted)
+            throws IOException {
+        this.filePrefix = path;
         this.parted = parted;
         generateNextStream();
     }
@@ -74,15 +115,17 @@ public class ZipReader
      * -------------------------------------------------------------------------
      */
     /**
+     * Generates the next entry of the zip stream.
+     * If allowed and needed, opens the next zip file if it exists.
+     * If the name of the previous entry is equal to the name of the new entry,
+     * then the data of the new entry is considered a continuation of the previous entry.
      * 
-     * @return {@code true} if the new entry is the same entry as
-     *     previous one.
+     * @return {@code true} if the new entry is the same entry as previous one.
      * 
-     * @throws FileNotFoundException if some directories are missing.
-     * @throws IOException if the file could not be written to.
+     * @throws IOException If some IO error occured.
      */
     private boolean generateNextEntry()
-            throws FileNotFoundException, IOException {
+            throws IOException {
         ZipEntry entry;
         while (zis == null || (entry = zis.getNextEntry()) == null) {
             generateNextStream();
@@ -101,9 +144,11 @@ public class ZipReader
     }
     
     /**
-     * Opens the stream for the next source file.
+     * Closes the previous stream if any, and opens the stream for the
+     * next zip file if multiple zip files should be read and if the 
+     * next file exists.
      * 
-     * @throws IOException If the file could not be written to.
+     * @throws IOException If some IO error occured.
      */
     private void generateNextStream()
             throws IOException {
@@ -115,7 +160,7 @@ public class ZipReader
         
         String fileName = (!parted
                 ? filePrefix
-                : filePrefix + ".part" + MultiTool.fillZero(fileCounter++, 4));
+                : filePrefix + ".part" + MultiTool.fillZero(fileCounter++, 3));
         File file = new File(fileName);
         
         zis = (file.exists()
@@ -126,9 +171,13 @@ public class ZipReader
     }
     
     /**
+     * Gets the next entry. <br>
+     * The returned entry is the first entry of a possible block
+     * of entries with the same name and spread over separate files.
      * 
-     * @return
-     * @throws IOException 
+     * @return The next entry.
+     * 
+     * @throws IOException If some IO error occured.
      */
     public ZipEntry nextEntry()
             throws IOException {

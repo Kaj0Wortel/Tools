@@ -36,6 +36,10 @@ public abstract class GeneratorIterator<E>
     /** The element to be generated next. */
     private E nextElem;
     
+    private boolean generated = false;
+    /** Denotes whether there still are elements remaining. */
+    private boolean done = false;
+    
     
     /* -------------------------------------------------------------------------
      * Functions.
@@ -43,22 +47,46 @@ public abstract class GeneratorIterator<E>
      */
     @Override
     public boolean hasNext() {
+        if (done) return false;
+        if (!generated) {
+            nextElem = generateNext();
+            generated = true;
+        }
+        return !done;
+        
+        /*
         if (nextElem != null) return true;
         return (nextElem = generateNext()) != null;
+        */
     }
     
     @Override
     public E next() {
         if (!hasNext()) throw new NoSuchElementException();
+        generated = false;
+        return nextElem;
+        
+        /*
+        if (!hasNext()) throw new NoSuchElementException();
         E elem = nextElem;
         nextElem = null;
         return elem;
+        */
     }
     
     /**
-     * Generates the next element.
+     * This function should be called when there are no more elements available.
+     * The {@link #generateNext()} function won't be called after calling this function.
+     */
+    protected final void done() {
+        done = true;
+    }
+    
+    /**
+     * Generates the next element. If no more elements exist, then the function
+     * {@link #done()} should be called.
      * 
-     * @return The next element to be returned, or {@code null} of no such element exists.
+     * @return The next element to be returned.
      */
     protected abstract E generateNext();
     

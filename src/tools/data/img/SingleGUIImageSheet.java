@@ -14,32 +14,26 @@
 package tools.data.img;
 
 
+// Tools imports
+import tools.gui.GUIState;
+
+
 /**
- * The default image sheet collection for GUI applications.
+ * Implementation of the {@link GUIImageSheet} class which returns a single
+ * sheet for all states of the button.
  * 
  * @version 1.0
  * @author Kaj Wortel
  */
-public class DefaultGUIImageSheet
+public class SingleGUIImageSheet
         extends GUIImageSheet {
-     
+    
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
-    /** The image sheet used for the default state. */
-    private final BoundedImageSheet def;
-    /** The image sheet used for the roll over state. */
-    private final BoundedImageSheet rollOver;
-    /** The image sheet used for the pressed state. */
-    private final BoundedImageSheet pressed;
-    /** The image sheet used for the disabled state. */
-    private final BoundedImageSheet disabled;
-    
-    /** The minimum width of all sheets. */
-    private final int minWidth;
-    /** The minimum height of all sheets. */
-    private final int minHeight;
+    /** The single image sheet which should be returned for every state. */
+    private final BoundedImageSheet sheet;
     
     
     /* -------------------------------------------------------------------------
@@ -47,23 +41,12 @@ public class DefaultGUIImageSheet
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a new image sheet collection for GUI applications.
+     * Creates a new GUI image sheet which only returns a single sheet.
      * 
-     * @param def The default image sheet used for no interaction with the button.
-     * @param rollOver The image sheet used for when the mouse is over the button,
-     *     but not pressed.
-     * @param pressed The image sheet used for when the button is pressed.
-     * @param disabled The image sheet used for when the button is disabled.
+     * @param sheet The sheet to be returned for all states.
      */
-    public DefaultGUIImageSheet(BoundedImageSheet def, BoundedImageSheet rollOver,
-            BoundedImageSheet pressed, BoundedImageSheet disabled) {
-        this.def = def;
-        this.rollOver = rollOver;
-        this.pressed = pressed;
-        this.disabled = disabled;
-        
-        this.minWidth = super.getMinWidth();
-        this.minHeight = super.getMinHeight();
+    public SingleGUIImageSheet(BoundedImageSheet sheet) {
+        this.sheet = sheet;
     }
     
     
@@ -72,33 +55,28 @@ public class DefaultGUIImageSheet
      * -------------------------------------------------------------------------
      */
     @Override
+    public BoundedImageSheet get(GUIState state) {
+        return sheet;
+    }
+    
+    @Override
     public BoundedImageSheet getDefault() {
-        return def;
+        return sheet;
     }
     
     @Override
     public BoundedImageSheet getRollOver() {
-        return rollOver;
+        return sheet;
     }
     
     @Override
     public BoundedImageSheet getPressed() {
-        return pressed;
+        return sheet;
     }
     
     @Override
     public BoundedImageSheet getDisabled() {
-        return disabled;
-    }
-    
-    @Override
-    public int getMinWidth() {
-        return minWidth;
-    }
-    
-    @Override
-    public int getMinHeight() {
-        return minHeight;
+        return sheet;
     }
     
     

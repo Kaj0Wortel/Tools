@@ -16,44 +16,59 @@ package tools.iterators;
 
 // Java imports
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 
 /**
- * Class that iterates over multiple iterators consecutively.
+ * Class that iterates over multiple iterators.
  * 
+ * @version 01.0
  * @author Kaj Wortel
  * 
  * @param <V> The type of the iterators.
  */
 public class MultiIterator<V>
-        implements Iterator<V> {
+        extends GeneratorIterator<V> {
     
-    /** The iterators. */
-    final private Iterator<? extends V>[] its;
-    /** Iterator counter. */
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The iterators to iterate over. */
+    private final Iterator<? extends V>[] its;
+    /** Counter of the iterator to use. */
     private int counter = 0;
     
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new iterator over multiple iterators.
+     * The iterators are iterated consecutively from the lowest index
+     * towards the higest index, and each iterator is fully iterated before
+     * iterating the next one.
+     * 
+     * @param its The iterators to iterate over.
+     */
     public MultiIterator(Iterator<? extends V>... its) {
         if (its == null) throw new NullPointerException("Null iterator!");
         this.its = its;
     }
     
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
-    public boolean hasNext() {
-        boolean hasNext = false;
-        while (counter < its.length && !(hasNext = its[counter].hasNext())) {
+    protected V generateNext() {
+        while (counter < its.length && !its[counter].hasNext()) {
             counter++;
         }
-        
-        return hasNext;
-    }
-    
-    @Override
-    public V next() {
-        if (!hasNext()) throw new NoSuchElementException(
-                "No more elements!");
-        return its[counter].next();
+        if (counter < its.length) return its[counter].next();
+        done();
+        return null;
     }
     
     

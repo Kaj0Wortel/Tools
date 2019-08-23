@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 // Tools imports
 import tools.Var;
 import tools.data.file.FileTree;
+import tools.data.img.managed.ImageManager;
 import tools.io.ImageSheetLoader;
 
 
@@ -48,7 +49,7 @@ import tools.io.ImageSheetLoader;
  * Button-like users should use {@link SheetButton} instead, as the dependancy
  * with the {@link ImageManager} is completely removed there.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class Button2
     extends AbstractButton {
     // The conditions of the button.

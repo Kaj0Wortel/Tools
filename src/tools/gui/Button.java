@@ -15,7 +15,6 @@ package tools.gui;
 
 
 // Java imports
-import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -28,14 +27,11 @@ import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import javax.swing.AbstractButton;
-import javax.swing.JFrame;
 import javax.swing.border.Border;
 
 
 // Tools imports
-import tools.data.file.FileTree;
 import tools.gui.border.IOBorder;
 import tools.data.img.managed.ImageManager;
 import tools.observer.HashObservableInterface;
@@ -52,10 +48,11 @@ import tools.observer.HashObservableInterface;
  * Button-like users should use {@link SheetButton} instead, as the dependancy
  * with the {@link ImageManager} is completely removed there.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class Button
         extends AbstractButton
         implements HashObservableInterface {
+    
     /**
      * Enum for keeping track of the current state.
      */

@@ -14,6 +14,12 @@
 package tools.gui;
 
 
+/**
+ * Enum class used for keeping track of the state of a GUI component.
+ * 
+ * @verions 1.0
+ * @author Kaj Wortel
+ */
 public enum GUIState {
     
     /**
@@ -30,6 +36,7 @@ public enum GUIState {
      * The component is pressed.
      */
     PRESSED,
+    
     /**
      * The component is disabled.
      */

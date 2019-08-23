@@ -14,18 +14,15 @@
 package tools.io;
 
 
-// Tools imports
-
-
 // Java imports
 import java.io.IOException;
 import java.io.OutputStream;
 
 
 /**
- * Wrapper class for attaching a listener for detecting
- * the closing of a stream.
+ * Wrapper class for attaching a listener for detecting the closing of a stream.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class OutputStreamClosedNotifier
@@ -35,8 +32,11 @@ public class OutputStreamClosedNotifier
      * Variables.
      * -------------------------------------------------------------------------
      */
+    /** The underlying output stream. */
     private final OutputStream os;
+    /** The listener used notify when the stream closes. */
     private StreamClosedListener listener = null;
+    /** Denotes whether the stream is closed. */
     private volatile boolean closed = false;
     
     
@@ -59,9 +59,6 @@ public class OutputStreamClosedNotifier
     /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
-     */
-    /**
-     * {@inheritDoc}
      */
     @Override
     public void write(int b)

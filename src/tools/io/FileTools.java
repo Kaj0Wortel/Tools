@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +42,16 @@ import java.util.function.Consumer;
 // Tools imports
 import tools.BoolEvaluator;
 import tools.Var;
-import static tools.Var.FS;
 import tools.data.BlockByteBuffer;
 
 
 /**
  * Tool classes for all kinds of file operation.
  * 
+ * @todo
+ * - Take a look at the forEachFile functions
+ * 
+ * @version 0.0
  * @author Kaj Wortel
  */
 public class FileTools {
@@ -527,9 +529,9 @@ public class FileTools {
             for (File file : source.listFiles()) {
                 if (cmp == null || !cmp.evaluate(file)) {
                     File newRoot = new File(
-                            source.getPath() + FS + file.getName());
+                            source.getPath() + Var.FS + file.getName());
                     File newTarget = (target == null ? null : new File(
-                            target.getPath() + FS + file.getName()));
+                            target.getPath() + Var.FS + file.getName()));
                     
                     fileTreeAction(newRoot, newTarget, cmp, action, options);
                     
@@ -545,8 +547,8 @@ public class FileTools {
      * Deletes all files in a directory, or deletes a single file
      * if {@code file} is a file.
      *
-     * @param dir the directory to delete all files of.
-     * @param deleteSelf whether to delete the directory itself.
+     * @param dir The directory to delete all files of.
+     * @param deleteSelf Whether to delete the directory itself.
      */
     public static void deleteAll(File dir, boolean deleteSelf) {
         if (dir.isFile()) {
@@ -576,14 +578,26 @@ public class FileTools {
      * If directories should be used in actions, they are always listed before
      * any other files within that directory.
      *
-     * @param root the root to start performing the actions.
-     * @param listDirs whether to perform the action on directories.
-     * @param action the action to perform.
+     * @param root The root to start performing the actions.
+     * @param listDirs Whether to perform the action on directories.
+     * @param action The action to perform.
+     * 
+     * @deprecated The functionality already exists in {@link tools.data.file.FileTree}.
      */
+    @Deprecated(forRemoval = true)
     public static void forEachFile(File root, Consumer<File> action) {
         forEachFile(root, true, action);
     }
     
+    /**
+     * 
+     * @param root
+     * @param listDirs
+     * @param action 
+     * 
+     * @deprecated The functionality already exists in {@link tools.data.file.FileTree}.
+     */
+    @Deprecated(forRemoval = true)
     public static void forEachFile(File root, boolean listDirs,
             Consumer<File> action) {
         if (root.isFile()) {

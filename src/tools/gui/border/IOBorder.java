@@ -32,8 +32,10 @@ import tools.data.img.managed.ImageManager;
 
 
 /**
+ * 
  * @todo
- * Complete refectoring.
+ * - <strike>Complete refectoring.</strike>
+ * - Remove class.
  * 
  * @author Kaj Wortel
  * 
@@ -43,7 +45,7 @@ import tools.data.img.managed.ImageManager;
  * Border-like users should use {@link SheetBorder} instead, as the dependancy
  * with the {@link ImageManager} is completely removed there.
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class IOBorder
         implements Border, PublicCloneable {
     

@@ -19,14 +19,28 @@ import java.io.Writer;
 
 
 /**
- * This is a writer class that ignores all data written to it.
+ * This is a writer implementation which ignores all data written to it.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class NullWriter extends Writer {
+public class NullWriter
+        extends Writer {
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new writer which ignores all data written to it.
+     */
     public NullWriter() { }
     
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     public void close() { }
     

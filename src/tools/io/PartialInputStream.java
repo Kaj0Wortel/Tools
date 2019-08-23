@@ -22,6 +22,10 @@ import java.io.InputStream;
 /**
  * Input stream for reading a part of another input stream.
  * 
+ * @todo
+ * - Instead of an inputstream, use the virtual files (to be implemented).
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class PartialInputStream

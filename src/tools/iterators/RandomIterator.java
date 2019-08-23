@@ -14,59 +14,68 @@
 package tools.iterators;
 
 
-// Tools imports
-
-
 // Java imports
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import tools.data.array.ArrayTools;
 
 
 /**
- * Iterator class for returning all elements in a collection or an
- * iterable at random.
+ * Iterator implementation which returns all elements in a collection or
+ * iterable in a random order.
  * 
+ * @todo
+ * - If possible, add performance for collection (random access)
+ * 
+ * @version 1.0
  * @author Kaj Wortel
- * @param <V> the type of the returned classes.
+ * 
+ * @param <V> The type of the returned values.
  */
 public  class RandomIterator<V>
         implements Iterator<V> {
     
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The iterator returning the suffled values.  */
     private Iterator<V> it;
     
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
     /**
-     * Constructor.
+     * Randomizes the order of the values returned by the iterator of the given iterable.
      * 
-     * @param iterable the iterable to create this iterator of.
+     * @param iterable The iterable to randomize.
      */
     public RandomIterator(Iterable<V> iterable) {
+        this(iterable.iterator());
+    }
+    
+    /**
+     * Randomizes the order of the values returned by the iterator of the given iterable.
+     * 
+     * @param iterable The iterable to randomize.
+     */
+    public RandomIterator(Iterator<V> iterator) {
         List<V> list = new ArrayList<V>();
-        for (V value : iterable) {
-            list.add(value);
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
         }
         Collections.shuffle(list);
         it = list.iterator();
     }
     
-    /**
-     * @param col the collection to create this iterator of.
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
      */
-    public RandomIterator(Collection<V> col) {
-        V[] arr = (V[]) new Object[col.size()];
-        int i = 0;
-        for (V value : col) {
-            arr[i++] = value;
-        }
-        ArrayTools.shuffle(arr);
-        it = new ArrayIterator(arr);
-    }
-    
-    
     @Override
     public boolean hasNext() {
         return it.hasNext();

@@ -87,30 +87,38 @@ public final class FontLoader {
      * -------------------------------------------------------------------------
      */
     /**
-     * Use this function to invoke and wait until all default additional fonts have been loaded.
+     * Use this function to wait until all default additional fonts have been loaded.
      */
     public static void syncLoad() { }
-    public static int X = 1;
     
     /**
-     * Loads the font with the given key from the file in the given file tree
-     * with the given path. If the key already exists in the font mapping, then
-     * the old font will be replaced by the new font if it is loaded successfully.
+     * Loads the font from the file in the file tree with the given path.
+     * The font will have the given style. The font must be a truetype font.
      * 
-     * @param fileTree 
-     * @param path 
-     * @param key 
-     * @param style 
+     * @param fileTree The file tree to load the file from (local or global).
+     * @param path The path of the font file.
+     * @param style The style of the font.
      * 
-     * @return The loaded font if successfull. {@code null} otherwise.
+     * @return The loaded font, or {@code null} if the font couldn't be loaded.
      */
     public static Font loadFont(FileTree fileTree, String path, int style) {
         return loadFont(fileTree, path, style, Font.TRUETYPE_FONT);
     }
     
+    /**
+     * Loads the font from the file in the file tree with the given path.
+     * The font will have the given style and is of the given type.
+     * 
+     * @param fileTree The file tree to load the file from (local or global).
+     * @param path The path of the font file.
+     * @param style The style of the font.
+     * @param type The type of font to load. By default {@link Font#TRUETYPE_FONT}.
+     * 
+     * @return The loaded font, or {@code null} if the font couldn't be loaded.
+     */
     public static Font loadFont(FileTree fileTree, String path, int style, int type) {
         try (InputStream stream = fileTree.getStream(path)) {
-            return loadFont(stream, path, style, type);
+            return loadFont(stream, fileTree.toAbsolutePath(path), style, type);
             
         } catch (FontFormatException | IOException e) {
             Logger.write(e);
@@ -119,22 +127,26 @@ public final class FontLoader {
     }
     
     /**
-     * TODO
-     * Loads a font from an input stream. Assumes that the input stream comes from the given path.
+     * Loads a font from an input stream. Assumes that the input stream comes from the given absolute path.
      * 
      * @implNote
      * Fonts must still be registered via {@link #registerFont(Font)} before they can be
      * used in swing environments.
      * 
-     * @param stream
-     * @param path
-     * @param style
-     * @param type
+     * @apiNote
+     * The path of the font is used as key, so only enter the absolute path to avoid clashes.
      * 
-     * @return
+     * @param stream The stream to get the data from.
+     * @param path The absolute path of the 
+     * @param style The style of the font.
+     * @param type The type of the font.
      * 
-     * @throws FontFormatException
-     * @throws IOException 
+     * @return The loaded font, or {@code null} if the font couldn't be loaded.
+     * 
+     * @throws FontFormatException If the font is not in the right format.
+     * @throws IOException If there was some IO error.
+     * 
+     * @see #getStyle(java.lang.String)
      */
     public static Font loadFont(InputStream stream, String path, int style, int type)
         throws FontFormatException, IOException {
@@ -143,128 +155,11 @@ public final class FontLoader {
         return font;
     }
     
-    
-    
-    
-    
-    
-    
     /**
-     * (Re-)loads a font from a file from the tool package.
+     * Returns the font from the given path.
      * 
-     * @implNote
-     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
-     * used in swing environments.
+     * @param path The absolute path of the font entry.
      * 
-     * @param localPath
-     * @param style
-     * 
-     * @return 
-     *//*
-    public static Font loadLocalFont(String localPath, int style) {
-        return loadLocalFont(localPath, style, Font.TRUETYPE_FONT);
-    }
-    
-    /**
-     * TODO
-     * (Re-)loads a font from a file.
-     * 
-     * @implNote
-     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
-     * used in swing environments.
-     * 
-     * @param localPath The (local) path of the font file inside the package.
-     * @param style The style of the font. Should be one of:
-     *     <ul>
-     *       <li>{@link Font.PLAIN} </li>
-     *       <li>{@link Font.ITALIC} </li>
-     *       <li>{@link Font.BOLD} </li>
-     *       <li>{@link Font.BOLD} | {@link Font.ITALIC} </li>
-     *     </ul>
-     * 
-     * @return The local font from the file with the given path, and with the given style and type.
-     * 
-     * @see Var#FONT_DIR
-     *//*
-    public static Font loadLocalFont(String localPath, int style, int type) {
-        try (InputStream stream = FileTree.getLocalFileTree().getStream(localPath)) {
-            return loadFont(stream, localPath, style, type);
-            
-        } catch (FontFormatException | IOException e) {
-            Logger.write(e);
-            return null;
-        }
-    }
-    
-    /**
-     * (Re-)loads a font from a file with the given absolute path. It is certain that
-     * this file is an outside resource.
-     * 
-     * @implNote
-     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
-     * used in swing environments.
-     * 
-     * @param path The absolute path to the font file.
-     * @param style The style of the font. Must be one of:
-     *     <ul>
-     *       <li> {@link Font#PLAIN} </li>
-     *       <li> {@link Font#ITALIC} </li>
-     *       <li> {@link Font#BOLD} </li>
-     *       <li> {@link Font#BOLD} | {@link Font#ITALIC}</li>
-     *     </ul>
-     *//*
-    public static Font loadAbsoluteFont(String path, int style) {
-        return loadFont(path, style, Font.TRUETYPE_FONT);
-    }
-    
-    /**
-     * (Re-)loads a font from a file with the given absolute path. It is certain that
-     * this file is an outside resource.
-     * 
-     * @implNote
-     * Fonts must still be registered via {@link #registerFont(Font)} before they can be
-     * used in swing environments.
-     * 
-     * @param path the path to the font file.
-     * @param style the style of the font. Must be one of:
-     *     <ul>
-     *       <li> {@link Font#PLAIN} </li>
-     *       <li> {@link Font#ITALIC} </li>
-     *       <li> {@link Font#BOLD} </li>
-     *       <li> {@link Font#BOLD} | {@link Font#ITALIC}</li>
-     *     </ul>
-     * @param type The font type. Should always be {@link Font#TRUETYPE_FONT}.
-     *//*
-    protected static Font loadFont(String path, int style, int type) {
-        Font font = null;
-        
-        try (InputStream stream = FontLoader.class.getResourceAsStream(path)) {
-            //font = Font.createFont(type, fis).deriveFont(style, 12F);
-            //font = Font.createFont(type, fis).deriveFont(12F);
-            font = Font.createFont(type, stream);// Check this.
-            FONTS.put(path, font);
-            
-        } catch (FontFormatException | IOException e) {
-            Logger.write(e);
-        }
-        
-        return font;
-    }
-    
-    /**
-     * TODO
-     * @param localPath The local path of the font file.
-     * @return The local font from the given path if it was loaded. {@code null} otherwise.
-     * 
-     * @see Var#FONT_DIR
-     */
-    public static Font getLocalFont(String localPath) {
-        return getFont(Var.FONT_DIR + localPath);
-    }
-    
-    /**
-     * TODO
-     * @param path The path of the font file.
      * @return The font from the given path if it was loaded. {@code null} otherwise.
      */
     public static Font getFont(String path) {
@@ -425,7 +320,7 @@ public final class FontLoader {
             Logger.write("load file tree");
             loadFileTree(FileTree.getLocalFileTree(), Var.L_FONT_DIR);
             
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             Logger.write(e);
             
         } finally {

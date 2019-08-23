@@ -22,12 +22,17 @@ import javax.swing.event.DocumentListener;
 /**
  * Adapter class for the {@link #DocumentListener} interface.
  * 
- * @author Kaj Wortel (0991586)
+ * @version 1.0
+ * @author Kaj Wortel
  */
 @FunctionalInterface
 public interface DocumentAdapter
         extends DocumentListener {
     
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     default public void insertUpdate(DocumentEvent e) {
         action(e);
@@ -49,5 +54,6 @@ public interface DocumentAdapter
      * @param e the document event.
      */
     public void action(DocumentEvent e);
+    
     
 }

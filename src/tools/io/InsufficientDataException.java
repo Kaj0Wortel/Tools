@@ -14,69 +14,57 @@
 package tools.io;
 
 
+// Java imports
 import java.io.IOException;
 
 
-
-// Own imports
-
-
-// Tools imports
-
-
-// Java imports
-
-
 /**
+ * This exception should be thrown when not enough data is available.
  * 
- * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class InsufficientDataException
         extends IOException {
     
     /* -------------------------------------------------------------------------
-     * Variables.
-     * -------------------------------------------------------------------------
-     */
-    
-    
-    /* -------------------------------------------------------------------------
-     * Inner classes.
-     * -------------------------------------------------------------------------
-     */
-    
-    
-    /* -------------------------------------------------------------------------
      * Constructors.
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * Creates a blank exception.
      */
     public InsufficientDataException() {
         super();
     }
     
+    /**
+     * Creates a new exception with the given message.
+     * 
+     * @param message The error message.
+     */
     public InsufficientDataException(String message) {
         super(message);
     }
     
+    /**
+     * Creates a new exception with the given message and cause.
+     * 
+     * @param message The error message.
+     * @param cause The cause for this exception.
+     */
     public InsufficientDataException(String message, Throwable cause) {
         super(message, cause);
     }
     
+    /**
+     * Creates a new exception with the given cause.
+     * 
+     * @param cause The cause for this exception.
+     */
     public InsufficientDataException(Throwable cause) {
         super(cause);
     }
-    
-    
-    
-    
-    /* -------------------------------------------------------------------------
-     * Functions.
-     * -------------------------------------------------------------------------
-     */
     
     
 }

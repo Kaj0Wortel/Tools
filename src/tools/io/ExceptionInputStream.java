@@ -27,9 +27,11 @@ import java.io.OutputStream;
  * It also adds an easy conversion function to switch between the this implementation and the
 * java {@link InputStream} variant.
  * 
- * @implNote It is highly advised to let the implementing class (indirectly) extend
- *     {@link InputStream} for compatibilty reasons.
+ * @implNote
+ * It is highly advised to let the implementing class (indirectly) extend {@link InputStream},
+ * as this interface re-defines the most functions from this class.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public interface ExceptionInputStream {
@@ -228,7 +230,7 @@ public interface ExceptionInputStream {
     
     
     /* -------------------------------------------------------------------------
-     * Functions.
+     * Exception functions.
      * -------------------------------------------------------------------------
      */
     /**

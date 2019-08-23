@@ -504,29 +504,30 @@ public final class ImageManager {
         return getNumImgWidth(idName) * getNumImgHeight(idName);
     }
     
-    /**
-     * Upon static class initialisation, create an inactive thread that
-     * waits until an image becomes invalid and removes this image from RAM. <br>
+    /*
+     * Upon static class initialisation, create a thread that waits until an
+     * image becomes invalid, and then removes this image from RAM. <br>
      * The thread is scheduled with the lowest priority to prevent disrupting
-     * time-sensitive threads.
+     * time-sensitive threads, and is initialized as daemon thread to prevent
+     * keeping the application alive at shut-down time.
      */
     static {
-        new Thread(ImageManager.class.getName() + " Thread") {
-            @Override
-            public void run() {
-                Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-                while (true) {
-                    try {
-                        Delay delay = QUEUE.poll(1, TimeUnit.DAYS);
-                        if (delay == null) continue;
-                        ImageSheetLoader.removeImage(delay.getToken().getIdName());
-                        
-                    } catch (InterruptedException e) {
-                        Logger.write(e);
-                    }
+        Thread runThread = new Thread(() -> {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            while (true) {
+                try {
+                    Delay delay = QUEUE.poll(1, TimeUnit.DAYS);
+                    if (delay == null) continue;
+                    ImageSheetLoader.removeImage(delay.getToken().getIdName());
+
+                } catch (InterruptedException e) {
+                    Logger.write(e);
                 }
             }
-        }.start();
+        });
+        runThread.setDaemon(true);
+        runThread.setPriority(Thread.MIN_PRIORITY);
+        runThread.start();
     }
     
     

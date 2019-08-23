@@ -19,14 +19,30 @@ import java.io.OutputStream;
 
 
 /**
- * This is an output stream class that ignores all data written to it.
+ * This is an output stream implementation which ignores all data written to it.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class NullOutputStream extends OutputStream {
+public class NullOutputStream
+        extends OutputStream {
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new output stream which ignores all data written to it.
+     */
     public NullOutputStream() { }
     
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     public void write(int i) { }
+    
+    
 }

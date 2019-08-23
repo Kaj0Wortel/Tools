@@ -221,6 +221,7 @@ public class JarFileTree
                         return new File(toAbsolutePath(name)).toPath();
                     }
                 }
+                done();
                 return null;
             }
         };

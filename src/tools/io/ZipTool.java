@@ -10,7 +10,7 @@
  * It is not allowed to redistribute any (modified) versions of this file    *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.io;
 
 
@@ -19,21 +19,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
-
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+
 /**
  * 
  * 
+ * @version 0.0
  * @author Kaj Wortel
+ * 
+ * @deprecated Ancient class. Should be removed.
  */
+@Deprecated(forRemoval = true)
 public class ZipTool {
     final static int BLOCK_SIZE = 1024;
     

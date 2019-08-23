@@ -42,6 +42,7 @@ import tools.io.PartFile;
  * </ul>
  * No other assumptions about the order of the files can be made.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class FileIterator
@@ -54,7 +55,8 @@ public class FileIterator
     /** The root directory to iterate over. */
     private final PartFile root;
     /** Whether to list the directories or not. */
-    private boolean listDirs;
+    private final boolean listDirs;
+    
     /** The stack for keeping track of which files to add. */
     private final Stack<PartFile> stack = new Stack<>();
     
@@ -72,7 +74,7 @@ public class FileIterator
      * @param root The root file.
      * @param listDirs Whether to list the directories.
      * 
-     * @throws IOException If the given file does not exist.
+     * @throws IOException If some IO error occured.
      */
     public FileIterator(File root, boolean listDirs)
             throws IOException {
@@ -110,6 +112,7 @@ public class FileIterator
             }
             if (listDirs) return file;
         }
+        done();
         return null;
     }
     

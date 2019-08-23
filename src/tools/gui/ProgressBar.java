@@ -10,12 +10,8 @@
  * It is not allowed to redistribute any (modified) versions of this file    *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.gui;
-
-
-// Tools imports
-import tools.MultiTool;
 
 
 // Java imports
@@ -32,12 +28,9 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseWheelEvent;
-
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.TimeZone;
-
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -51,13 +44,160 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
-//import javax.swing.text.Document;
 
 
-public class ProgressBar extends JFrame {
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Bar class
-     * ----------------------------------------------------------------------------------------------------------------
+// Tools imports
+import tools.MultiTool;
+
+
+/**
+ * 
+ * @todo Complete refactoring.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Complete refactoring needed.
+ */
+@Deprecated
+public class ProgressBar
+        extends JFrame {
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    private static final long DEFAULT_MAX_VALUE = 100L;
+    private static final int DEFAULT_DECIMALS = 2;
+    private static final boolean DEFAULT_AUTO_RESIZE = true;
+    
+    private static final int DEFAULT_EXTRA_LOG_WIDTH = 100;
+    private static final int DEFAULT_EXTRA_LOG_HEIGHT = 200;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    private final String name;
+    private final int decimals;
+    
+    private long maxValue;
+    private long curValue = 0;
+    private Integer prevTextLength = 0;
+    private double progressPercentage = 0.0;
+    private long startTime = System.currentTimeMillis();
+    private long endTime = 0L;
+    private boolean logDocListenerAdded = true;
+    private int optionButtonHeight = 0;
+    
+    // GUI
+    private Bar bar;
+    private JLabel description;
+    private JEditorPane logPane;
+    private JScrollPane logScrollPane;
+    private JButton moreHideButton;
+    
+    private boolean showMore = false;
+    private String moreText = "More >>";
+    private String hideText = "Hide <<";
+    private int spacing = 6;
+    private int barHeight = 30;
+    private int descriptionHeight = 20;
+    private boolean autoResize = true;
+    private AbstractButton[] buttons = null;
+    
+    /**
+     * Used to detect buttonpresses for the more/hide button.
+     * Shows the log screen after the "more" button was pressed,
+     * and hides when the "hide" button was pressed.
+     */
+    private final ActionListener moreHideActionListener = (ActionEvent e) -> {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                showMore = !showMore;
+                
+                if (showMore) {
+                    moreHideButton.setText(hideText);
+                    add(logScrollPane);
+                    
+                    if (autoResize) {
+                        setSize(getWidth() + DEFAULT_EXTRA_LOG_WIDTH, getHeight() + DEFAULT_EXTRA_LOG_HEIGHT + spacing);
+                    }
+                    
+                } else {
+                    moreHideButton.setText(moreText);
+                    remove(logScrollPane);
+                    
+                    if (autoResize) {
+                        setSize(getWidth() - DEFAULT_EXTRA_LOG_WIDTH, getHeight() - logScrollPane.getHeight() - spacing);
+                    }
+                }
+                
+                update();
+            }
+        });
+    };
+    
+    private final DocumentListener logDocListener = new DocumentListener() {
+        @Override
+        public void changedUpdate(DocumentEvent e) { }
+        
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    logPane.setCaretPosition(logPane.getDocument().getLength());
+                }
+            });
+        }
+        
+        @Override
+        public void removeUpdate(DocumentEvent e) { }
+    };
+    /**
+     * Checks if the user scrolled. If so, check if the cursor is now at the end.
+     * If so, start keep it there after new updates.
+     * Else dont update it at all.
+     */
+    private MouseAdapter scrollChanger = new MouseAdapter() {
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    JScrollBar vertical = logScrollPane.getVerticalScrollBar();
+                    if (vertical.getValue() + vertical.getModel().getExtent() == vertical.getMaximum()) {
+                        if (!logDocListenerAdded) {
+                            logPane.getDocument().addDocumentListener(logDocListener);
+                            logDocListenerAdded = true;
+                        }
+                        
+                    } else if (logDocListenerAdded) {
+                        logPane.getDocument().removeDocumentListener(logDocListener);
+                        logDocListenerAdded = false;
+                    }
+                }
+            });
+        }
+    };
+    
+    /**
+     * Checks of resize events.
+     */
+    private final ComponentAdapter windowResizeListener = new ComponentAdapter() {
+        @Override
+        public void componentResized(ComponentEvent e) {
+            update();
+        }
+    };
+    
+    
+    /* -------------------------------------------------------------------------
+     * Inner classes.
+     * -------------------------------------------------------------------------
      */
     public class Bar extends JPanel {
         final private Bar thisObj;
@@ -119,47 +259,10 @@ public class ProgressBar extends JFrame {
         }
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Global variables
-     * ----------------------------------------------------------------------------------------------------------------
-     */
-    final private static long DEFAULT_MAX_VALUE = 100L;
-    final private static int DEFAULT_DECIMALS = 2;
-    final private static boolean DEFAULT_AUTO_RESIZE = true;
     
-    final private static int DEFAULT_EXTRA_LOG_WIDTH = 100;
-    final private static int DEFAULT_EXTRA_LOG_HEIGHT = 200;
-    
-    final private String name;
-    final private int decimals;
-    private long maxValue;
-    private long curValue = 0;
-    private Integer prevTextLength = 0;
-    private double progressPercentage = 0.0;
-    private long startTime = System.currentTimeMillis();
-    private long endTime = 0L;
-    private boolean logDocListenerAdded = true;
-    private int optionButtonHeight = 0;
-    
-    // GUI
-    private Bar bar;
-    private JLabel description;
-    private JEditorPane logPane;
-    private JScrollPane logScrollPane;
-    private JButton moreHideButton;
-    
-    private boolean showMore = false;
-    private String moreText = "More >>";
-    private String hideText = "Hide <<";
-    private int spacing = 6;
-    private int barHeight = 30;
-    private int descriptionHeight = 20;
-    private boolean autoResize = true;
-    private AbstractButton[] buttons = null;
-    
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Constructors
-     * ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
      */
     // Without autoResize
     public ProgressBar(AbstractButton... buttons) {
@@ -208,7 +311,8 @@ public class ProgressBar extends JFrame {
     }
     
     // Full constructor
-    public ProgressBar(String name, long maxValue, int decimals, boolean autoResize, AbstractButton... buttons) {
+    public ProgressBar(String name, long maxValue, int decimals, boolean autoResize,
+            AbstractButton... buttons) {
         super((name == null ? "" : name + " - ") + "0%");
         if (maxValue < 0) throw new IllegalArgumentException("Max value is < 0: " + maxValue);
         if (decimals < 0) throw new IllegalArgumentException("Decimals is < 0: " + decimals);
@@ -261,148 +365,57 @@ public class ProgressBar extends JFrame {
         this.addComponentListener(windowResizeListener);
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Action functions
-     * ----------------------------------------------------------------------------------------------------------------
+    
+    /* -------------------------------------------------------------------------
+     * Action functions.
+     * -------------------------------------------------------------------------
      */
-    /* 
+    /**
      * Sets the buttons below in a row on the panel.
      * First removes all other buttons, then adds the new ones.
      * To remove all buttons, call setButtons(null).
+     * 
+     * @param btns 
      */
     public void setButtons(AbstractButton[] btns) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                // Remove the previous buttons
-                if (buttons != null) {
-                    for (int i = 0; i < buttons.length; i++) {
-                        remove(buttons[i]);
-                    }
+        SwingUtilities.invokeLater(() -> { // is this needed?
+            // Remove the previous buttons
+            if (buttons != null) {
+                for (int i = 0; i < buttons.length; i++) {
+                    remove(buttons[i]);
                 }
+            }
+            
+            int prevOptionButtonHeight = optionButtonHeight;
+            optionButtonHeight = 0;
+            // Add the new buttons
+            if (btns == null) {
+                buttons = null;
                 
-                int prevOptionButtonHeight = optionButtonHeight;
-                optionButtonHeight = 0;
-                // Add the new buttons
-                if (btns == null) {
-                    buttons = null;
+            } else {
+                buttons = new AbstractButton[btns.length];
+                for (int i = 0; i < btns.length; i++) {
+                    buttons[i] = btns[i];
                     
-                } else {
-                    buttons = new AbstractButton[btns.length];
-                    for (int i = 0; i < btns.length; i++) {
-                        buttons[i] = btns[i];
-                        
-                        // Update the new button height
-                        if (buttons[i] != null) {
-                            add(buttons[i]);
-                            if (buttons[i].getHeight() > optionButtonHeight) {
-                                optionButtonHeight = buttons[i].getHeight();
-                            }
+                    // Update the new button height
+                    if (buttons[i] != null) {
+                        add(buttons[i]);
+                        if (buttons[i].getHeight() > optionButtonHeight) {
+                            optionButtonHeight = buttons[i].getHeight();
                         }
                     }
                 }
-                
-                if (autoResize) {
-                    setSize(getWidth(), getHeight() - prevOptionButtonHeight + optionButtonHeight);
-                }
-                
-                update();
             }
+            
+            if (autoResize) {
+                setSize(getWidth(), getHeight() - prevOptionButtonHeight + optionButtonHeight);
+            }
+            
+            update();
         });
     }
     
-    /* 
-     * Used to detect buttonpresses for the more/hide button.
-     * Shows the log screen after the "more" button was pressed,
-     * and hides when the "hide" button was pressed.
-     */
-    private ActionListener moreHideActionListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    showMore = !showMore;
-                    
-                    if (showMore) {
-                        moreHideButton.setText(hideText);
-                        add(logScrollPane);
-                        
-                        if (autoResize) {
-                            setSize(getWidth() + DEFAULT_EXTRA_LOG_WIDTH, getHeight() + DEFAULT_EXTRA_LOG_HEIGHT + spacing);
-                        }
-                        
-                    } else {
-                        moreHideButton.setText(moreText);
-                        remove(logScrollPane);
-                        
-                        if (autoResize) {
-                            setSize(getWidth() - DEFAULT_EXTRA_LOG_WIDTH, getHeight() - logScrollPane.getHeight() - spacing);
-                        }
-                    }
-                    
-                    update();
-                }
-            });
-        }
-    };
-    
-    /* 
-     * Checks if the user scrolled. If so, check if the cursor is now at the end.
-     * If so, start keep it there after new updates.
-     * Else dont update it at all.
-     */
-    private MouseAdapter scrollChanger = new MouseAdapter() {
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    JScrollBar vertical = logScrollPane.getVerticalScrollBar();
-                    if (vertical.getValue() + vertical.getModel().getExtent() == vertical.getMaximum()) {
-                        if (!logDocListenerAdded) {
-                            logPane.getDocument().addDocumentListener(logDocListener);
-                            logDocListenerAdded = true;
-                        }
-                        
-                    } else if (logDocListenerAdded) {
-                        logPane.getDocument().removeDocumentListener(logDocListener);
-                        logDocListenerAdded = false;
-                    }
-                }
-            });
-        }
-    };
-    
-    DocumentListener logDocListener = new DocumentListener() {
-        @Override
-        public void changedUpdate(DocumentEvent e) { }
-        
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    logPane.setCaretPosition(logPane.getDocument().getLength());
-                }
-            });
-        }
-        
-        @Override
-        public void removeUpdate(DocumentEvent e) { }
-    };
-    
-    /* 
-     * Checks of resize events.
-     */
-    ComponentAdapter windowResizeListener = new ComponentAdapter() {
-        @Override
-        public void componentResized(ComponentEvent e) {
-            update();
-        }
-    };
-    
-    /* 
+    /**
      * Updates and repaints all components.
      */
     public void update() {
@@ -465,13 +478,19 @@ public class ProgressBar extends JFrame {
         });
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Set functions
-     * ----------------------------------------------------------------------------------------------------------------
+    
+    /* -------------------------------------------------------------------------
+     * Set functions.
+     * -------------------------------------------------------------------------
      */
-    /* 
+    /**
      * Sets the location and size of this object.
      * Aditionally updates after setting the bounds.
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height 
      */
     @Override
     public void setBounds(int x, int y, int width, int height) {
@@ -479,9 +498,11 @@ public class ProgressBar extends JFrame {
         this.update();
     }
     
-    /* 
+    /**
      * Sets this object (in-)visible.
      * Aditionally updates when made visible.
+     * 
+     * @param visible 
      */
     @Override
     public void setVisible(boolean visible) {
@@ -492,76 +513,79 @@ public class ProgressBar extends JFrame {
         }
     }
     
-    /* 
+    /**
      * Sets the value of the bar.
+     * 
+     * @param value 
      */
     public void setValue(long value) {
-        //SwingUtilities.invokeLater(new Runnable() {
-        //    @Override
-        //    public void run() {
-                curValue = value;
-                
-                progressPercentage = ((double) value) / ((double) maxValue) * 100.0;
-                bar.setPercentage(progressPercentage);
-                
-                String text = MultiTool.doubleToStringDecimals(progressPercentage, decimals);
-                setTitle((name == null ? "" : name + " - ") + text + "%");
-                
-                update();
-        //    }
+        //SwingUtilities.invokeLater(() -> {
+            curValue = value;
+            
+            progressPercentage = ((double) value) / ((double) maxValue) * 100.0;
+            bar.setPercentage(progressPercentage);
+            
+            String text = MultiTool.doubleToStringDecimals(progressPercentage, decimals);
+            setTitle((name == null ? "" : name + " - ") + text + "%");
+            
+            update();
         //});
     }
     
-    /* 
+    /**
      * Sets the max value.
      * Uses the setValue() method to update correctly.
+     * 
+     * @param value 
      */
     public void setMaxValue(long value) {
         maxValue = value;
         setValue(curValue);
     }
     
-    /* 
+    /**
      * Adds the given value to the current value.
      * Uses the method setValue(long) for futher handeling.
+     * 
+     * @param addValue 
      */
     public void addValue(long addValue) {
         setValue(curValue + addValue);
     }
     
-    /* 
+    /**
      * Adds a description to the log.
-     * Also sets the description of the short description 
+     * Also sets the short description.
+     * 
+     * @param text 
      */
     public void addDescription(String text) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                synchronized(prevTextLength) {
-                    description.setText(text);
+        SwingUtilities.invokeLater(() -> {
+            synchronized(prevTextLength) {
+                description.setText(text);
+                
+                if (logPane.getText().equals("")) {
+                    logPane.setText(text);
                     
-                    if (logPane.getText().equals("")) {
-                        logPane.setText(text);
-                        
-                    } else {
-                        try {
-                            logPane.getDocument().insertString(logPane.getText().length(), 
-                                                               System.getProperty("line.separator") + text, null);
-                        } catch (BadLocationException e) {
-                            System.err.println(e);
-                        }
+                } else {
+                    try {
+                        logPane.getDocument().insertString(logPane.getText().length(),
+                                System.getProperty("line.separator") + text, null);
+                    } catch (BadLocationException e) {
+                        System.err.println(e);
                     }
-                    
-                    prevTextLength = text.length();
                 }
+                
+                prevTextLength = text.length();
             }
         });
     }
     
-    
-    /* 
+    /**
      * Changes the previous description in the log.
      * Also sets the description for the short description.
+     * 
+     * @param text 
      */
     public void changePrevDescription(String text) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -583,7 +607,7 @@ public class ProgressBar extends JFrame {
         });
     }
     
-    /* 
+    /**
      * Sets the start time.
      * Also returns the exact start time.
      */
@@ -591,7 +615,7 @@ public class ProgressBar extends JFrame {
         return startTime = System.currentTimeMillis();
     }
     
-    /* 
+    /**
      * Sets the end time.
      * Also returns the exact end time.
      */
@@ -599,9 +623,13 @@ public class ProgressBar extends JFrame {
         return endTime = System.currentTimeMillis();
     }
     
-    /* 
+    /**
      * Sets the end time and logs the time taken
      * Returns the end time.
+     * 
+     * @param dateFormat
+     * 
+     * @return 
      */
     public long setEndTimeAndLog(String dateFormat) {
         Date time = new Date(setEndTime() - startTime);
@@ -613,49 +641,58 @@ public class ProgressBar extends JFrame {
         return endTime;
     }
     
+    /**
+     * 
+     * @param more 
+     */
     public void setLog(boolean more) {
         if (more != showMore) {
             moreHideActionListener.actionPerformed(null);
         }
     }
     
-    /* ----------------------------------------------------------------------------------------------------------------
-     * Get functions
-     * ----------------------------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
+     * Get functions.
+     * -------------------------------------------------------------------------
      */
-    /* 
-     * Returns the set name.
+    /**
+     * @todo
+     * is this function needed?
+     * 
+     * @return The name of the progress bar.
      */
+    @Override
     public String getName() {
         return name;
     }
     
-    /* 
-     * Returns the set maximal value.
+    /**
+     * @return The set maximal progress value.
      */
     public long getMaxValue() {
         return maxValue;
     }
     
-    /* 
-     * Returns the current value.
+    /**
+     * @return The current progress value.
      */
     public long getValue() {
         return curValue;
     }
     
-    /* 
+    /**
      * Returns the percentage currently set.
      * Note that this value can have a higher decimal precision than
      * the decimal precision that was set.
+     * 
+     * @return 
      */
     public double getPercentage() {
         return progressPercentage;
     }
     
-    /* 
-     * Returns true if the log is open.
-     * False otherwise.
+    /**
+     * @return {@code true} if the log is opened. {@code false} otherwise.
      */
     public boolean logIsOpen() {
         return showMore;
@@ -688,6 +725,8 @@ public class ProgressBar extends JFrame {
         
         pb.setEndTimeAndLog("HH'h 'mm'm 'ss'.'SSS'ms'");
     }
+    
+    
 }
 
 

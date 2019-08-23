@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-/**DONE (maybe 2nd check for constructors)
+/**
  * Provides an easy way of processing a data file. Has the following
  * functionality:
  * <ul>
@@ -48,6 +48,11 @@ import java.util.Objects;
  *   <li> Can be used as a wrapper for readers.</li>
  * </ul>
  * 
+ * @todo
+ * - Check constructors.
+ * - Add implementation of the {@link #read()} function.
+ * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class BufferedReaderPlus
@@ -55,7 +60,7 @@ public class BufferedReaderPlus
         implements Closeable {
     
     /* -------------------------------------------------------------------------
-     * Variables.
+     * Constants.
      * -------------------------------------------------------------------------
      */
     // Types of supported comments.
@@ -82,6 +87,11 @@ public class BufferedReaderPlus
     /** Support CONFIG file types. */
     public static final int TYPE_CONFIG = 2;
     
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
     /** Current lineCounter in the file. */
     private int lineCounter = 0;
     
@@ -131,7 +141,7 @@ public class BufferedReaderPlus
      * 
      * @param file The file to read.
      * 
-     * @throws FileNotFoundException Iff the file could not be accessed.
+     * @throws FileNotFoundException If the file could not be accessed.
      */
     public BufferedReaderPlus(String file)
             throws FileNotFoundException {
@@ -1124,10 +1134,16 @@ public class BufferedReaderPlus
         return lineCounter;
     }
     
+    
+    /* -------------------------------------------------------------------------
+     * Not supported functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Not supported function.
      *
-     * @throws UnsupportedOperationException when called
+     * @throws UnsupportedOperationException Always when called.
+     * 
      * @deprecated Function cannot and shouldn't be implemented.
      */
     @Override
@@ -1139,7 +1155,8 @@ public class BufferedReaderPlus
     /**
      * Not supported function.
      *
-     * @throws UnsupportedOperationException when called
+     * @throws UnsupportedOperationException Always when called
+     * 
      * @deprecated Function cannot and shouldn't be implemented.
      */
     @Override

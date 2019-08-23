@@ -63,9 +63,13 @@ public class SheetBorder
      * Variables.
      * -------------------------------------------------------------------------
      */
+    /** The current state of the border. */
     private GUIState state = GUIState.DEFAULT;
+    /** The image sheets representing the border. */
     private GUIImageSheet sheets;
+    /** The insets of the border. */
     private Insets insets;
+    /** The scaling type for scaling the border. */
     private int scaleType = Image.SCALE_DEFAULT;
     
     
@@ -74,7 +78,10 @@ public class SheetBorder
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
+     * Creates a new border with the given insets and image sheets.
+     * 
+     * @param insets The insets of the border.
+     * @param sheets The image sheets used to display the border.
      */
     public SheetBorder(Insets insets, GUIImageSheet sheets) {
         setImageSheet(sheets);

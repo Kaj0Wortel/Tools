@@ -21,6 +21,7 @@ import java.util.EventListener;
 /**
  * Listener class for capturing stream closures.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 @FunctionalInterface

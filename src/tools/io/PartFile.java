@@ -1,3 +1,15 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
+ * Contact: kaj.wortel@gmail.com                                             *
+ *                                                                           *
+ * This file is part of the tools project, which can be found on github:     *
+ * https://github.com/Kaj0Wortel/tools                                       *
+ *                                                                           *
+ * It is allowed to use, (partially) copy and modify this file               *
+ * in any way for private use only by using this header.                     *
+ * It is not allowed to redistribute any (modified) versions of this file    *
+ * without my permission.                                                    *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package tools.io;
 
@@ -11,10 +23,9 @@ import tools.Var;
 
 
 /**
- * Extends the {@link File} class by supporting partial files. <br>
- * This includes initializing and getting a basis directory and
- * a file path relative to that directory.
+ * Extends the {@link File} class by supporting operations for files with a base path.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class PartFile

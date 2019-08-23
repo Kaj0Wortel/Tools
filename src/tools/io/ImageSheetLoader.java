@@ -62,7 +62,7 @@ public final class ImageSheetLoader {
      * 
      * @deprecated No instances should be made.
      */
-    @Deprecated
+    @Deprecated(forRemoval = false)
     private ImageSheetLoader() { }
     
     

@@ -10,17 +10,11 @@
  * It is not allowed to redistribute any (modified) versions of this file    *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.gui;
 
 
-// Tools imports
-import tools.Var;
-import tools.ImageTools;
-
-
 // Java imports
-import tools.io.ImageSheetLoader;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -28,27 +22,39 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-
 import java.io.IOException;
-
 import javax.imageio.IIOException;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 
-// tmp
-import javax.swing.JFrame;
+// Tools imports
+import tools.Var;
+import tools.ImageTools;
 import tools.data.file.FileTree;
+import tools.io.ImageSheetLoader;
 
 
 /**
  * Provides a customizable slider via images.
  * 
  * @todo
+ * - Throw away class and create a new {@code SheetSlider} class
+ *   which supports more or less the same functionallity, but then
+ *   with {@link ImageSheet}s.
+ * 
+ * @oldTodo
  * complete refactoring
  * old:
  * - implement "good" rescaling images by rescaling them in the repaint
  *   method instead of the setBounds.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Ancient class. Should be thrown away.
  */
+@Deprecated(forRemoval = true)
 public class Slider
         extends JPanel {
     

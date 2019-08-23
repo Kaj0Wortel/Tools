@@ -27,10 +27,10 @@ import java.util.List;
 
 
 /**
- * TODO: comments + refactoring
+ * Collector class for creating an iterator over multiple arrays
+ * and elements.
  * 
- * Collector class for creating an iterator over multiple arrays.
- * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ArrayCollector<V>
@@ -41,32 +41,49 @@ public class ArrayCollector<V>
      * -------------------------------------------------------------------------
      */
     /** List containing all data so far. */
-    final private List<Wrapper<V[]>> data = new ArrayList<>();
+    private final List<Wrapper<V[]>> data = new ArrayList<>();
     
     
     /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
-    
+    /**
+     * Appends the element to the end of the list.
+     * 
+     * @param part The item to append.
+     */
     public void appendItem(V part) {
         data.add(new Wrapper(new Object[] {part}));
     }
     
+    /**
+     * Appends a wrapped element to the end of the list.
+     * 
+     * @param part The item to append.
+     */
     public void appendItem(Wrapper<V> part) {
+        if (part == null) throw new NullPointerException();
         data.add(new Wrapper(new Object[] {part.get()}));
     }
     
     /**
-     * Adds the given part to the iterator.
+     * Adds the given parts to the list.
      * 
-     * @param part the part to be added.
+     * @param part The part to be added.
      */
     public void append(V[] part) {
+        if (part == null) throw new NullPointerException();
         data.add(new Wrapper<V[]>(part));
     }
     
+    /**
+     * Appends all elements in the array in the wrapper to the list.
+     * 
+     * @param part The elements to append.
+     */
     public void append(Wrapper<V[]> part) {
+        if (part == null) throw new NullPointerException();
         data.add(part);
     }
     

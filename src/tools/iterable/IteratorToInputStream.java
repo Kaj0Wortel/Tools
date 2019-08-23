@@ -21,18 +21,20 @@ import java.util.Iterator;
 
 
 /**
+ * Creates an input stream from a byte iterable/iterator.
  * 
- * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class IteratorToInputStream
         extends InputStream {
+    
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
     /** The iterator to obtain the data from. */
-    final private Iterator<Byte> it;
+    private final Iterator<Byte> it;
     
     
     /* -------------------------------------------------------------------------
@@ -40,7 +42,7 @@ public class IteratorToInputStream
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a new input stream from the given iterator.
+     * Creates a new input stream from the given byte iterator.
      * 
      * @param it the iterator to obtain the data from.
      */
@@ -49,7 +51,7 @@ public class IteratorToInputStream
     }
     
     /**
-     * Creates a new input stream from the iterator of the given iterable.
+     * Creates a new input stream from the iterator of the given byte iterable.
      * 
      * @param it the iterable to obtain the data from.
      */

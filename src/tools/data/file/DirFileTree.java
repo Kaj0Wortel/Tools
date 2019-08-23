@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -183,10 +182,14 @@ public class DirFileTree
             throws IOException {
         File absFile = new File(toAbsolutePath(file.toString()));
         Iterator<PartFile> it = new FileIterator(absFile, true);
-        return new GeneratorIterator<Path>() {
+        return new Iterator<Path>() {
             @Override
-            protected Path generateNext() {
-                if (!it.hasNext()) return null;
+            public boolean hasNext() {
+                return it.hasNext();
+            }
+            
+            @Override
+            public Path next() {
                 return it.next().toPath();
             }
         };

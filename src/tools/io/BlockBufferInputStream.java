@@ -27,6 +27,7 @@ import java.io.InputStream;
  * Abstract class for making an {@link InputStream} which accepts only
  * (dynamic) chunks of data instead of a stream.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public abstract class BlockBufferInputStream
@@ -95,8 +96,8 @@ public abstract class BlockBufferInputStream
     
     /**
      * Returns the block size for the {@link #readBlock(byte[])} function. <br>
-     * This function will be called exactly once before each call to the function
-     * {@link #readBlock(byte[])}. <br>
+     * This function will be called exactly once before each call to the
+     * {@link #readBlock(byte[])} function. <br>
      * Furthermore is guarateed that this function will only be called
      * after the {@link #readBlock(byte[])} function has been invoked for the
      * previous block (if such a block exists).

@@ -24,6 +24,7 @@ import java.io.OutputStream;
  * Wrapper class to convert an {@link InputStream} to an
  * {@link ExceptionInputStream} and vice verca.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ExceptionInputStreamWrapper

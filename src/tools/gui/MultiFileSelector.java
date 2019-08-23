@@ -10,17 +10,14 @@
  * It is not allowed to redistribute any (modifed) versions of this file     *
  * without my permission.                                                    *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//todo
+
 package tools.gui;
-
-
-// Tools imports
-import tools.log.Logger;
 
 
 // Java imports
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
@@ -29,44 +26,64 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-
 import java.util.ArrayList;
-
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.border.Border;
 
-// tmp
-import javax.swing.JFrame;
-import java.awt.Dimension;
+
+// Tools imports
+import tools.log.Logger;
 
 
-public class MultiFileSelector extends JPanel {
-    final static private int ENTRY_HEIGHT = 20;
-    final private MultiFileSelector mfs = this;
-    final FieldData[] fieldData;
+/**
+ * @todo
+ * Complete refactoring.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Complete refactoring needed.
+ */
+@Deprecated
+public class MultiFileSelector
+        extends JPanel {
     
-    final private Object fileEntryLock = new Object();
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    private static final int ENTRY_HEIGHT = 20;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    private final FieldData[] fieldData;
+    
+    /** The lock used to synchronize the class. */
+    private final Lock lock = new ReentrantLock();
     
     private volatile ArrayList<Thread> requestThreads = new ArrayList<Thread>();
     private ArrayList<FileEntry> selectedFileEntries = new ArrayList<FileEntry>();
     private ArrayList<FileEntry> fileEntries = new ArrayList<FileEntry>();
     private FileEntry focusFieldEntry = null;
-    private boolean showErrTextIfLogNotSupported = false;
     private FileEntryHeader feh;
     
     JScrollPane fileScrollPane = new JScrollPane();
@@ -75,11 +92,94 @@ public class MultiFileSelector extends JPanel {
     JButton removeFileButton = new JButton("Remove file");
     JButton approveButton;
     
-    
-    /* -----------------------------
-     * Constructors
+    /**
+     * ActionListener for the buttons
      */
+    private ActionListener buttonListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JButton button = (JButton) e.getSource();
+            if (button == addFileButton) {
+                JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+                fc.setMultiSelectionEnabled(true);
+                fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                int action = fc.showDialog(MultiFileSelector.this, "Select file/dir");
+                
+                if (action == JFileChooser.APPROVE_OPTION) {
+                    File[] newFiles = fc.getSelectedFiles();
+                    
+                    for (int i = 0; i < newFiles.length; i++) {
+                        try {
+                            addFile(newFiles[i]);
+                            
+                        } catch (IOException ex) {
+                            Logger.write(ex);
+                        }
+                    }
+                }
+                
+            } else if (button == removeFileButton) {
+                for (int i = 0; i < selectedFileEntries.size(); i++) {
+                    remove(selectedFileEntries.get(i));
+                }
+                
+                removeFileEntries(selectedFileEntries);
+            }
+        }
+    };
     
+    /**
+     * ActionListener for the approve button
+     */
+    private ActionListener approveListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            ActionListener[] als = (ActionListener[]) getListeners(ActionListener.class);
+            
+            for (int i = 0; i < als.length; i++) {
+                e.setSource(this);
+                als[i].actionPerformed(e);
+            }
+            
+            // Releases all thread that are waiting for the files
+            while (requestThreads.size() != 0) {
+                synchronized(requestThreads.get(0)) {
+                    requestThreads.get(0).notify();
+                    requestThreads.remove(0);
+                }
+            }
+        }
+    };
+    
+    /**
+     * MouseListener for the FileEntries
+     */
+    private MouseAdapter ml = new MouseAdapter() {
+        @Override
+        public void mouseEntered(MouseEvent e) { }
+        
+        @Override
+        public void mouseExited(MouseEvent e) { }
+        
+        @Override
+        public void mousePressed(MouseEvent e) {
+            FileEntry fe = (FileEntry) e.getSource();
+            requestFocus(fe);
+            
+            if (fe.setSelected(!fe.isSelected())) {
+                selectedFileEntries.add(fe);
+                
+            } else {
+                selectedFileEntries.remove(fe);
+            }
+        }
+    };
+    
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
     // No approve text
     public MultiFileSelector(FieldData... fieldData) {
         this(0, 0, 0, 0, "OK", fieldData);
@@ -170,13 +270,20 @@ public class MultiFileSelector extends JPanel {
         Logger.write(this.getClass().getName() + " Object was created.");
     }
     
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     public void setBounds(int x, int y, int width, int height) {
         super.setBounds(x, y, width, height);
     }
     
-    /* 
-     * Calcualtes the initial label breaks
+    /**
+     * Calcualates the initial label breaks
+     * 
+     * @return 
      */
     public Integer[] calculateInitialLabelBreaks() {
         Integer[] labelBreaks = new Integer[fieldData.length];
@@ -238,8 +345,12 @@ public class MultiFileSelector extends JPanel {
         return labelBreaks;
     }
     
-    /* 
+    /**
      * Adds a FileEntry to the list
+     * 
+     * @param file
+     * 
+     * @throws IOException 
      */
     public void addFile(File file) throws IOException {
         JComponent[] labels = new JComponent[fieldData.length];
@@ -341,48 +452,59 @@ public class MultiFileSelector extends JPanel {
         repaint();
     }
     
-    /* 
+    /**
      * Removes a FileEntry from the list
+     * 
+     * @param fe 
      */
     public void removeFileEntry(FileEntry fe) {
-        synchronized(fileEntryLock) {
+        lock.lock();
+        try {
             fileEntries.remove(fe);
             selectedFileEntries.remove(fe);
             fe.removeMouseListener(ml);
             filePanel.remove(fe);
-            
             updateFilePanel();
+            
+        } finally {
+            lock.unlock();
         }
         
         repaint();
     }
     
-    /* 
+    /**
      * Remove all FileEntries in the given ArrayList from the list
      * Also works when 'selectedFileEntries' or 'files' is used.
+     * 
+     * @param fel 
      */
     public void removeFileEntries(ArrayList<FileEntry> fel) {
-        synchronized(fileEntryLock) {
+        lock.lock();
+        try {
             for (int i =  fel.size() - 1; i >= 0; i--) {
                 FileEntry fe = fel.get(i);
-                
                 fileEntries.remove(fe);
                 selectedFileEntries.remove(fe);
                 fe.removeMouseListener(ml);
             }
             
             updateFilePanel();
+            
+        } finally {
+            lock.unlock();
         }
         
         repaint();
     }
     
-    /* 
+    /**
      * Removes all FileEntries
      */
     public void clear() {
-        synchronized(fileEntryLock) {
-            while (fileEntries.size() != 0) {
+        lock.lock();
+        try {
+            while (!fileEntries.isEmpty()) {
                 FileEntry fe = fileEntries.get(0);
                 
                 fe.removeMouseListener(ml);
@@ -392,12 +514,15 @@ public class MultiFileSelector extends JPanel {
             }
             
             updateFilePanel();
+            
+        } finally {
+            lock.unlock();
         }
         
         repaint();
     }
     
-    /* 
+    /**
      * Updates the size of the filePanel
      */
     private void updateFilePanel() {
@@ -411,7 +536,7 @@ public class MultiFileSelector extends JPanel {
         }
     }
     
-    /* 
+    /**
      * Requests the focus for a FileEntry
      */
     protected void requestFocus(FileEntry fe) {
@@ -420,11 +545,12 @@ public class MultiFileSelector extends JPanel {
         focusFieldEntry.setFocus(true);
     }
     
-    /* 
+    /**
      * Wait for the approved button to be pressed.
      * Then returns all files.
      * 
-     * NOTE: This method BLOCKS a thread until the approve button is pressed
+     * @implNote
+     * This method BLOCKS a thread until the approve button is pressed
      */
     public File[] getAllFilesOnApprove() throws IllegalStateException {
         Thread curThread = Thread.currentThread();
@@ -443,113 +569,31 @@ public class MultiFileSelector extends JPanel {
         return new File[] {new File("C:\\Hey!")};
     }
     
-    /* 
+    /**
      * Returns all Files
      */
     public File[] getAllFiles() {
-        synchronized(fileEntryLock) {
+        lock.lock();
+        try {
             File[] curFiles = new File[fileEntries.size()];
-            
             for (int i = 0; i < fileEntries.size(); i++) {
                 curFiles[i] = new File(fileEntries.get(i).getFile().getPath());
             }
             
             return curFiles;
+            
+        } finally {
+            lock.unlock();
         }
     }
     
-    /* 
+    /**
      * Returns all FileEntries
      */
     public ArrayList<FileEntry> getAllFileEntries() {
         return fileEntries;
     }
     
-    /* -----------------------------
-     * Listeners
-     */
-    /* 
-     * ActionListener for the buttons
-     */
-    ActionListener buttonListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            JButton button = (JButton) e.getSource();
-            if (button == addFileButton) {
-                JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-                fc.setMultiSelectionEnabled(true);
-                fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-                int action = fc.showDialog(mfs, "Select file/dir");
-                
-                if (action == JFileChooser.APPROVE_OPTION) {
-                    File[] newFiles = fc.getSelectedFiles();
-                    
-                    for (int i = 0; i < newFiles.length; i++) {
-                        try {
-                            addFile(newFiles[i]);
-                            
-                        } catch (IOException ex) {
-                            Logger.write(ex);
-                        }
-                    }
-                }
-                
-            } else if (button == removeFileButton) {
-                for (int i = 0; i < selectedFileEntries.size(); i++) {
-                    remove(selectedFileEntries.get(i));
-                }
-                
-                removeFileEntries(selectedFileEntries);
-            }
-        }
-    };
-    
-    /* 
-     * ActionListener for the approve button
-     */
-    ActionListener approveListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            ActionListener[] als = (ActionListener[]) getListeners(ActionListener.class);
-            
-            for (int i = 0; i < als.length; i++) {
-                e.setSource(this);
-                als[i].actionPerformed(e);
-            }
-            
-            // Releases all thread that are waiting for the files
-            while (requestThreads.size() != 0) {
-                synchronized(requestThreads.get(0)) {
-                    requestThreads.get(0).notify();
-                    requestThreads.remove(0);
-                }
-            }
-        }
-    };
-    
-    /* 
-     * MouseListener for the FileEntries
-     */
-    MouseAdapter ml = new MouseAdapter() {
-        @Override
-        public void mouseEntered(MouseEvent e) { }
-        
-        @Override
-        public void mouseExited(MouseEvent e) { }
-        
-        @Override
-        public void mousePressed(MouseEvent e) {
-            FileEntry fe = (FileEntry) e.getSource();
-            requestFocus(fe);
-            
-            if (fe.setSelected(!fe.isSelected())) {
-                selectedFileEntries.add(fe);
-                
-            } else {
-                selectedFileEntries.remove(fe);
-            }
-        }
-    };
     
     
     // tmp
@@ -595,9 +639,13 @@ public class MultiFileSelector extends JPanel {
 
 
 
-/* 
- * FileEntryHeader class
+/**
  * 
+ * @todo
+ * Export class to external file.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
  */
 class FileEntryHeader {
     private FieldData[] fieldData;
@@ -710,11 +758,16 @@ enum FieldData {
 
 
 
-/* --------------------------------------------------------------------------------------------------------------------
- * FileEntry class
+/**
  * 
+ * @todo
+ * Export class to external file.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
  */
-class FileEntry extends JPanel {
+class FileEntry
+        extends JPanel {
     //static private Border focusBorder = BorderFactory.createDashedBorder(Color.BLACK);
     //static private Border selectBorder = BorderFactory.createLineBorder(Color.BLACK, 2);
     //static private Border emptyBorder = BorderFactory.createLineBorder(Color.GRAY, 1);

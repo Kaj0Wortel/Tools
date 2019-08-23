@@ -71,10 +71,9 @@ public abstract class FileTree {
      * @return The local file tree of this class.
      * 
      * @throws IllegalStateException If the execution folder does not exists.
-     * @throws IOException If the file tree could not be read.
      */
     public static FileTree getLocalFileTree()
-            throws IllegalArgumentException, IOException {
+            throws IllegalArgumentException {
         return FileTree.getLocalFileTree(FileTree.class);
     }
     
@@ -91,16 +90,19 @@ public abstract class FileTree {
      * @return The local file tree for the given class.
      * 
      * @throws IllegalStateException If the execution folder does not exists.
-     * @throws IOException If the file tree could not be read.
      */
     public static FileTree getLocalFileTree(Class<?> c)
-            throws IllegalArgumentException, IOException {
-        String path = getProjectSourceFile(c);
-        if (path.endsWith(".jar")) {
-            return JarFileTree.getTree(path);
-            
-        } else {
-            return DirFileTree.getTree(path);
+            throws IllegalArgumentException {
+        try {
+            String path = getProjectSourceFile(c);
+            if (path.endsWith(".jar")) {
+                return JarFileTree.getTree(path);
+                
+            } else {
+                return DirFileTree.getTree(path);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
     

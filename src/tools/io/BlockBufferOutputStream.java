@@ -27,6 +27,7 @@ import java.io.OutputStream;
  * Abstract class for making an {@link OutputStream} which accepts only
  * (dynamic) chunks of data instead of a stream.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public abstract class BlockBufferOutputStream

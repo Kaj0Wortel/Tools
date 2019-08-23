@@ -14,13 +14,8 @@
 package tools.io;
 
 
-// Own imports
-import tools.MultiTool;
-
-
 // Java imports
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,28 +24,69 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 
+// Tools imports
+import tools.MultiTool;
+
+
 /**
- * Wrapper write class for the {@link ZipOutputStream}.
- * Added functionality:<br>
- * - Supports file splitting.
+ * Output stream which writes a stream of data to one or more zip files.
+ * This class uses the {@link ZipOutputStream} class for writing to a single
+ * zip file. <br>
+ * A limit can be set on how big a zip file can be. If the amount of data exceeds
+ * the limit, then a new zip file will be created and a new entry with the same
+ * name will be created. The rest of the data will be created.
+ * <br>
+ * If the stream should not be parted, then {@code maxSize} is ignored. <br>
+ * <br>
+ * <h2>Naming scheme</h2>
+ * If the stream should not be parted, then the zip file is exactly named as the given path. <br>
+ * <b>Example</b>: <br>
+ * Given path: "/some/path/data.zip" <br>
+ * Generated file: "/some/path/data.zip" <br>
+ * <br>
+ * If the stream should be parted, then ".partxxx" -- where 'x' is a single digit
+ * number -- is appended. The number starts at {@code 0} and is
+ * increased linearly after each file. If the number doesn't fit in the three reserved
+ * characters, then more characters are added. <br>
+ * <b>Example</b>: <br>
+ * Given path: "/some/path/data.zip" <br>
+ * Number of files generated: 1001 <br>
+ * Generated files:
+ * <ul>
+ *   <li> "/some/path/data.zip.part000" </li>
+ *   <li> "/some/path/data.zip.part001" </li>
+ *   <li> "/some/path/data.zip.part002" </li>
+ *   <li> ... </li>
+ *   <li> "/some/path/data.zip.part999" </li>
+ *   <li> "/some/path/data.zip.part1000" </li>
+ * </ul>
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
-public class ZipWriter
+public class MultiZipOutputStream
         extends OutputStream {
     
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
-    final private String targetFile;
+    /** The path of the zip file to write to. */
+    private final String targetPath;
+    /** Denotes whether the data should be split over multiple zip files. */
+    private final boolean parted;
+    /** Denotes the maximum file size if the stream should be parted. */
+    private final long maxSize;
+    
+    /** The current zip output stream. */
     private ZipOutputStream zos;
-    final private boolean parted;
-    final private long maxSize;
+    /** The current entry of the zip output stream. */
     private ZipEntry entry;
     
     // Counters
+    /** Counter for keeping track of the next zip file number. */
     private int fileCounter = 0;
+    /** Denotes the file size of the current zip file. */
     private long fileSize;
     
     
@@ -59,14 +95,15 @@ public class ZipWriter
      * -------------------------------------------------------------------------
      */
     /**
-     * TODO
-     * @param targetFile
-     * @param parted
-     * @param maxSize 
+     * Creates a new output stream for multiple zip files.
+     * 
+     * @param targetPath The path of the zip file.
+     * @param parted Whether the stream should be parted over multiple zip files.
+     * @param maxSize The maximum size of a zip file. Is only used when
+     *     {@code parted == true}.
      */
-    public ZipWriter(final String targetFile, final boolean parted,
-            final long maxSize) {
-        this.targetFile = targetFile;
+    public MultiZipOutputStream(String targetPath, boolean parted, long maxSize) {
+        this.targetPath = targetPath;
         this.parted = parted;
         this.maxSize = maxSize;
     }
@@ -77,14 +114,16 @@ public class ZipWriter
      * -------------------------------------------------------------------------
      */
     /**
-     * TODO
+     * Sets the zip entry of the Stream.
+     * Automatically closes the previous entry. <br>
+     * This function must be called before writing any data.
      * 
-     * @param entry
-     * @throws FileNotFoundException
-     * @throws IOException 
+     * @param entry The new entry.
+     * 
+     * @throws IOException If some IO error occured.
      */
-    public void setEntry(final ZipEntry entry)
-            throws FileNotFoundException, IOException {
+    public void setEntry(ZipEntry entry)
+            throws IOException {
         this.entry = entry;
         if (zos == null) {
             nextStream();
@@ -95,7 +134,7 @@ public class ZipWriter
     }
     
     /**
-     * @return The current {@link ZipEntry}.
+     * @return The current zip entry.
      */
     public ZipEntry getEntry() {
         return entry;
@@ -104,15 +143,14 @@ public class ZipWriter
     /**
      * Opens the stream for the next source file.
      * 
-     * @throws FileNotFoundException if some directories are missing.
-     * @throws IOException if the file could not be written to.
+     * @throws IOException If some IO error occured.
      */
     private void nextStream()
-            throws FileNotFoundException, IOException {
+            throws IOException {
         if (zos != null) zos.close();
         String fileName = (!parted
-                ? targetFile
-                : targetFile + ".part" + MultiTool.fillZero(fileCounter++, 4));
+                ? targetPath
+                : targetPath + ".part" + MultiTool.fillZero(fileCounter++, 4));
         File file = new File(fileName);
         file.getParentFile().mkdirs();
         file.createNewFile();
@@ -121,12 +159,13 @@ public class ZipWriter
     }
     
     /**
-     * TODO
+     * Creates a clone of the given zip entry.
      * 
-     * @param source
-     * @return 
+     * @param source The zip entry to be cloned.
+     * 
+     * @return A clone of the given zip entry.
      */
-    private ZipEntry cloneEntry(final ZipEntry source) {
+    private ZipEntry cloneEntry(ZipEntry source) {
         ZipEntry clone = new ZipEntry(source.getName());
         clone.setComment(source.getComment());
         clone.setExtra(source.getExtra());
