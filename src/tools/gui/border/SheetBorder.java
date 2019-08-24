@@ -53,6 +53,10 @@ import tools.gui.GUIState;
  *   <tr><td> 2 </td> <td> 2 </td> <td> Lower right corner </td></tr>
  * </table>
  * 
+ * @todo
+ * - Create super class for all GUI border. All of these borders
+ *   will have a GUIState with all appropriate methods and listeners.
+ * 
  * @version 1.0
  * @author Kaj Wortel
  */
