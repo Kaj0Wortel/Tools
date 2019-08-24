@@ -56,7 +56,6 @@ public interface Var {
     @Deprecated
     public static final String IMG_DIR = WORKING_DIR + "img" + FS;
     /** The data direcotry. */
-    @Deprecated
     public static final String DATA_DIR = WORKING_DIR + "data" + FS;
     /** The default log file. */
     public static final File LOG_FILE = new File(LOG_DIR + "log.log");
