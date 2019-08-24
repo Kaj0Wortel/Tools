@@ -16,22 +16,46 @@ package tools.log;
 
 // Java imports
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
 /**
- * Logger to combine multiple loggers.
+ * Logger implementation which distributes a single log operation to
+ * all initially provided loggers. <br>
+ * <br>
+ * Logger classes which are an instance of {@link DefaultLogger} are
+ * handled differently. The pre-processing steps are calculated in this class,
+ * and only the {@link DefaultLogger#writeText(String)} function is invoked
+ * for each default logger, as the same data would be generated multiple times
+ * otherwise. Other logger classes will have to generate everything separately.
  * 
- * @author Kaj Wortel (0991586)
+ * @version 1.0
+ * @author Kaj Wortel
  */
 public class MultiLogger
         extends DefaultLogger {
-    final private List<Logger> loggers;
-    final private List<DefaultLogger> defLoggers;
     
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The non-default loggers to distribute the data over. */
+    private final List<Logger> loggers;
+    /** The default loggers to distribute the data over. */
+    private final List<DefaultLogger> defLoggers;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Creates a logger which distributes all log operations to all given loggers.
+     * 
+     * @param loggers The loggers to distribute the data over.
+     */
     public MultiLogger(Logger... loggers) {
         if (loggers == null) {
             this.loggers = new ArrayList<Logger>(0);
@@ -51,6 +75,11 @@ public class MultiLogger
         }
     }
     
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     protected void writeText(String msg)
             throws IOException {
@@ -82,7 +111,6 @@ public class MultiLogger
         for (DefaultLogger defLog : defLoggers) {
             defLog.flush();
         }
-        
         for (Logger log : loggers) {
             log.flush();
         }
@@ -93,7 +121,6 @@ public class MultiLogger
         for (DefaultLogger defLog : defLoggers) {
             defLog.close();
         }
-        
         for (Logger log : loggers) {
             log.close();
         }

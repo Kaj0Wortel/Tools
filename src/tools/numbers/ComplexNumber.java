@@ -20,65 +20,89 @@ import tools.MultiTool;
 
 /**
  * Class representing a complex number.
- * Note that non-complex numbers are treated as real numbers.
+ * 
+ * @apiNote
+ * Non-complex numbers are treated as real numbers.
+ * 
+ * @version 0.1
+ * @author Kaj Wortel
  */
 public class ComplexNumber<N extends Number>
         extends ToolNumberAdapter<ComplexNumber> {
     
-    protected ToolNumber real; // Real part
-    protected ToolNumber comp; // Complex part
-    
-    
-    /**-------------------------------------------------------------------------
-     * Constructor.
+    /* -------------------------------------------------------------------------
+     * Variables.
      * -------------------------------------------------------------------------
      */
-    /**
-     * Creates a complex number from two values.
-     * 
-     * @param r real value.
-     * @param c complex value.
+    /** The real part of the number. */
+    protected ToolNumber real;
+    /** The complex part of the number. */
+    protected ToolNumber comp;
+    
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
      */
     public ComplexNumber(N r) {
         real = new PrimitiveNumber<N>(r);
         comp = real.mul((short) 0);
     }
     
-    public ComplexNumber(N r, N c) {
-        real = new PrimitiveNumber<N>(r);
-        comp = new PrimitiveNumber<N>(c);
+    /**
+     * Creates a complex number from a real and complex part.
+     * 
+     * @param real The real value of the number.
+     * @param comp The complex value of the number.
+     */
+    public ComplexNumber(N real, N comp) {
+        this.real = new PrimitiveNumber<N>(real);
+        this.comp = new PrimitiveNumber<N>(comp);
+    }
+    
+    /**
+     * Creates a new complex number from the given complex number.
+     * The number is cloned by default.
+     * 
+     * @param comp The complex value of the number.
+     */
+    public ComplexNumber(ToolNumber comp) {
+        this(comp.sub(comp), comp, true);
+    }
+    
+    /**
+     * Creates a new complex number from two tool numbers.
+     * The numbers are cloned by default.
+     * 
+     * @param real The real value of the number.
+     * @param comp The complex value of the number.
+     */
+    public ComplexNumber(ToolNumber real, ToolNumber comp) {
+        this(real, comp, true);
     }
     
     /**
      * Creates a new complex number from two tool numbers.
      * 
-     * @param r real value.
-     * @param c complex value.
-     * @param clone whether the tool number should be cloned.
+     * @param real The real value of the number.
+     * @param comp The complex value of the number.
+     * @param clone Whether the tool number should be cloned.
      */
-    public ComplexNumber(ToolNumber r) {
-        this(r, r.sub(r), true);
-    }
-    
-    public ComplexNumber(ToolNumber r, ToolNumber c) {
-        this(r, c, true);
-    }
-    
-    public ComplexNumber(ToolNumber r, ToolNumber c, boolean clone) {
+    public ComplexNumber(ToolNumber real, ToolNumber comp, boolean clone) {
         if (clone) {
-            real = r.clone();
-            comp = c.clone();
+            this.real = real.clone();
+            this.comp = comp.clone();
             
         } else {
-            real = r;
-            comp = c;
+            this.real = real;
+            this.comp = comp;
         }
     }
     
     /**
      * Creates a new complex number from a complex number.
      * 
-     * @param cNum the complex number to be cloned.
+     * @param cNum The complex number to be cloned.
      */
     public ComplexNumber(ComplexNumber<N> cNum) {
         real = cNum.real.clone();
@@ -86,7 +110,7 @@ public class ComplexNumber<N extends Number>
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
@@ -112,7 +136,7 @@ public class ComplexNumber<N extends Number>
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Overrides from ToolNumber.
      * -------------------------------------------------------------------------
      */
@@ -139,7 +163,7 @@ public class ComplexNumber<N extends Number>
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Overrides from ToolNumberDecorator.
      * -------------------------------------------------------------------------
      */
@@ -397,7 +421,7 @@ public class ComplexNumber<N extends Number>
         comp = cn.comp;
     }
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Overrides from Number.
      * -------------------------------------------------------------------------
      */
@@ -432,7 +456,7 @@ public class ComplexNumber<N extends Number>
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Other overrides.
      * -------------------------------------------------------------------------
      */

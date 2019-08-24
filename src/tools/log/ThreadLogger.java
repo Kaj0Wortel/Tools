@@ -24,64 +24,50 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Logger wrap class to execute log actions on a separate thread.
+ * 
+ * @version 1.0
+ * @author Kaj Wortel
  */
 public class ThreadLogger
         extends Logger {
-    final private Deque<Runnable> requestQueue = new LinkedList<>();
-    final private Condition addedRequest;
-    final private Logger logger;
     
-    
-    /**
-     * Logger thread.
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
      */
-    private Thread loggerThread = new Thread("Logging-thread") {
-        @Override
-        @SuppressWarnings("UseSpecificCatch")
-        public void run() {
-            // The update thread should have minimal priority.
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            
-            while (true) {
-                try {
-                    while (!requestQueue.isEmpty()) {
-                        Runnable r = requestQueue.pollFirst();
-                        if (r != null) r.run();
-                    }
-                    
-                    lock.lock();
-                    try {
-                        if (requestQueue.isEmpty()) {
-                            addedRequest.await();
-                        }
-                        
-                    } finally {
-                        lock.unlock();
-                    }
-                    
-                } catch (Exception e) {
-                    System.err.println("Logger error:");
-                    System.err.println(e);
-                }
-            }
-        }
-    };
+    /** The request queue used to queue actions which should be executed on the logging thread. */
+    private final Deque<Runnable> requestQueue = new LinkedList<>();
+    /** The condition which is invoked when a request was added. */
+    private final Condition addedRequest;
+    /** The logger to relay the data to. */
+    private final Logger logger;
+    /** The thread used for logging. */
+    private final Thread loggerThread;
     
     
+    /* -------------------------------------------------------------------------
+     * Constructor.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Creates a new thread logger for the given logger.
      * 
-     * @param logger the logger to execute on a different thread.
+     * @param logger The logger to relay the requests to.
      */
     @SuppressWarnings("CallToThreadStartDuringObjectConstruction")
     public ThreadLogger(Logger logger) {
         lock = new ReentrantLock(true);
-         addedRequest = lock.newCondition();
+        addedRequest = lock.newCondition();
         this.logger = logger;
+        loggerThread = createLoggingThread();
         loggerThread.start();
     }
     
     
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     protected void writeE(Exception e, Type type, Date timeStamp) {
         checkAndExe(() -> {
@@ -110,6 +96,48 @@ public class ThreadLogger
         });
     }
     
+    /**
+     * Creates a new logging thread with all the necessary properties.
+     * 
+     * @return A new logging thread with all the necessary properties.
+     */
+    private Thread createLoggingThread() {
+        @SuppressWarnings("UseSpecificCatch")
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    while (!requestQueue.isEmpty()) {
+                        Runnable r = requestQueue.pollFirst();
+                        if (r != null) r.run();
+                    }
+                    
+                    lock.lock();
+                    try {
+                        if (requestQueue.isEmpty()) {
+                            addedRequest.await();
+                        }
+                        
+                    } finally {
+                        lock.unlock();
+                    }
+                    
+                } catch (Exception e) {
+                    System.err.println("Logger error:");
+                    System.err.println(e);
+                }
+            }
+        }, "Logging-thread");
+        thread.setDaemon(true);
+        thread.setPriority(Thread.MIN_PRIORITY);
+        return thread;
+    }
+    
+    /**
+     * If the logging thread is executing this function, then the task is executed.
+     * Otherwise it is queued and a request for execution is signaled.
+     * 
+     * @param r The task to be executed.
+     */
     private void checkAndExe(Runnable r) {
         if (r == null) return;
         lock.lock();
@@ -119,7 +147,6 @@ public class ThreadLogger
 
             } else {
                 requestQueue.addLast(r);
-                
                 addedRequest.signal();
             }
             

@@ -16,6 +16,7 @@ package tools.log;
 
 // Java imports
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -24,9 +25,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.HashMap;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import java.util.Collections;
 import java.util.Map;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -39,9 +38,6 @@ import javax.swing.SwingUtilities;
 
 
 // Tools imports
-import tools.MultiTool;
-import tools.Pair;
-import tools.Var;
 import tools.event.Key;
 import tools.font.FontLoader;
 
@@ -49,54 +45,102 @@ import tools.font.FontLoader;
 /**
  * Logs the data to a GUI.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class ScreenLogger
         extends DefaultLogger {
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
     /** The spacing on the left side. */
     protected final static int SPACING = 5;
-    
-    /** Default title. */
+    /** The default title of the frame. */
     protected final static String DEFAULT_TITLE = "Logger";
     
-    // GUI needed for the logger.
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The frame of the logger. */
     private static JFrame frame;
+    /** A content panel of the logger. */
     private JPanel panel;
+    /** The checkbox for en-/disabling auto-scrolling */
     private JCheckBox checkBox;
+    /** The scoll panel used for displaying large texts. */
     private JScrollPane scroll;
+    /** The text area used to display the text. */
     private JTextArea text;
     
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Constructor.
      * 
      * @param title the title of the frame.
      * @param actionMap mapping from the keys to runnable functions.
      *     When a key is pressed, the corresponding function is executed.
-     * @param key when only one action is required, this is the key that
-     *     invokes the action.
-     * @param run when only one action is required, this is the action that
-     *     is invoked.
+     * @param key when only one action is required, this is the key that invokes the action.
+     * @param run when only one action is required, this is the action that is invoked.
      */
     public ScreenLogger() {
         this(DEFAULT_TITLE);
     }
     
+    /**
+     * Creates a new logger which displays the logged text to a GUI.
+     * 
+     * @param title The title of the frame.
+     */
     public ScreenLogger(String title) {
         this(title, null);
     }
     
+    /**
+     * Creates a new logger which displays the logged text to a GUI.
+     * 
+     * @param key The key to invoke the given action.
+     * @param run The runnable to be invoked after the given key has been pressed.
+     */
     public ScreenLogger(Key key, Runnable run) {
         this(DEFAULT_TITLE, key, run);
     }
     
+    /**
+     * Creates a new logger which displays the logged text to a GUI.
+     * 
+     * @param title The title of the frame.
+     * @param key The key to invoke the given action.
+     * @param run The runnable to be invoked after the given key has been pressed.
+     */
     public ScreenLogger(String title, Key key, Runnable run) {
-        this(title, MultiTool.addToMap(new HashMap<>(), new Pair<>(key, run)));
+        this(title, Collections.singletonMap(key, run));
     }
     
+    /**
+     * Creates a new logger which displays the logged text to a GUI.
+     * 
+     * @param actionMap A mapping from keys to runnable functions. When a key is pressed,
+     *     the corresponding function is executed.
+     */
     public ScreenLogger(Map<Key, Runnable> map) {
         this(DEFAULT_TITLE, map);
     }
     
+    /**
+     * Creates a new logger which displays the logged text to a GUI.
+     * 
+     * @param title The title of the frame.
+     * @param actionMap A mapping from keys to runnable functions. When a key is pressed,
+     *     the corresponding function is executed.
+     */
     public ScreenLogger(String title, Map<Key, Runnable> map) {
         frame = new JFrame(title);
         frame.setLayout(null);
@@ -128,12 +172,6 @@ public class ScreenLogger
         text.setBackground(Color.BLACK);
         text.setForeground(Color.GREEN);
         
-        SwingUtilities.invokeLater(() -> {
-            FontLoader.syncLoad();
-            //text.setFont(FontLoader.getLocalFont("cousine" + Var.FS
-            //        + "Cousine-Regular.ttf").deriveFont(13F));
-        });
-        
         scroll = new JScrollPane(text);
         panel.add(scroll);
         scroll.setLocation(SPACING, checkBox.getHeight() + SPACING);
@@ -162,33 +200,34 @@ public class ScreenLogger
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                SwingUtilities.invokeLater(() -> {
-                    Insets in = frame.getInsets();
-                    panel.setSize(frame.getWidth() - in.left - in.right,
-                            frame.getHeight() - in.top - in.bottom);
-                    
-                    scroll.setSize(panel.getWidth() - SPACING,
-                            panel.getHeight() - checkBox.getHeight() - SPACING);
-                });
+                //SwingUtilities.invokeLater(() -> {
+                Insets in = frame.getInsets();
+                panel.setSize(frame.getWidth() - in.left - in.right,
+                        frame.getHeight() - in.top - in.bottom);
+
+                scroll.setSize(panel.getWidth() - SPACING,
+                        panel.getHeight() - checkBox.getHeight() - SPACING);
+                //});
             }
         });
         
-        text.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent e) {
+        SwingUtilities.invokeLater(() -> {
+            FontLoader.syncLoad();
+            Font font = FontLoader.getFont("Cousine-Regular.ttf");
+            if (font != null) {
+                text.setFont(font.deriveFont(13F));
             }
-            
-            @Override
-            public void removeUpdate(DocumentEvent e) { }
-            @Override
-            
-            public void insertUpdate(DocumentEvent e) { }
         });
         
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
     
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     @Override
     protected void writeText(String msg) {
         text.append(msg);
@@ -207,35 +246,5 @@ public class ScreenLogger
     @Override
     protected void close() { }
     
-    
-    // tmp
-    public static void main(String[] args) {
-        // To load the GS class
-        System.out.println(Var.FS); 
-        
-        
-        tmpThread(1).start();
-        tmpThread(2).start();
-        tmpThread(3).start();
-        tmpThread(4).start();
-        tmpThread(5).start();
-        tmpThread(6).start();
-        tmpThread(7).start();
-        tmpThread(8).start();
-        MultiTool.sleepThread(2000);
-        Logger.write("          |");
-        Logger.write("MMMMMMMMMM|");
-    }
-    
-    public static Thread tmpThread(int val) {
-        return new Thread() {
-            @Override
-            public void run() {
-                for (int i = 0; i <= 100; i++) {
-                    Logger.write("Thread = " + val + ", i = " + i);
-                }
-            }
-        };
-    }
     
 }

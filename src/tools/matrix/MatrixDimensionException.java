@@ -14,13 +14,21 @@
 package tools.matrix;
 
 
-/* 
+/**
  * This exception should be thrown when the matrix is an incorrect dimension.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public class MatrixDimensionException
         extends RuntimeException {
     
     public MatrixDimensionException(String id) {
         super(id);
     }
+    
+    
 }

@@ -17,70 +17,125 @@ package tools.log;
 // Java imports
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 
 
 /**
- * Abstract class for log classes.
+ * Abstract base class for log classes.
  * 
  * @todo
  * - Cleanup
  * - Add class based-logging.
- * - Add group logging (invent what and how first).
+ * - Add logger for a file tree.
+ * - Add group logging (invent what and how first (maybe with a lock?)).
+ * - Allow the logger class to be 'paused':
+ *   - All log operations are recorded.
+ *   - After 'unpausing' the logger, all log operations are executed at once as
+ *     if they were just invoked.
  * 
- * @version 0.0
+ * @version 1.0
  * @author Kaj Wortel
  */
 public abstract class Logger {
-    /** Constants. */
-    // The default date format
-    final protected static DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
     
-    /** Static variables. */
-    // The terminal message and type.
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    /** The default date format */
+    protected static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS");
+    
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The message which should be written upon termination of the program. */
     private static Object terminateMsg = null;
+    /** The type of the terminal message. */
     private static Type terminateType = Type.INFO;
     
-    // The default logger object.
+    /** The default logger. */
     private static Logger defLog;
     
-    // The header on each log file.
+    /** The header to print before writing data. */
     protected static String header;
     
-    // Whether to use a timeStamp as default or not.
-    protected static boolean useTimeStamp = true;
-    
-    // Whether to use the full exception notation as default or not.
+    /** Whether to use the full exception notation as default or not. */
     protected static boolean useFull = true;
     
-    // The date format used for logging
+    
+    /** Whether to use a time stamp by default or not. */
+    protected static boolean useTimeStamp = true;
+    /** The date format used for logging a time stamp. */
     protected static DateFormat dateFormat = DEFAULT_DATE_FORMAT;
     
-    /** Non-static variables. */
-    // The lock of the writer.
+    /** The lock of each logger. */
     protected Lock lock;
     
-    // Enum denoting the severity type of a log action.
+    
+    /* -------------------------------------------------------------------------
+     * Inner classes..
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Enum class denoting the severity type of a log action.
+     */
     public enum Type {
-        NONE, INFO, WARNING, ERROR, DEBUG;
+        
+        /**
+         * This type is used when the type field should be blank.
+         */
+        NONE,
+        
+        /**
+         * This type is used to notify the reader of the log that the text
+         * contains plain information.
+         */
+        INFO,
+        
+        /**
+         * This type is used to notify the reader of the log that something
+         * might have gone wrong, but it was not fatal.
+         */
+        WARNING,
+        
+        /**
+         * This type is used to notify the reader of the log that something
+         * went wrong and, most likely, the application could not recover
+         * from the error.
+         */
+        ERROR,
+        
+        /**
+         * This type is used to notify the reader of the log that this text
+         * is only temporary and should be removed when the component is finished.
+         */
+        DEBUG;
+        
+        
     }
     
     
+    /* -------------------------------------------------------------------------
+     * Tool functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Checks whether the default logger is not null.
-     * If it is null, set the default logger to defaultLogger.
+     * If it is {@code null}, set the default logger to {@link NullLogger}.
      */
     private static void checkDef() {
-        if (defLog == null) defLog = NullLog.getInstance();
+        if (defLog == null) defLog = NullLogger.getInstance();
     }
     
     /**
      * Formats the date using the date format
      * 
      * @param timeStamp the time stamp to be converted.
-     * @return a {@code String} representing the date.
+     * 
+     * @return A string representing the date.
      */
     protected static String formatDate(Date timeStamp) {
         return dateFormat.format(timeStamp);
@@ -89,62 +144,82 @@ public abstract class Logger {
     /**
      * Checks the given type on null values.
      * 
-     * @param type the type to be checked. May be null.
-     * @return if {@code type != null} then the provided type.
-     *     {@code Type.NONE} otherwise.
+     * @param type The type to be checked. May be null.
+     * 
+     * @return The provided type if {@code type != null}. {@link Type#NONE} otherwise.
      */
     protected static Type checkType(Type type) {
-        return (type != null
-                    ? type
-                    : Type.NONE);
+        return (type != null ? type : Type.NONE);
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Log function to be implemented
      * -------------------------------------------------------------------------
      */
     /**
-     * Writes the exception to a log file.
+     * Writes the exception to a log file. <br>
      * It is given that {@code type != null} and {@code timeStamp != null}.
      * 
-     * @param e the exception to be written.
-     * @param type the severity type.
-     * @param timeStamp the time stamp in milliseconds precision.
+     * @param e The exception to be written.
+     * @param timeStamp The time stamp in milliseconds precision.
      */
     protected void writeE(Exception e, Date timeStamp) {
         writeE(e, Type.ERROR, new Date());
     }
     
+    /**
+     * Writes the exception to a log file. <br>
+     * It is given that {@code type != null} and {@code timeStamp != null}.
+     * 
+     * @param e The exception to be written.
+     * @param type The severity type. The default is {@link Type#ERROR}.
+     * @param timeStamp The time stamp in milliseconds precision.
+     */
     protected abstract void writeE(Exception e, Type type, Date timeStamp);
     
     /**
-     * Writes the object to a log file.
+     * Writes the object to a log file. <br>
      * It is given that {@code type != null} and {@code timeStamp != null}.
      * 
-     * @param obj the object to be written.
-     * @param type the severity type.
-     * @param timeStamp the time stamp in milliseconds precision.
+     * @param obj The object to be written.
+     * @param timeStamp The time stamp in milliseconds precision.
      */
     protected void writeO(Object obj, Date timeStamp) {
         writeO(obj, Type.DEBUG, timeStamp);
     }
     
+    /**
+     * Writes the object to a log file. <br>
+     * It is given that {@code type != null} and {@code timeStamp != null}.
+     * 
+     * @param obj The object to be written.
+     * @param type The severity type.
+     * @param timeStamp The time stamp in milliseconds precision.
+     */
     protected abstract void writeO(Object obj, Type type, Date timeStamp);
     
     /**
      * Writes an object array to a log file.
-     * Ensures that all data is logged consecutively.
+     * Ensures that all data is logged consecutively. <br>
      * It is given that {@code type != null} and {@code timeStamp != null}.
      * 
-     * @param objArr the object array to be written.
-     * @param type the severity type.
-     * @param timeStamp the time stamp in milliseconds precision.
+     * @param objArr The object array to be written.
+     * @param timeStamp The time stamp in milliseconds precision.
      */
     protected void writeOA(Object[] objArr, Date timeStamp) {
         writeOA(objArr, Type.DEBUG, timeStamp);
     }
     
+    /**
+     * Writes an object array to a log file.
+     * Ensures that all data is logged consecutively. <br>
+     * It is given that {@code type != null} and {@code timeStamp != null}.
+     * 
+     * @param objArr The object array to be written.
+     * @param type The severity type.
+     * @param timeStamp The time stamp in milliseconds precision.
+     */
     protected void writeOA(Object[] objArr, Type type, Date timeStamp) {
         if (defLog.lock != null) defLog.lock.lock();
         try {
@@ -189,9 +264,9 @@ public abstract class Logger {
      * -------------------------------------------------------------------------
      */
     /**
-     * Delegates the static write action to the default logger singleton.
+     * Delegates the static write action to the default logger instance.
      * 
-     * See {@link writeE(Exception, Date)}.
+     * @see #writeE(Exception, Date)
      */
     public static void write(Exception e) {
         checkDef();
@@ -199,9 +274,9 @@ public abstract class Logger {
     }
     
     /**
-     * Delegates the static write action to the default logger singleton.
+     * Delegates the static write action to the default logger instance.
      * 
-     * See {@link writeE(Exception, Type, Date)}.
+     * @see #writeE(Exception, Type, Date)
      */
     public static void write(Exception e, Type type) {
         checkDef();
@@ -209,9 +284,9 @@ public abstract class Logger {
     }
     
     /**
-     * Delegates the static write action to the default logger singleton.
+     * Delegates the static write action to the default logger instance.
      * 
-     * See {@link writeO(Object, Date)}.
+     * @see #writeO(Object, Date)
      */
     public static void write(Object obj) {
         checkDef();
@@ -219,9 +294,9 @@ public abstract class Logger {
     }
     
     /**
-     * Delegates the static write action to the default logger singleton.
+     * Delegates the static write action to the default logger instance.
      * 
-     * See {@link writeO(Object, Type, Date)}.
+     * @see #writeO(Object, Type, Date)
      */
     public static void write(Object obj, Type type) {
         checkDef();
@@ -229,13 +304,12 @@ public abstract class Logger {
     }
     
     /**
-     * Delegates the static write action to the default logger singleton.
-     * Ensures that all data is logged consecutively and with the same
-     * time stamp.
+     * Delegates the static write action to the default logger instance. <br>
+     * Ensures that all data is logged consecutively and with the same time stamp.
      * 
      * @param objArr the object array to be logged.
      * 
-     * See {@link writeOA(Object[], Date)}
+     * @see #writeOA(Object[], Date)
      */
     public static void write(Object[] objArr) {
         checkDef();
@@ -243,12 +317,12 @@ public abstract class Logger {
     }
     
     /**
-     * Delegates the static write action to the default logger singleton.
+     * Delegates the static write action to the default logger instance. <br>
      * Ensures that all data is logged consecutively.
      * 
      * @param objArr the object array to be logged.
      * 
-     * See {@link writeOA(Object[], Type, Date)}.
+     * @see #writeOA(Object[], Type, Date)
      */
     public static void write(Object[] objArr, Type type) {
         checkDef();
@@ -256,10 +330,12 @@ public abstract class Logger {
     }
     
     /**
-     * Closes the log file and releases system resources.
-     * Note that no default log is created here if none existed yet.
+     * Closes the logger and releases system resources.
      * 
-     * See {@link close()}
+     * @apiNote
+     * No default logger is created here if none existed yet.
+     * 
+     * @see #close()
      */
     public static void closeLog() {
         if (defLog != null) defLog.close();
@@ -267,7 +343,9 @@ public abstract class Logger {
     
     /**
      * Flushes the writer.
-     * Note that no default log is created here if none existed yet.
+     * 
+     * @apiNote
+     * No default logger is created here if none existed yet.
      */
     public static void flushLog() {
         if (defLog != null) defLog.flush();
@@ -276,10 +354,10 @@ public abstract class Logger {
     /**
      * Changes whether to use the time stamp.
      * 
-     * @param useTS whether to use the time stamp or not.
+     * @param useTimeStamp Whether to use the time stamp or not.
      */
-    public static void setUsagetimeStamp(boolean useTS) {
-        useTimeStamp = useTS;
+    public static void setUsagetimeStamp(boolean useTimeStamp) {
+        Logger.useTimeStamp = useTimeStamp;
     }
     
     /**
@@ -308,25 +386,46 @@ public abstract class Logger {
     
     /**
      * Sets the message that will be logged when the application shuts down.
-     * Use {@code msg = null} to prevent any message to be written.
-     * Note that no message will be printed if no default log is selected.
+     * Use {@code msg == null} to prevent any message to be written.
+     * Additionally, no message will be printed if no default log is selected.
      * 
-     * @param msg the message to be logged.
-     * @param type the severity type of the message.
+     * @param msg The message to be logged.
      */
     public static void setShutDownMessage(Object msg) {
         setShutDownMessage(msg, Type.INFO);
     }
     
+    /**
+     * Sets the message that will be logged when the application shuts down.
+     * Use {@code msg = null} to prevent any message to be written.
+     * Additionally, no message will be printed if no default log is selected.
+     * 
+     * @param msg The message to be logged.
+     * @param type The severity type of the message. The default type is {@link Type#INFO}.
+     */
     public static void setShutDownMessage(Object msg, Type type) {
         terminateMsg = msg;
         terminateType = checkType(type);
     }
     
     /**
+     * @return The message that will be logged when the application shuts down.
+     */
+    public static Object getShutDownMessage() {
+        return terminateMsg;
+    }
+    
+    /**
+     * @return The type of the message that will be logged when the application shuts down.
+     */
+    public static Type getShutDownType() {
+        return terminateType;
+    }
+    
+    /**
      * Sets the date format for logging.
      * 
-     * @param format the format used for a {@code SimpleDateFormat}.
+     * @param format The format used for a {@code SimpleDateFormat}.
      */
     public static void setDateFormat(String format) {
         setDateFormat(new SimpleDateFormat(format));
@@ -336,47 +435,48 @@ public abstract class Logger {
      * Sets the date format for logging.
      * Use {@code null} to reset to default.
      * 
-     * @param df the date format used for logging.
+     * @param df The date format used for logging.
      */
     public static void setDateFormat(DateFormat df) {
-        if (df == null) {
-            dateFormat = DEFAULT_DATE_FORMAT;
-            
-        } else {
-            dateFormat = df;
-        }
+        dateFormat = (df == null ? DEFAULT_DATE_FORMAT : df);
+    }
+    
+    /**
+     * @return The date format used to log the date.
+     */
+    public static DateFormat getDateFormat() {
+        return dateFormat;
     }
     
     /**
      * Sets the log header.
      * Use {@code null} to have no header.
      * Use "&date&" to use the time stamp of when the log was created.
+     * 
+     * @param header The header to print before writing data
      */
-    public static void setLogHeader(String logHeader) {
-        header = logHeader;
+    public static void setLogHeader(String header) {
+        Logger.header = header;
     }
-    
     
     /**
      * Adds a shutdown hook for writing the terminate message and
      * closing the stream resources of the log file.
      */
     static {
-        Runtime.getRuntime().addShutdownHook
-        (new Thread("Shutdown-Log-Thread") {
-            @Override
-            public void run() {
-                if (defLog != null) {
-                    // Write the terminal message (if any) to the default log.
-                    if (terminateMsg != null) {
-                        write(terminateMsg, terminateType);
-                    }
-                    
-                    // Close the log
-                    defLog.close();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (Logger.getLog() != null) {
+                // Write the terminal message (if any) to the default log.
+                Object msg = Logger.getShutDownMessage();
+                if (msg != null) {
+                    write(msg, Logger.getShutDownType());
                 }
+                
+                // Close the log
+                Logger.closeLog();
             }
-        });
+        }, "Shutdown-Log-Thread"));
     }
+    
     
 }

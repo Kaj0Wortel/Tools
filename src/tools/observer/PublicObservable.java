@@ -23,7 +23,8 @@ import java.util.Observer;
  * Identical to the {@link java.util.Observable}, but then with
  * public functions.
  * 
- * @author Kaj Wortel (0991586)
+ * @version 0.0
+ * @author Kaj Wortel
  */
 @SuppressWarnings("deprecation")
 public class PublicObservable

@@ -19,22 +19,40 @@ import java.util.Date;
 
 
 /**
- * This is a log class that ignores all log action.
+ * This is a logger class that ignores all log action.
+ * 
+ * @version 1.0
+ * @author Kaj Wortel
  */
-public class NullLog
+public class NullLogger
         extends Logger {
-    // The only instance of this class.
-    private static NullLog instance = new NullLog();
     
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    /** The only instance of this class. */
+   private static final NullLogger instance = new NullLogger();
+    
+   
+    /* -------------------------------------------------------------------------
+     * Constructor..
+     * -------------------------------------------------------------------------
+     */
     /**
      * Only a single private constructor because of singleton design pattern.
      */
-    private NullLog() { }
+    private NullLogger() { }
     
-    /**
-     * @return the only null log instance.
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
      */
-    public static synchronized NullLog getInstance() {
+    /**
+     * @return A null logger instance.
+     */
+    public static synchronized NullLogger getInstance() {
         return instance;
     }
     
@@ -61,5 +79,6 @@ public class NullLog
     
     @Override
     protected void flush() { }
+    
     
 }

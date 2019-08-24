@@ -26,54 +26,110 @@ import java.util.Random;
 
 /**
  * Wrapper for the BigInteger class to use it as a toolNumber.
+ * 
+ * @version 0.1
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public class BigIntegerTool
         extends ToolNumberOperationAdapter {
     
+    /* -------------------------------------------------------------------------
+     * Variables
+     * -------------------------------------------------------------------------
+     */
     private BigInteger value;
     
     
-    /**-------------------------------------------------------------------------
-     * Constructors from BigInteger.
+    /* -------------------------------------------------------------------------
+     * Constructors.
      * -------------------------------------------------------------------------
+     */
+    // BigInteger constructors.
+    /**
+     * TODO
+     * 
+     * @param val 
      */
     public BigIntegerTool(byte[] val) {
         value = new BigInteger(val);
     }
     
+    /**
+     * TODO
+     * 
+     * @param signum
+     * @param magnitude 
+     */
     public BigIntegerTool(int signum, byte[] magnitude) {
         value = new BigInteger(signum, magnitude);
     }
     
+    /**
+     * TODO
+     * 
+     * @param bitLength
+     * @param certainty
+     * @param rnd 
+     */
     public BigIntegerTool(int bitLength, int certainty, Random rnd) {
         value = new BigInteger(bitLength, certainty, rnd);
     }
     
+    /**
+     * TODO
+     * 
+     * @param numBits
+     * @param rnd 
+     */
     public BigIntegerTool(int numBits, Random rnd) {
         value = new BigInteger(numBits, rnd);
     }
     
+    /**
+     * TODO
+     * 
+     * @param val 
+     */
     public BigIntegerTool(String val) {
         value = new BigInteger(val);
     }
-    
+    /**
+     * TODO
+     * 
+     * @param val
+     * @param radix 
+     */
     public BigIntegerTool(String val, int radix) {
         value = new BigInteger(val, radix);
     }
     
-    
-    /**-------------------------------------------------------------------------
-     * Clone constructors.
-     * -------------------------------------------------------------------------
+    // Clone constructors.
+    /**
+     * TODO 
+     * @param val 
      */
     public BigIntegerTool(BigIntegerTool val) {
         this(val.getValue(), true);
     }
     
+    /**
+     * TODO
+     * 
+     * @param val 
+     */
     public BigIntegerTool(BigInteger val) {
         this(val, true);
     }
     
+    /**
+     * TODO
+     * 
+     * @param val
+     * @param clone 
+     */
     public BigIntegerTool(BigInteger val, boolean clone) {
         if (val == null)
             throw new NullPointerException("value is not allowed to be null!");
@@ -84,7 +140,7 @@ public class BigIntegerTool
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Overrides from ToolNumber.
      * -------------------------------------------------------------------------
      */
@@ -99,7 +155,7 @@ public class BigIntegerTool
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Override from ToolNumberOperationAdapter.
      * -------------------------------------------------------------------------
      */
@@ -169,7 +225,7 @@ public class BigIntegerTool
     }
     
     
-    /**-------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------
      * Overrides from Number.
      * -------------------------------------------------------------------------
      */
@@ -204,8 +260,8 @@ public class BigIntegerTool
     }
     
     
-    /**-------------------------------------------------------------------------
-     * Other overrides.
+    /* -------------------------------------------------------------------------
+     * Object overrides.
      * -------------------------------------------------------------------------
      */
     @Override

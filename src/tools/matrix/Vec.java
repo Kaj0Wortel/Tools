@@ -21,7 +21,13 @@ import tools.numbers.ToolNumber;
 
 /**
  * This class extends the {@link tools.matrix.Mat} class to a vector format.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public class Vec
         extends Mat {
     /**-------------------------------------------------------------------------

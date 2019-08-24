@@ -15,29 +15,30 @@ package tools.observer;
 
 
 /**
- * Observer interface for when an object that already extends another
- * class can still become an observer.
+ * ToolObserver interface for when an object that already extends another
+ class can still become an observer.
  * 
  * @author Kaj Wortel
  * @param <V> the value used for notifying observers.
  */
 public interface ObsInterface<T extends ObsInterface<T, V>, V> {
+    
     /**
      * Adds the given observer to the list of observers.
      * 
      * @param o oberver to be added.
      * @throws NullPointerException iff {@code obs == null}.
      */
-    public void addObserver(Observer<T, V> o);
+    public void addObserver(ToolObserver<T, V> o);
     
     /**
      * Deletes the given observer from the list of observers.
      * 
      * @param o observer to be deleted.
      * 
-     * Implementation via {@link Observer#deleteObserver(Observer)}.
+     * Implementation via {@link ToolObserver#deleteObserver(Observer)}.
      */
-    public void deleteObserver(Observer<T, V> o);
+    public void deleteObserver(ToolObserver<T, V> o);
     
     /**
      * This method should be invoked to notify all observers of a change.
@@ -46,7 +47,7 @@ public interface ObsInterface<T extends ObsInterface<T, V>, V> {
      * 
      * @see #notifyObservers(Object)
      */
-    default public void notifyObservers() {
+    public default void notifyObservers() {
         notifyObservers(null);
     }
     
@@ -66,12 +67,12 @@ public interface ObsInterface<T extends ObsInterface<T, V>, V> {
     /**
      * Set that there was a change.
      */
-    void setChanged();
+    public void setChanged();
     
     /**
      * Set that there was no change.
      */
-    void clearChanged();
+    public void clearChanged();
     
     /**
      * @return whether there was a change.

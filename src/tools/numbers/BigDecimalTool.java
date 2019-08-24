@@ -26,7 +26,13 @@ import java.math.MathContext;
 
 /**
  * Wrapper for the BigDecimal class to use it as a toolNumber.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public class BigDecimalTool
         extends ToolNumberOperationAdapter {
     

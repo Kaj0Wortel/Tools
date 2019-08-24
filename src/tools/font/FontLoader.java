@@ -40,10 +40,6 @@ import tools.data.file.FileTree;
 /**
  * Auto-loads all the nessecary FONTS for the application at start-up.
  * 
- * @todo
- * - decide on which types of files to load (jar vs dev vs class).
- * - Implement tje tool.data.file classes and use them here.
- * 
  * @version 1.0
  * @author Kaj Wortel
  */
@@ -134,7 +130,7 @@ public final class FontLoader {
      * used in swing environments.
      * 
      * @apiNote
-     * The path of the font is used as key, so only enter the absolute path to avoid clashes.
+     * The name of the font file is used as key, so enter different names to avoid clashes.
      * 
      * @param stream The stream to get the data from.
      * @param path The absolute path of the 
@@ -156,11 +152,11 @@ public final class FontLoader {
     }
     
     /**
-     * Returns the font from the given path.
+     * Returns the font with the given (font file) name.
      * 
-     * @param path The absolute path of the font entry.
+     * @param path The name of the font file of the font entry.
      * 
-     * @return The font from the given path if it was loaded. {@code null} otherwise.
+     * @return The font with the given (font file) name if it was loaded. {@code null} otherwise.
      */
     public static Font getFont(String path) {
         return FONTS.get(path);
@@ -245,7 +241,7 @@ public final class FontLoader {
     }
     
     /**
-     * @return the default font.
+     * @return The default font of the application.
      */
     public static Font getDefaultFont() {
         return defaultFont;

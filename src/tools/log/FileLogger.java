@@ -23,84 +23,120 @@ import java.io.PrintWriter;
 
 
 /**
- * Class for logging data to a file.
- * All functions are thread safe.
+ * Logger implementation which logs the data to a file.
  * 
- * @todo
- * ALL
+ * @version 1.0
+ * @author Kaj Wortel
  */
 public class FileLogger
         extends DefaultLogger {
-    // The default log file to write to.
+    
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The default log file to write to. */
     protected File logFile;
-    
-    // The writer used to write the log data to the file.
+    /** The writer used to write the log data to the file. */
     private PrintWriter writer;
-    
-    // Whether to append to the given file.
+    /** Whether to append to the given file. */
     private boolean append;
     
     
-    /**-------------------------------------------------------------------------
-     * Constructor
+    /* -------------------------------------------------------------------------
+     * Constructors.
      * -------------------------------------------------------------------------
      */
     /**
-     * @param fileName name of the file to log to.
-     * @param file file to log to.
-     * @param append whether to append to the log file after the stream
-     *     has been closed and then re-opened.
-     * @param appendBeginOnly whether to append to the logfile
-     *     at initialization.
-     * @throws IOException if the file could not be initialized.
+     * Creates a new file logger which logs to the given file.
+     * By default, removes all data from the file at initialization, but
+     * appends after closing an re-opening.
+     * 
+     * @param fileName The name of the file to log to.
+     * 
+     * @throws IOException If some IO error occured.
      */
     public FileLogger(String fileName)
             throws IOException {
         this(new File(fileName));
     }
     
+    /**
+     * Creates a new file logger which logs to the given file.
+     * By default, removes all data from the file at initialization, but
+     * appends after closing an re-opening.
+     * 
+     * @param file The file to log to.
+     * 
+     * @throws IOException If some IO error occured.
+     */
     public FileLogger(File file)
             throws IOException {
         this(file, true, false);
     }
     
+    /**
+     * Creates a new file logger which logs to the given file.
+     * It only appends the data for the first time if {@code appendBeginOnly == true},
+     * and after being closed an re-opened it appends data only if {@code append == true}.
+     * 
+     * @param fileName The Name of the file to log to.
+     * @param append Whether to append to the log file after the stream has been closed
+     *     and then re-opened.
+     * @param appendBeginOnly Whether to append to the logfile at initialization.
+     * 
+     * @throws IOException If some IO error occured.
+     */
     public FileLogger(String fileName, boolean append, boolean appendBeginOnly)
             throws IOException {
         this(new File(fileName), append, appendBeginOnly);
     }
     
+    /**
+     * Creates a new file logger which logs to the given file.
+     * It only appends the data for the first time if {@code appendBeginOnly == true},
+     * and after being closed an re-opened it appends data only if {@code append == true}.
+     * 
+     * @param file The file to log to.
+     * @param append Whether to append to the log file after the stream has been closed
+     *     and then re-opened.
+     * @param appendBeginOnly Whether to append to the logfile at initialization.
+     * 
+     * @throws IOException If some IO error occured.
+     */
     public FileLogger(File file, boolean append, boolean appendBeginOnly)
             throws IOException {
         this.logFile = file;
         file.getParentFile().mkdirs();
         this.append = append;
         createWriter(appendBeginOnly);
-        if (appendBeginOnly) writeHeader();
+        if (!appendBeginOnly) writeHeader();
     }
     
     
-    /**-------------------------------------------------------------------------
-     * Functions
+    /* -------------------------------------------------------------------------
+     * Functions.
      * -------------------------------------------------------------------------
      */
     /**
      * Checks if the writer non-null and opened.
-     * - If the writer is {@code null}, a new writer is created and overwrites
-     *   the old file of the file and write the header.
-     * - If the writer is not {@code null} but is closed, a new writer
-     *   is created and appends to the file.
-     * After calling this method it is guaranteed that {@code writer != null}.
+     * <ul>
+     *   <li> If the writer is {@code null}, a new writer is created and overwrites
+     *        the old file of the file and write the header. </li>
+     *   <li> If the writer is not {@code null} but is closed, a new writer
+     *        is created and appends to the file. </li>
+     * </ul>
+     * After calling this function it is guaranteed that either an {@link IOException} has
+     * been thrown, or {@code writer != null}.
      * 
-     * @throws IOException iff either {@code writer == null} or
-     *     {@code writer.isClosed()}, and no new writer could be created.
-     *     
+     * @throws IOException If some IO error occured.
      * 
-     * Also see: {@link writeHeader()}.
+     * @see #writeHeader()
      */
     protected void checkWriter()
             throws IOException {
         if (writer != null || !isClosed()) return;
-        createWriter(writer != null || append);
+        createWriter(append);
     }
     
     /**
@@ -115,33 +151,35 @@ public class FileLogger
         close();
         
         // Create the new writer.
-        writer = new PrintWriter
-            (new BufferedWriter(new FileWriter(logFile, append)));
+        writer = new PrintWriter(new BufferedWriter(new FileWriter(logFile, append)));
         
         // Add a header for clean files.
         if (!append) writeHeader();
     }
     
     @Override
-    protected void writeText(String text) throws IOException {
-        // Check if the writer is active.
+    protected void writeText(String text)
+            throws IOException {
         checkWriter();
-        
-        // Write the text
         writer.print(text);
     }
     
     /**
      * Sets the log file.
      * 
-     * @param fileName the name of the new log file.
-     * @param file the name of the log file.
-     * @param append whether to append to the new log file.
+     * @param fileName The name of the new log file.
+     * @param append Whether to append to the new log file.
      */
     protected void setFile(String fileName, boolean append) {
         setFile(new File(fileName), append);
     }
     
+    /**
+     * Sets the log file.
+     * 
+     * @param file The name of the log file.
+     * @param append Whether to append to the new log file.
+     */
     protected void setFile(File file, boolean append) {
         try {
             // Close the previous log file.
@@ -194,16 +232,16 @@ public class FileLogger
     
     /**
      * Sets whether to append to the log file after the stream
-     *     has been closed and then re-opened.
+     * has been closed and then re-opened.
      * 
-     * @param append whether to append.
+     * @param append Whether to append to the log file.
      */
     public void setAppend(boolean append) {
         this.append = append;
     }
     
     /**
-     * @return whether to append to the log file after the stream
+     * @return Whether to append to the log file after the stream
      *     has been closed and then re-opened.
      */
     public boolean usesAppend() {

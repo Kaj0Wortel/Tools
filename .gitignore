@@ -28,9 +28,15 @@ hs_err_pid*
 /tools/nbproject/private/
 /build/
 /dist/
+/store/
 /nbproject/
 /build.xml
 /manifest.mf
 
 # Intellij
 /.idea/
+
+# Ignore notes & tmp testing
+note.txt
+notes.txt
+Test.java

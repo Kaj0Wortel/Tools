@@ -26,7 +26,13 @@ import tools.PublicCloneable;
 
 /**
  * Class for matrix operations.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public class Mat
         extends ToolNumberAdapter<Mat>
         implements PublicCloneable, HashObservableInterface {

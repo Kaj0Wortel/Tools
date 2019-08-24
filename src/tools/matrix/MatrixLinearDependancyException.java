@@ -14,11 +14,18 @@
 package tools.matrix;
 
 
-/* 
+/**
  * This exception should be thrown when a matrix has an incorrect amount
  * of linear dependant dimensions.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
-public class MatrixLinearDependancyException extends RuntimeException {
+@Deprecated
+public class MatrixLinearDependancyException
+        extends RuntimeException {
     
     public MatrixLinearDependancyException() {
         super("Cannot create an nxn inverse matrix of a matrix that has "

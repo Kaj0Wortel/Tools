@@ -25,7 +25,7 @@ import java.util.concurrent.locks.Condition;
 
 
 // Tools imports
-import tools.observer.Observer;
+import tools.observer.ToolObserver;
 
 
 /**
@@ -74,7 +74,7 @@ public class SchedulerSet<S extends Scheduler>
      * This Observer should be added to all schedulers which can be used
      * for scheduling tasks by this class.
      */
-    private final Observer<Scheduler, SchedulerEventObject> schedulerObserver = (s, e) -> {
+    private final ToolObserver<Scheduler, SchedulerEventObject> schedulerObserver = (s, e) -> {
         if (terminated) return;
         SchedulerEvent event = e.getEvent();
         

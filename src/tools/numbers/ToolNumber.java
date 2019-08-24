@@ -13,13 +13,18 @@
 
 package tools.numbers;
 
-// tmp
 import tools.matrix.Mat;
 
-/* 
+/**
  * A handy number data representation providing
  * the basic operations for numbers.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public abstract class ToolNumber
         extends Number 
         implements tools.PublicCloneable {

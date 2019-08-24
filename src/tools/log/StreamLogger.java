@@ -14,46 +14,59 @@
 package tools.log;
 
 
-// Java packages
+// Java imports
 import java.io.IOException;
 import java.io.OutputStream;
-
 import java.nio.charset.Charset;
 
 
 /**
- * Logs the data to an OutputStream.
+ * Logs the data to an {@link OutputStream}.
+ * 
+ * @version 1.0
+ * @author Kaj Wortel
  */
 public class StreamLogger
         extends DefaultLogger {
-    // The stream used to output the log data.
-    private OutputStream stream;
     
-    // The used charset
+    /* -------------------------------------------------------------------------
+     * Variables.
+     * -------------------------------------------------------------------------
+     */
+    /** The stream used to output the log data. */
+    private OutputStream stream;
+    /** The used character set. */
     private Charset charset = Charset.forName("UTF-8");
     
     
-    /**-------------------------------------------------------------------------
-     * Constructor
+    /* -------------------------------------------------------------------------
+     * Constructor.
      * -------------------------------------------------------------------------
      */
     /**
-     * @param outputStream the output stream to log to.
-     *     The default is {@code System.out}.
+     * Creates a new stream logger which logs to the default {@code System.out}.
      */
     public StreamLogger() {
         this(System.out);
     }
     
+    /**
+     * Creates a new stream logger which logs to the given output stream.
+     * 
+     * @param outputStream The output stream to log to. The default is {@code System.out}.
+     */
     public StreamLogger(OutputStream outputStream) {
         super();
         stream = outputStream;
     }
     
     
-    /**-------------------------------------------------------------------------
-     * Functions
+    /* -------------------------------------------------------------------------
+     * Functions.
      * -------------------------------------------------------------------------
+     */
+    /**
+     * @return The output stream the logger uses to output data.
      */
     public OutputStream getStream() {
         return stream;
@@ -77,6 +90,14 @@ public class StreamLogger
     }
     
     @Override
-    protected void flush() { }
+    protected void flush() {
+        try {
+            stream.flush();
+            
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+    
     
 }

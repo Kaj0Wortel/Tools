@@ -18,43 +18,40 @@ package tools.observer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
+// Tools imports
+import tools.Var;
+
+
 /**
- * Observer interface for when an object that already extends another
+ * ToolObserver interface for when an object that already extends another
  * class can still become an observer.
  * 
- * 
- * 
+ * @version 0.0
  * @author Kaj Wortel
+ * 
  * @deprecated This implementation can be used for quick building up a model,
- * but will become slow when overused in too many classes. It also hasn't a
+ * but will become slow when overused in too many classes. It also doesn't have
  * destruction handler, so this interface <b>cannot</b> be used for classes
  * which are constantly being created over time.
  */
 @Deprecated
 public interface HashObservableInterface<T extends HashObservableInterface<T, V>, V>
         extends ObsInterface<T, V> {
-    // Variable mapping each interface to an entry.
-    // This is done to by-pass the static initialisation of interfaces.
-    final public static Map<HashObservableInterface, Entry> entryMap
-            = new HashMap<>();
-    
-    // Random variable for the entry class.
-    final static public Random r = new Random();
-    
+    /** Variable mapping each interface to an entry.
+     *  This is done to by-pass the static initialisation of interfaces. */
+    public static final Map<HashObservableInterface, Entry> entryMap = new HashMap<>();
     
     /**
      * Entry class for keeping track of the observers per observable.
      */
-    final public static class Entry {
-        final private int hash = r.nextInt();
+    public static final class Entry {
+        private final int hash = Var.RAN.nextInt();
         
-        final private HashObservableInterface hoi;
-        final private List<Observer> obs
-                = new CopyOnWriteArrayList();
+        private final HashObservableInterface hoi;
+        private final List<ToolObserver> obs = new CopyOnWriteArrayList();
         private boolean modified = false;
         
         
@@ -62,7 +59,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
             this.hoi = hoi;
         }
         
-        public List<Observer> getObsList() {
+        public List<ToolObserver> getObsList() {
             return obs;
         }
         
@@ -95,11 +92,10 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
     
     
     /**
-     * @param hoi the hash observable interface refference to get the
-     *     entry of.
+     * @param hoi The hash observable interface reference to get the entry for.
      * @return the entry of the given observer.
      */
-    default public Entry getEntry(T hoi) {
+    public default Entry getEntry(T hoi) {
         Entry entry = entryMap.get(hoi);
         if (entry != null) return entry;
         
@@ -115,7 +111,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * @throws NullPointerException iff {@code obs == null}.
      */
     @Override
-    default public void addObserver(Observer<T, V> o) {
+    public default void addObserver(ToolObserver<T, V> o) {
         Entry entry = getEntry((T) this);
         entry.getObsList().add(o);
     }
@@ -126,7 +122,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * @param o observer to be deleted.
      */
     @Override
-    default public void deleteObserver(Observer<T, V> o) {
+    public default void deleteObserver(ToolObserver<T, V> o) {
         Entry entry = getEntry((T) this);
         entry.getObsList().remove(o);
     }
@@ -137,7 +133,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * @param arg the updated object.
      */
     @Override
-    default public void notifyObservers() {
+    public default void notifyObservers() {
         notifyObservers(null);
     }
     
@@ -148,7 +144,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * @param arg the updated object.
      */
     @Override
-    default public void notifyObservers(V arg) {
+    public default void notifyObservers(V arg) {
         Entry entry = getEntry((T) this);
         entry.getObsList().forEach(o -> {
             if (o != null) o.update(this, arg);
@@ -159,7 +155,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * Deletes all observers from the list of observers.
      */
     @Override
-    default public void deleteObservers() {
+    public default void deleteObservers() {
         Entry entry = getEntry((T) this);
         entry.getObsList().clear();
     }
@@ -186,7 +182,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * @return whether there was a change.
      */
     @Override
-    default public boolean hasChanged() {
+    public default boolean hasChanged() {
         Entry entry = getEntry((T) this);
         return entry.getModified();
     }
@@ -195,7 +191,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
      * @return the number of observers of this object.
      */
     @Override
-    default public int countObservers() {
+    public default int countObservers() {
         Entry entry = getEntry((T) this);
         return entry.getObsList().size();
     }

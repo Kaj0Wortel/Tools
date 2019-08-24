@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
 // Tools imports
 import tools.log.Logger;
 import tools.observer.ObsInterface;
-import tools.observer.Observer;
+import tools.observer.ToolObserver;
 
 
 /**
@@ -59,7 +59,7 @@ public abstract class Scheduler
      * because it automatically achieves synchronization by copying the
      * array when modified.
      */
-    private final List<Observer<Scheduler, SchedulerEventObject>> obs
+    private final List<ToolObserver<Scheduler, SchedulerEventObject>> obs
             = new CopyOnWriteArrayList<>();
     
     /** Whether there was a modification. */
@@ -267,16 +267,16 @@ public abstract class Scheduler
     
     
     /* -------------------------------------------------------------------------
-     * Observer functions.
+     * ToolObserver functions.
      * -------------------------------------------------------------------------
      */
     @Override
-    public void addObserver(Observer<Scheduler, SchedulerEventObject> o) {
+    public void addObserver(ToolObserver<Scheduler, SchedulerEventObject> o) {
         obs.add(o);
     }
     
     @Override
-    public void deleteObserver(Observer<Scheduler, SchedulerEventObject> o) {
+    public void deleteObserver(ToolObserver<Scheduler, SchedulerEventObject> o) {
         obs.remove(o);
     }
     

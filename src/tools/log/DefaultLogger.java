@@ -23,34 +23,51 @@ import tools.Var;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
- * Default format for a logger class.
+ * Abstract logger implementation which can be used as basis for a logger.
  * 
- * @author Kaj Wortel (0991586)
+ * @version 1.0
+ * @author Kaj Wortel
  */
 public abstract class DefaultLogger
         extends Logger {
-    final public static String LS = System.getProperty("line.separator");
     
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
     /**
-     * Default constructor which creates a new fair lock.
+     * Default constructor which creates a new fair lock for concurrent operations.
      */
     public DefaultLogger() {
-        lock = new ReentrantLock(true);
+        super.lock = new ReentrantLock(true);
+    }
+    
+    /**
+     * Constructor which initializes the lock with the given lock.
+     * 
+     * @param lock The lock to use for this class.
+     */
+    public DefaultLogger(Lock lock) {
+        super.lock = lock;
     }
     
     
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
     /**
      * Writes the given text to the log.
      * 
-     * @param text to be write to the log.
+     * @param text The text to be write to the log.
      * 
-     * Note: The default exception handeling is printing them to
-     * the {@code System.out stream}. Catch The exception here to change the
-     * behaviour.
+     * @implSpec
+     * The default exception handeling is to print exceptions to the {@code System.err stream}.
      * 
      * @throws IOException If some IO error occured.
      */
@@ -109,15 +126,14 @@ public abstract class DefaultLogger
     }
     
     /**
-     * Processes the text to a single String.
+     * Processes the text with the given attributes to a single String.
      * 
-     * @param text the text to be processed.
-     * @param type the type of logging.
-     * @param timeStamp the time stamp of the logging.
-     * @param useDate whether the time should be used in this logging.
+     * @param text The text to be processed.
+     * @param type The type of logging.
+     * @param timeStamp The time stamp of the logging.
+     * @param useDate Whether the time should be used in this logging.
      */
-    protected void processText(String text, Type type, Date timeStamp,
-            boolean useDate) {
+    protected void processText(String text, Type type, Date timeStamp, boolean useDate) {
         try {
             String dateLine;
             String infoLine;
@@ -137,7 +153,7 @@ public abstract class DefaultLogger
                         .fillSpaceRight("[" + type.toString() + "]", 10);
             }
             
-            writeText(dateLine + infoLine + text + LS);
+            writeText(dateLine + infoLine + text + Var.LS);
             
         } catch (IOException e){
             System.err.println(e);
@@ -146,13 +162,12 @@ public abstract class DefaultLogger
     }
     
     /**
-     * Writes the header of the log file.
-     * Here is given that {@code writer != null}.
+     * Writes the header of the log file if it was not yet written.
      */
     protected void writeHeader() {
         try {
             if (header == null) return;
-            writeText(header.replaceAll("&date&", formatDate(new Date())) + LS);
+            writeText(header.replaceAll("&date&", formatDate(new Date())) + Var.LS);
             
         } catch (IOException e){
             System.err.println(e);

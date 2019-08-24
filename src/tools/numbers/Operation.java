@@ -1,5 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright (C) 2018 by Kaj Wortel - all rights reserved                    *
+ * Copyright (C) August 2019 by Kaj Wortel - all rights reserved             *
  * Contact: kaj.wortel@gmail.com                                             *
  *                                                                           *
  * This file is part of the tools project, which can be found on github:     *
@@ -14,6 +14,38 @@
 package tools.numbers;
 
 
+/**
+ * Enum denoting the mathematical operation.
+ * 
+ * @version 1.0
+ * @author Kaj Wortel
+ */
 public enum Operation {
-    ADD, SUB, MUL, DIV, MOD;
+    
+    /**
+     * Denotes the addition operation.
+     */
+    ADD,
+    
+    /**
+     * Denotes the subtraction operation.
+     */
+    SUB,
+    
+    /**
+     * Denotes the multiplication operation.
+     */
+    MUL,
+    
+    /**
+     * Denotes the division operation.
+     */
+    DIV,
+    
+    /**
+     * Denotes the modulus operation.
+     */
+    MOD;
+    
+    
 }

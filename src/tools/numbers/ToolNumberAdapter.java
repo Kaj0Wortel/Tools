@@ -24,7 +24,13 @@ import tools.StoreException;
  * using the convert function.
  * 
  * Note that this must be an instance of C.
+ * 
+ * @version 0.0
+ * @author Kaj Wortel
+ * 
+ * @deprecated Old class, and needs to be refactored.
  */
+@Deprecated
 public abstract class ToolNumberAdapter<C extends ToolNumber>
         extends ToolNumber {
     
