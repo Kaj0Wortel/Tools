@@ -182,8 +182,8 @@ public final class ImageManager {
      * Registers a image sheet for later use.
      * 
      * @implNote
-     * When there already exists a sheet with the same absolute path, then
-     * the previous sheet <b>WILL BE OVERWRITTEN</b> with this call.
+     * When there already exists a sheet with the same absolute path, then the new
+     * settings <b>WILL NOT</b> be loaded, and the previous settings will remain.
      * 
      * @param fileTree The file tree to use.
      * @param path The path of the file inside the file tree.
@@ -205,8 +205,8 @@ public final class ImageManager {
      * Registers a image sheet for later use.
      * 
      * @implNote
-     * When there already exists a sheet with the same absolute path, then
-     * the previous sheet <b>WILL BE OVERWRITTEN</b> with this call.
+     * When there already exists a sheet with the same absolute path, then the new
+     * settings <b>WILL NOT</b> be loaded, and the previous settings will remain.
      * 
      * @param fileTree The file tree to use.
      * @param path The path of the file inside the file tree.
@@ -228,6 +228,7 @@ public final class ImageManager {
             throw new IllegalArgumentException("The path doesn't exist: '" + path + "'.");
         }
         String idName = getIdOf(fileTree, path);
+        if (TOKEN_MAP.containsKey(idName)) return idName;
         Token token = new EqualToken(fileTree, path, idName, startX, startY,
                 endX, endY, width, height);
         TOKEN_MAP.put(idName, token);
@@ -238,8 +239,9 @@ public final class ImageManager {
      * Registers a image sheet for later use.
      * 
      * @implNote
-     * When there already exists a sheet with the same absolute path, then
-     * the previous sheet <b>WILL BE OVERWRITTEN</b> with this call.
+     * When there already exists a sheet with the same absolute path,
+     * When there already exists a sheet with the same absolute path, then the new
+     * settings <b>WILL NOT</b> be loaded, and the previous settings will remain.
      * 
      * @param fileTree The file tree to use.
      * @param path The path of the file inside the file tree.
@@ -254,6 +256,7 @@ public final class ImageManager {
             throw new IllegalArgumentException("The path doesn't exist: '" + path + "'.");
         }
         String idName = getIdOf(fileTree, path);
+        if (TOKEN_MAP.containsKey(idName)) return idName;
         TOKEN_MAP.put(idName, new UnequalToken(fileTree, path, idName, recs));
         return idName;
     }
