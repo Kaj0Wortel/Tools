@@ -24,7 +24,7 @@ import tools.Var;
 
 
 /**
- * Wrapper class to easily allow strings to be written to an {@link OutputStream}.
+ * Wrapper class to easily allow strings to be written to a {@link OutputStream}.
  * 
  * @version 1.0
  * @author Kaj Wortel
@@ -47,7 +47,7 @@ public class StringOutputStream
     /**
      * Wrapper construtor.
      * 
-     * @param os output stream to delegate the writing to.
+     * @param os The output stream to delegate the writing to.
      */
     public StringOutputStream(OutputStream os) {
         if (os == null) throw new NullPointerException();
@@ -68,7 +68,7 @@ public class StringOutputStream
     /**
      * Writes a string to the output stream.
      * 
-     * @param text the text to write.
+     * @param text The text to write.
      * 
      * @throws IOException If some IO error occured.
      */
@@ -80,7 +80,7 @@ public class StringOutputStream
     /**
      * Writes a line of text, including line separator.
      * 
-     * @param text the text to write.
+     * @param text The text to write.
      * 
      * @throws IOException If some IO error occured.
      */
