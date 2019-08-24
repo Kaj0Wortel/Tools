@@ -44,7 +44,6 @@ public interface Var {
     @Deprecated
     public static final String TEST_DIR = System.getProperty("user.dir") + FS + "test" + FS;
     /** The global project log directory. */
-    @Deprecated
     public static final String LOG_DIR = System.getProperty("user.dir") + FS + "log" + FS;
     
     /** The directory of the tool package. */
@@ -60,7 +59,6 @@ public interface Var {
     @Deprecated
     public static final String DATA_DIR = WORKING_DIR + "data" + FS;
     /** The default log file. */
-    @Deprecated
     public static final File LOG_FILE = new File(LOG_DIR + "log.log");
     
     /** Random number generator. */
