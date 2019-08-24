@@ -48,7 +48,7 @@ public class DefaultValueArray<V>
     /**
      * Creates a object which can return values from the given array or a default value.
      * 
-     * @param data The backening array.
+     * @param arr The backening array.
      * @param def The default value.
      */
     public DefaultValueArray(V[] arr, V def) {
@@ -58,7 +58,7 @@ public class DefaultValueArray<V>
     /**
      * Creates a object which can return values from the given array or a default value.
      * 
-     * @param data The backening array.
+     * @param arr The backening array.
      * @param def The default value.
      */
     public DefaultValueArray(Object arr, V def) {
@@ -68,7 +68,7 @@ public class DefaultValueArray<V>
     /**
      * Creates a object which can return values from the given array or a default value.
      * 
-     * @param data The backening array in a wrapper.
+     * @param arr The backening array in a wrapper.
      * @param def The default value.
      */
     public DefaultValueArray(Wrapper<V[]> arr, V def) {
@@ -78,7 +78,7 @@ public class DefaultValueArray<V>
     /**
      * Creates a object which can return values from the given array or a default value.
      * 
-     * @param data The backening array in a wrapper.
+     * @param arr The backening array in a wrapper.
      * @param def The default value in a wrapper.
      */
     public DefaultValueArray(Wrapper<V[]> arr, Wrapper<V> def) {

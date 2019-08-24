@@ -67,13 +67,18 @@ public class Vec
     /**
      * Creates an 1xn vector with the given (tool)numbers.
      * 
-     * @param cloneMat whether to clone the given array. Default is true.
      * @param values the numbers in the new vector.
      */
     public Vec(Number... values) {
         super(values.length, 1, values);
     }
     
+    /**
+     * Creates an 1xn vector with the given (tool)numbers.
+     * 
+     * @param cloneMat whether to clone the given array. Default is {@code true}.
+     * @param values the numbers in the new vector.
+     */
     public Vec(boolean cloneMat, Number... values) {
         super(values.length, 1, cloneMat, values);
     }

@@ -423,7 +423,7 @@ public final class MultiTool {
      * Calculates the power significantly faster compared to
      * {@link Math#pow(double, double)}, but only accepts integer powers.
      *
-     * Benchmarks compared to {@link Math#pow(double, double):
+     * Benchmarks compared to {@link Math#pow(double, double)}:
      * <ul>
      *   <li> 2.4 times faster for very small powers an bases
      *        (e.g. between -50 and 50). </li>

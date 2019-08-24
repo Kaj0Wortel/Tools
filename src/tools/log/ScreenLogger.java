@@ -82,13 +82,7 @@ public class ScreenLogger
      * -------------------------------------------------------------------------
      */
     /**
-     * Constructor.
-     * 
-     * @param title the title of the frame.
-     * @param actionMap mapping from the keys to runnable functions.
-     *     When a key is pressed, the corresponding function is executed.
-     * @param key when only one action is required, this is the key that invokes the action.
-     * @param run when only one action is required, this is the action that is invoked.
+     * Creates a new logger which displays the logged text to a GUI.
      */
     public ScreenLogger() {
         this(DEFAULT_TITLE);
@@ -130,8 +124,8 @@ public class ScreenLogger
      * @param actionMap A mapping from keys to runnable functions. When a key is pressed,
      *     the corresponding function is executed.
      */
-    public ScreenLogger(Map<Key, Runnable> map) {
-        this(DEFAULT_TITLE, map);
+    public ScreenLogger(Map<Key, Runnable> actionMap) {
+        this(DEFAULT_TITLE, actionMap);
     }
     
     /**
@@ -141,7 +135,7 @@ public class ScreenLogger
      * @param actionMap A mapping from keys to runnable functions. When a key is pressed,
      *     the corresponding function is executed.
      */
-    public ScreenLogger(String title, Map<Key, Runnable> map) {
+    public ScreenLogger(String title, Map<Key, Runnable> actionMap) {
         frame = new JFrame(title);
         frame.setLayout(null);
         Rectangle windowSize = GraphicsEnvironment
@@ -179,17 +173,17 @@ public class ScreenLogger
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants
                 .VERTICAL_SCROLLBAR_ALWAYS);
         
-        if (map != null) {
+        if (actionMap != null) {
             KeyListener kl = new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
-                    Runnable r = map.get(new Key(e, false));
+                    Runnable r = actionMap.get(new Key(e, false));
                     if (r != null) r.run();
                 }
                 
                 @Override
                 public void keyReleased(KeyEvent e) {
-                    Runnable r = map.get(new Key(e, true));
+                    Runnable r = actionMap.get(new Key(e, true));
                     if (r != null) r.run();
                 }
             };

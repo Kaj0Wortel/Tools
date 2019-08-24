@@ -226,7 +226,7 @@ public abstract class FileTree {
     /**
      * Returns an iterator which iterates over all paths from the given directory.
      * 
-     * @param path The starting directory.
+     * @param file The starting directory.
      * @param options The walk options.
      * 
      * @return An iterator over all paths in the tree.
@@ -260,7 +260,7 @@ public abstract class FileTree {
      * Determines the size of the given file in this file tree.
      * If the file doesn't exist or cannot be accessed, then {@code -1} is returned.
      * 
-     * @param path The file.
+     * @param file The file to get the size of.
      * 
      * @return The size of a file in bytes, or {@code 0} if the file could not be accessed.
      */
@@ -291,7 +291,7 @@ public abstract class FileTree {
     /**
      * Checks whether the given file exists.
      * 
-     * @param path The file to check.
+     * @param file The file to check for existance.
      * 
      * @return {@code true} if the path exists. {@code false} otherwise.
      * 
@@ -328,7 +328,7 @@ public abstract class FileTree {
     /**
      * Creates an input stream from the provided file.
      * 
-     * @param path The path of the file.
+     * @param file The file to get the stream from.
      * 
      * @return The stream of the file with the given file.
      * 
@@ -369,7 +369,7 @@ public abstract class FileTree {
     /**
      * Reads all bytes from the given file and puts them in an array.
      * 
-     * @param path The path of the file.
+     * @param file The file to read all bytes of.
      * 
      * @return A byte array containing all bytes of the file.
      * 
@@ -420,7 +420,7 @@ public abstract class FileTree {
      * @implNote
      * If the file does not exist, then this function will return {@code false}.
      * 
-     * @param path The path to check.
+     * @param file The file to check.
      * 
      * @return {@code true} if the given file is a directory.
      *     {@code false} otherwise.

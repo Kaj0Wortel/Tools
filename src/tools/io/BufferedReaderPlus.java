@@ -284,7 +284,6 @@ public class BufferedReaderPlus
      *     a multiple line comment. Default is {@code null}.
      * @param multipleCommentEnd The String used to indicate the end of
      *     a multiple line comment. Default is {@code null}.
-     * @param type The type of file that will be read. Must be one of:
      */
     public BufferedReaderPlus(String file, String singleComment,
                               String multipleCommentStart,

@@ -95,8 +95,7 @@ public class Wrapper<V>
     /**
      * Gets an element of the wrapped array object.
      *
-    * @param array The array to access
-    * @param index The array index to access
+    * @param index The array index to access.
     * 
     * @throws NullPointerException If {@code array} is null.
     * @throws ArrayIndexOutOfBoundsException If {@code index} is out of bounds.

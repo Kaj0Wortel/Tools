@@ -68,7 +68,7 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
         }
         
         /**
-         * @return  {@code true iff the obsevable had a modification.
+         * @return {@code true} if the obsevable had a modification.
          */
         public boolean getModified() {
             return modified;
@@ -129,8 +129,6 @@ public interface HashObservableInterface<T extends HashObservableInterface<T, V>
     
     /**
      * This method should be invoked to notify all observers of a change.
-     * 
-     * @param arg the updated object.
      */
     @Override
     public default void notifyObservers() {

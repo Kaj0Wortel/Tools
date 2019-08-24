@@ -49,7 +49,7 @@ public class PartFile
      * Creates a new {@code PartFile} with the given starting directory
      * and the file relative to this directory.
      * 
-     * @param dir The name of the starting directory.
+     * @param dirName The name of the starting directory.
      * @param filePath The file path relative to the directory.
      */
     public PartFile(String dirName, String filePath) {
@@ -76,7 +76,7 @@ public class PartFile
      * file relative to this directory.
      * 
      * @param dir The starting directory.
-     * @param filePath The file path relative to the directory.
+     * @param file The file path relative to the directory.
      */
     public PartFile(File dir, File file) {
         super((dir == null ? "" : dir.toString() + Var.FS) + file.toString());

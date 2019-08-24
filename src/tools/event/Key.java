@@ -326,7 +326,7 @@ public class Key implements PublicCloneable {
     /**
      * Creates a new mutable key.
      * 
-     * @see #Key(boolean, int, int, boolean)
+     * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key) {
         this(key, false);
@@ -335,7 +335,7 @@ public class Key implements PublicCloneable {
     /**
      * Creates a new mutable key.
      * 
-     * @see #Key(boolean, int, int, boolean)
+     * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key, int mask) {
         this(key, mask, DEFAULT_KEY_RELEASE, DEFAULT_MUTABLE);
@@ -344,7 +344,7 @@ public class Key implements PublicCloneable {
     /**
      * Creates a new mutable key.
      * 
-     * @see #Key(boolean, int, int, boolean)
+     * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key, boolean onKeyRelease) {
         this(key, DEFAULT_MASK, onKeyRelease, DEFAULT_MUTABLE);
@@ -353,7 +353,7 @@ public class Key implements PublicCloneable {
     /**
      * Creates a new mutable key.
      * 
-     * @see #Key(boolean, int, int, boolean)
+     * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key, int mask, boolean onKeyRelease) {
         this(key, mask, onKeyRelease, DEFAULT_MUTABLE);
@@ -363,7 +363,7 @@ public class Key implements PublicCloneable {
      * Creates a new key.
      * 
      * @param key Value for this key.
-     * @param modifier The modifier of the key.
+     * @param mask The mask of the key.
      * @param onKeyRelease Whether the key was released or pressed.
      * @param immutable Whether this key should be immutable.
      */

@@ -35,15 +35,11 @@ public interface ObsInterface<T extends ObsInterface<T, V>, V> {
      * Deletes the given observer from the list of observers.
      * 
      * @param o observer to be deleted.
-     * 
-     * Implementation via {@link ToolObserver#deleteObserver(Observer)}.
      */
     public void deleteObserver(ToolObserver<T, V> o);
     
     /**
      * This method should be invoked to notify all observers of a change.
-     * 
-     * @param arg the updated object.
      * 
      * @see #notifyObservers(Object)
      */

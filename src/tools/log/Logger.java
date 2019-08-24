@@ -449,9 +449,9 @@ public abstract class Logger {
     }
     
     /**
-     * Sets the log header.
-     * Use {@code null} to have no header.
-     * Use "&date&" to use the time stamp of when the log was created.
+     * Sets the log header. <br>
+     * Use {@code null} to have no header. <br>
+     * Use {@code &date&} to use the time stamp of when the log was created.
      * 
      * @param header The header to print before writing data
      */

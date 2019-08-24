@@ -137,7 +137,7 @@ public class JarFileTree
      * <br>
      * This function replaces the constructor.
      * 
-     * @param path The jar file.
+     * @param file The jar file.
      * 
      * @return A file tree of the given jar file.
      * 

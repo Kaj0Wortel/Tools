@@ -385,36 +385,14 @@ public class FileTools {
         
     }
     
-    
-    public static void main(String[] args)
-            throws Exception {
-        URI uri = URI.create(new File("jar:file:" + FileTools.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getPath());
-        Map<String, ?> env = new HashMap<>();
-        FileSystem fs = FileSystems.newFileSystem(uri, env);
-        System.out.println(fs);
-        System.out.println(new FileInputStream(fs.getPath("/img/black_square.png").toUri().toString()));
-        /*
-        File root = new File("/media/kaj/OSDisk2/Users/s155587/Documents/_projects/tmp/");
-        File root = new File("/media/kaj/OSDisk2/Users/s155587/Documents/_projects/");
-        System.out.println(getFileList(root, true).toString().replaceAll(", ", "\n"));
-        
-        //File outFile = new File(Var.LOG_DIR + "tree.txt");
-        //outFile.getParentFile().mkdirs();
-        //listFiles(root).transferTo(new FileOutputStream(outFile, false));
-        System.out.println("working: " + Var.WORKING_DIR);
-        System.out.println("font: " + Var.FONT_DIR);
-        //Logger.setDefaultLogger(new StreamLogger(System.out));
-        FontLoader.syncLoad();*/
-    }
-    
     /**
      * Moves an entire file tree from {@code soruce} to {@code target}.
      *
-     * @param source the source file/directory of the move.
-     * @param target the target file/directory of the move.
-     * @param cmp the comparator for ignoring files.
-     * @param options the copy options for moving the files.
-     * @throws IOException
+     * @param source The source file/directory of the move.
+     * @param target The target file/directory of the move.
+     * @param options The copy options for moving the files.
+     * 
+     * @throws IOException If some IO error occured.
      *
      * @see Files#move(Path, Path, CopyOption...)
      * @see #fileTreeAction(File, File, BoolEvaluator, int, CopyOption...)
@@ -425,6 +403,19 @@ public class FileTools {
         moveFileTree(source, target, null, options);
     }
     
+    /**
+     * Moves an entire file tree from {@code soruce} to {@code target}.
+     *
+     * @param source The source file/directory of the move.
+     * @param target The target file/directory of the move.
+     * @param cmp The comparator for ignoring files.
+     * @param options The copy options for moving the files.
+     * 
+     * @throws IOException If some IO error occured.
+     *
+     * @see Files#move(Path, Path, CopyOption...)
+     * @see #fileTreeAction(File, File, BoolEvaluator, int, CopyOption...)
+     */
     public static void moveFileTree(File source, File target,
             BoolEvaluator<File> cmp, CopyOption... options)
             throws IOException {
@@ -436,9 +427,9 @@ public class FileTools {
      *
      * @param source the source file/directory of the copy.
      * @param target the target file/directory of the copy.
-     * @param cmp the comparator for ignoring files.
      * @param options the copy options for moving the files.
-     * @throws IOException
+     * 
+     * @throws IOException If some IO error occured.
      *
      * @see Files#copy(Path, Path, CopyOption...)
      * @see #fileTreeAction(File, File, BoolEvaluator, int, CopyOption...)
@@ -449,6 +440,19 @@ public class FileTools {
         copyFileTree(source, target, null, options);
     }
     
+    /**
+     * Copies an entire file tree from {@code soruce} to {@code target}.
+     *
+     * @param source the source file/directory of the copy.
+     * @param target the target file/directory of the copy.
+     * @param cmp the comparator for ignoring files.
+     * @param options the copy options for moving the files.
+     * 
+     * @throws IOException If some IO error occured.
+     *
+     * @see Files#copy(Path, Path, CopyOption...)
+     * @see #fileTreeAction(File, File, BoolEvaluator, int, CopyOption...)
+     */
     public static void copyFileTree(File source, File target,
             BoolEvaluator<File> cmp, CopyOption... options)
             throws IOException {
@@ -459,10 +463,9 @@ public class FileTools {
      * Deletes the entire file tree {@code soruce}.
      *
      * @param source the source file/directory of the delete.
-     * @param cmp the comparator for ignoring files.
-     * @throws IOException
-     *
-     * Also see:
+     * 
+     * @throws IOException If some IO error occured.
+     * 
      * @see File#delete()
      * @see #fileTreeAction(File, File, BoolEvaluator, int, CopyOption...)
      */
@@ -471,6 +474,17 @@ public class FileTools {
         deleteFileTree(source, null);
     }
     
+    /**
+     * Deletes the entire file tree {@code soruce}.
+     *
+     * @param source the source file/directory of the delete.
+     * @param cmp the comparator for ignoring files.
+     * 
+     * @throws IOException If some IO error occured.
+     * 
+     * @see File#delete()
+     * @see #fileTreeAction(File, File, BoolEvaluator, int, CopyOption...)
+     */
     public static void deleteFileTree(File source, BoolEvaluator<File> cmp)
             throws IOException {
         fileTreeAction(source, null, cmp, DELETE_FILES);
@@ -574,12 +588,10 @@ public class FileTools {
      * If the root is a directory, then iterate over all files in that
      * directory.
      * <br><br>
-     * Note:
      * If directories should be used in actions, they are always listed before
      * any other files within that directory.
-     *
+     * 
      * @param root The root to start performing the actions.
-     * @param listDirs Whether to perform the action on directories.
      * @param action The action to perform.
      * 
      * @deprecated The functionality already exists in {@link tools.data.file.FileTree}.
@@ -590,10 +602,19 @@ public class FileTools {
     }
     
     /**
+     * Executes an action for each file starting at the given
+     * root directory.
+     * <br>
+     * If the root is a file, then it is accepted by default.
+     * If the root is a directory, then iterate over all files in that
+     * directory.
+     * <br><br>
+     * If directories should be used in actions, they are always listed before
+     * any other files within that directory.
      * 
-     * @param root
-     * @param listDirs
-     * @param action 
+     * @param root The root to start performing the actions.
+     * @param listDirs Whether to perform the action on directories.
+     * @param action The action to perform.
      * 
      * @deprecated The functionality already exists in {@link tools.data.file.FileTree}.
      */

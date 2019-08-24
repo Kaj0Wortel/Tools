@@ -194,7 +194,7 @@ public final class ImageManager {
      * 
      * @throws IllegalArgumentException If the given path doesn't exists.
      * 
-     * @see #registerSheet(FileTree, String, String, int, int, int, int, int, int)
+     * @see #registerSheet(FileTree, String, int, int, int, int, int, int)
      */
     public static String registerSheet(FileTree fileTree, String path, int width, int height)
             throws IllegalArgumentException {

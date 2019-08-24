@@ -470,7 +470,7 @@ public class Button
     /**
      * Paints the text on this panel.
      * 
-     * @param g the graphics object.
+     * @param g2d the graphics object.
      * 
      * @see #setText(String)
      */

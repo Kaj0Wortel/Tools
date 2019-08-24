@@ -65,13 +65,17 @@ public class Mat
      * Creates a 1x1 matrix only containing the given ToolNumber.
      * 
      * @param value the sole value in the matrix.
-     * @param cloneMat whether to clone the value.
-     *     Default is true.
      */
     public Mat(ToolNumber value) {
         this(value, true);
     }
     
+    /**
+     * Creates a 1x1 matrix only containing the given ToolNumber.
+     * 
+     * @param value The sole value in the matrix.
+     * @param cloneMat Whether to clone the values of the matrix. Default is {@code true}.
+     */
     public Mat(ToolNumber value, boolean cloneMat) {
         setMatrix(new ToolNumber[][] {
             new ToolNumber[] {
@@ -86,19 +90,23 @@ public class Mat
     public Mat(Number[]... values) {
         this(true, (PrimitiveNumber[][]) PrimitiveNumber.toPrimNumber(values));
     }
-        
+    
     /**
      * Creates a matrix object of the given matrix.
      * 
-     * @param values the given matrix.
-     * @param cloneMat whether to clone the given matrix.
-     *     Default is true.
+     * @param values The given matrix.
      */
     public Mat(ToolNumber[]... values)
             throws MatrixDimensionException {
         this(true, values);
     }
     
+    /**
+     * Creates a matrix object of the given matrix.
+     * 
+     * @param values The given matrix.
+     * @param cloneMat Whether to clone the values. Default is {@code true}.
+     */
     public Mat(boolean cloneMat, ToolNumber[]... values)
             throws MatrixDimensionException {
         setMatrix(values, cloneMat);
@@ -1635,7 +1643,7 @@ public class Mat
      */
     /**
      * This method is called when the matrix is set via
-     * {@link setMatrix(double[][], boolean)} and adds constrains for the
+     * {@link #setMatrix(ToolNumber[][], boolean)} and adds constrains for the
      * dimension. A MatrixDimensionException should be thrown here if
      * an unacceptable matrix dimension was given.
      */

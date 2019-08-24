@@ -86,8 +86,8 @@ public class SourceImageSheet
      * has been called, then the behaviour of any function is undefined.
      * 
      * @param images The source images for this sheet.
-     * @param width The width of the image sheet.
-     * @param height The height of the image sheet.
+     * @param sheetWidth The width of the image sheet.
+     * @param sheetHeight The height of the image sheet.
      */
     public SourceImageSheet(Image[][] images, int sheetWidth, int sheetHeight) {
         if (sheetWidth < 0 || sheetHeight < 0) {

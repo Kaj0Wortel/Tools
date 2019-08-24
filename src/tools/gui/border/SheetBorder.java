@@ -132,7 +132,7 @@ public class SheetBorder
      * <ul>
      *   <li> {@link Image#SCALE_DEFAULT} </li>
      *   <li> {@link Image#SCALE_FAST} </li>
-     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>
      *   <li> {@link Image#SCALE_REPLICATE} </li>
      *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
      * </ul>
@@ -148,7 +148,7 @@ public class SheetBorder
      * <ul>
      *   <li> {@link Image#SCALE_DEFAULT} </li>
      *   <li> {@link Image#SCALE_FAST} </li>
-     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>
      *   <li> {@link Image#SCALE_REPLICATE} </li>
      *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
      * </ul>

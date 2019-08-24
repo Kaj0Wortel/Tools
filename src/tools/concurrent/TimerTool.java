@@ -121,17 +121,17 @@ public class TimerTool {
      * -------------------------------------------------------------------------
      */
     /**
+     * Creates a timer with no initial delay and runs at 1 second intervals.
+     * 
      * @param rs The actions that will be executed when the timer ends.
-     * @param delay The time in ms before the first exectution of
-     *     {@code r.run()}.
-     * @param interval The time in ms which is between two executions of
-     *     {@code r.run()}.
      */
     public TimerTool(Runnable... rs) {
         this(0L, 1000L, true, rs);
     }
     
     /**
+     * Creates a timer with no initial delay and runs at the given interval.
+     * 
      * @param rs The actions that will be executed when the timer ends.
      * @param interval The time in ms which is between two executions of {@code r.run()}.
      */
@@ -152,13 +152,13 @@ public class TimerTool {
     
     /**
      * Creates a new timer with the given delay and interval, which will run
-     * the given runnables as tasks. The times will run on daemon threads only
+     * the given runnables as tasks. The times will run as daemon only
      * if {@link isDaemon == true}
      * 
      * @param rs The actions that will be executed when the timer ends.
      * @param delay The time in ms before the first exectution of {@code r.run()}.
      * @param interval The time in ms which is between two executions of {@code r.run()}.
-     * @param isDaemon Whether the created times will be daemon or not.
+     * @param isDaemon Whether the created times will be daemon or not. The default is {@code true}.
      */
     public TimerTool(long delay, long interval, boolean isDaemon, Runnable... rs) {
         this.tasks = rs;

@@ -134,11 +134,10 @@ public abstract class BlockBufferOutputStream
     
     /**
      * The data block to process. <br>
-     * It is guaranteed that the length of {@code data} is equal to the
-     * value previously returned by {@link #getNextBlockSize()} if,
-     * and only if {@link #fillEnd()} returned {@code true}.
+     * It is guaranteed that the length of {@code data} is at most to the
+     * value previously returned by {@link #getNextBlockSize()}.
      * 
-     * @param data The data to be encrypted.
+     * @param data The data to be processed.
      * 
      * @throws IOException If an IO error occurs.
      */

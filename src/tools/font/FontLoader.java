@@ -154,12 +154,26 @@ public final class FontLoader {
     /**
      * Returns the font with the given (font file) name.
      * 
-     * @param path The name of the font file of the font entry.
+     * @param name The name of the font file of the font entry.
      * 
      * @return The font with the given (font file) name if it was loaded. {@code null} otherwise.
      */
-    public static Font getFont(String path) {
-        return FONTS.get(path);
+    public static Font getFont(String name) {
+        return FONTS.get(name);
+    }
+    
+    /**
+     * Returns the font with the given (font file) name, rescaled in the given size.
+     * 
+     * @param name The name of the font file of the font entry.
+     * @param size The size of the font.
+     * 
+     * @return The font with the given (font file) name if it was loaded. {@code null} otherwise.
+     */
+    public static Font getFont(String name, int size) {
+        Font font = FONTS.get(name);
+        if (font == null) return null;
+        else return font.deriveFont(size);
     }
     
     /**

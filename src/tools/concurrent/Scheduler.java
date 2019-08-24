@@ -288,7 +288,7 @@ public abstract class Scheduler
     /**
      * {@inheritDoc}
      * 
-     * @see #forceNotifyObservers(Object)
+     * @see #forceNotifyObservers(SchedulerEventObject)
      */
     @Override
     public void notifyObservers(SchedulerEventObject arg) {

@@ -874,7 +874,7 @@ public final class ArrayTools {
     /**
      * Converts the given array of any type to a list of the same type.
      * 
-     * @param arr The array to convert.
+     * @param array The array to convert.
      * 
      * @return An array of the given list.
      * 
@@ -917,8 +917,6 @@ public final class ArrayTools {
     
     /**
      * Converts the given boolean array to a Boolean list.
-     * 
-     * @param <V> The type of the given array.
      * 
      * @param arr The array to convert.
      * 
@@ -1989,16 +1987,14 @@ public final class ArrayTools {
      * @implSpec
      * This function runs in {@code O(n)}.
      *
-     * @param <V> The type of the array.
+     * @param <A> The type of the array.
      * 
      * @param arr The input array.
-     * @param rnd The used random generator used for swapping elements.
      * 
      * @return The input array, but then all elements are randomly shuffled.
      * 
      * @see #shuffle(Object, Random)
      */
-    
     public static <A> A shuffle(A arr) {
         return shuffle(arr, Var.RAN);
     }

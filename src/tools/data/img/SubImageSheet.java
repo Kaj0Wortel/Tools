@@ -59,8 +59,8 @@ public class SubImageSheet
      * 
      * @see #SubImageSheet(tools.data.img.ImageSheet, int, int, int, int)
      */
-    public SubImageSheet(ImageSheet sheet, int width, int height) {
-        this(sheet, 0, 0, width, height);
+    public SubImageSheet(ImageSheet sheet, int sheetWidth, int sheetHeight) {
+        this(sheet, 0, 0, sheetWidth, sheetHeight);
     }
     
     /**
@@ -78,9 +78,9 @@ public class SubImageSheet
      * @see #setSize(int, int)
      * @see #setTranslate(int, int)
      */
-    public SubImageSheet(ImageSheet sheet, int tranxX, int transY, int width, int height) {
+    public SubImageSheet(ImageSheet sheet, int tranxX, int transY, int sheetWidth, int sheetHeight) {
         if ((this.sheet = sheet) == null) throw new NullPointerException();
-        setSize(width, height);
+        setSize(sheetWidth, sheetHeight);
         setTranslate(transX, transY);
     }
     

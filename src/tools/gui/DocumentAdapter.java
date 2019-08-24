@@ -20,7 +20,7 @@ import javax.swing.event.DocumentListener;
 
 
 /**
- * Adapter class for the {@link #DocumentListener} interface.
+ * Adapter class for the {@link DocumentListener} interface.
  * 
  * @version 1.0
  * @author Kaj Wortel

@@ -59,7 +59,7 @@ public class ManagedImageSheet
      * @param width  The width of each subimage.
      * @param height The height of each subimage.
      * 
-     * @see ImageManager#registerSheet(FileTree, String, String, int, int)
+     * @see ImageManager#registerSheet(FileTree, String, int, int)
      */
     public ManagedImageSheet(FileTree fileTree, String path, int width, int height) {
         this.idName = ImageManager.registerSheet(fileTree, path, width, height);
@@ -78,7 +78,7 @@ public class ManagedImageSheet
      * @param width The width of each sub-image.
      * @param height The height of each sub-image.
      * 
-     * @see ImageManager#registerSheet(FileTree, String, String, int, int, int, int, int, int)
+     * @see ImageManager#registerSheet(FileTree, String, int, int, int, int, int, int)
      */
     public ManagedImageSheet(FileTree fileTree, String path, int startX, int startY,
             int endX, int endY, int width, int height) {
@@ -94,7 +94,7 @@ public class ManagedImageSheet
      * @param path The path of the file inside the file tree.
      * @param recs The locations and sizes of the images to load.
      * 
-     * @see ImageManager#registerSheet(FileTree, String, String, Rectangle[][])
+     * @see ImageManager#registerSheet(FileTree, String, Rectangle[][])
      */
     public ManagedImageSheet(FileTree fileTree, String path, Rectangle[][] recs) {
         this.idName = ImageManager.registerSheet(fileTree, path, recs);

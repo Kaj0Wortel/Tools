@@ -60,7 +60,6 @@ public class BlockByteBuffer
      * @param values The values to be added to the buffer.
      * 
      * @see #add(byte[], int, int)
-     * @see #add(Byte[])
      */
     public void add(byte[] values) {
         add(values, 0, values.length);

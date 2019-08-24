@@ -161,7 +161,7 @@ public abstract class ImageSheet {
     
     /**
      * @return {@code false} if requesting the image at (x, y) will always result
-     *     in an {@link IndexOutOfBoundException} being thrown. {@code true} otherwise.
+     *     in an {@link IndexOutOfBoundsException} being thrown. {@code true} otherwise.
      */
     public abstract boolean canAccess(int x, int y);
     

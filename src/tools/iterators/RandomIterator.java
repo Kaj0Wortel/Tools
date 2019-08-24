@@ -60,7 +60,7 @@ public  class RandomIterator<V>
     /**
      * Randomizes the order of the values returned by the iterator of the given iterable.
      * 
-     * @param iterable The iterable to randomize.
+     * @param iterator The iterable to randomize.
      */
     public RandomIterator(Iterator<V> iterator) {
         List<V> list = new ArrayList<V>();

@@ -27,7 +27,7 @@ import tools.io.ImageSheetLoader;
 
 /**
  * Token class for unequally divided images on a sheet. <br>
- * Uses {@link ImageSheetLoader#loadImage(String, String, Rectangle[][])} for reading the images.
+ * Uses {@link ImageSheetLoader#loadImage(FileTree, String, Rectangle[][])} for reading the images.
  * 
  * @version 1.0
  * @author Kaj Wortel

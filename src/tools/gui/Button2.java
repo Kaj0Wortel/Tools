@@ -199,9 +199,9 @@ public class Button2
      *     o img[0][0] contains the overlay of the upper left corner.
      *     o img[1][0] contains the overlay of the uppper bar.
      *     o img[2][0] contains the overlay of the center part
-     *     o img[0][x] with 1 <= x < 4 contain the backgrounds for the corners.
-     *     o img[1][x] with 1 <= x < 4 contain the backgrounds for the edges.
-     *     o img[2][x] with 1 <= x < 4 contain the backgrounds for the center part
+     *     o img[0][x] with {@code 1 <= x < 4} contain the backgrounds for the corners.
+     *     o img[1][x] with {@code 1 <= x < 4} contain the backgrounds for the edges.
+     *     o img[2][x] with {@code 1 <= x < 4} contain the backgrounds for the center part.
      */
     public Button2(int sizeX, int sizeY, int barSize, Image[][] img, int type) {
         this.imageType = type;
@@ -331,6 +331,13 @@ public class Button2
         font = font.deriveFont(size);
         label.setFont(font);
     }
+    public void setImage(Image image, boolean resize) {
+        setImage(image, barSize, barSize, resize);
+    }
+    
+    public void setImage(Image image, int imgBarSize, boolean resize) {
+        setImage(image, imgBarSize, imgBarSize, resize);
+    }
     
     /**
      * Sets the given image as icon image
@@ -343,14 +350,6 @@ public class Button2
      * @param resize whether the image should be resized to have
      *     an equal border on all sides.
      */
-    public void setImage(Image image, boolean resize) {
-        setImage(image, barSize, barSize, resize);
-    }
-    
-    public void setImage(Image image, int imgBarSize, boolean resize) {
-        setImage(image, imgBarSize, imgBarSize, resize);
-    }
-    
     public void setImage(Image image, int barWidth, int barHeight,
                          boolean resize) {
         this.image = image;

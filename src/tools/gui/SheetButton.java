@@ -171,7 +171,7 @@ public class SheetButton
      * <ul>
      *   <li> {@link Image#SCALE_DEFAULT} </li>
      *   <li> {@link Image#SCALE_FAST} </li>
-     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>
      *   <li> {@link Image#SCALE_REPLICATE} </li>
      *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
      * </ul>
@@ -188,7 +188,7 @@ public class SheetButton
      * <ul>
      *   <li> {@link Image#SCALE_DEFAULT} </li>
      *   <li> {@link Image#SCALE_FAST} </li>
-     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>
      *   <li> {@link Image#SCALE_REPLICATE} </li>
      *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
      * </ul>
@@ -205,7 +205,7 @@ public class SheetButton
      * <ul>
      *   <li> {@link Image#SCALE_DEFAULT} </li>
      *   <li> {@link Image#SCALE_FAST} </li>
-     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>
      *   <li> {@link Image#SCALE_REPLICATE} </li>
      *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
      *   <li> {@code 0} </li>
@@ -228,7 +228,7 @@ public class SheetButton
      * <ul>
      *   <li> {@link Image#SCALE_DEFAULT} </li>
      *   <li> {@link Image#SCALE_FAST} </li>
-     *   <li> {@link Image#SCALE_SMOOTH} </li>>
+     *   <li> {@link Image#SCALE_SMOOTH} </li>
      *   <li> {@link Image#SCALE_REPLICATE} </li>
      *   <li> {@link Image#SCALE_AREA_AVERAGING} </li>
      * </ul>
