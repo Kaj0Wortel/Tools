@@ -190,6 +190,7 @@ public abstract class BoundedImageSheet
     public boolean drawFromRow(Graphics2D g2d, int i, int posX, int posY,
             int width ,int height, int scaleHints)
             throws IndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         checkLinearBounds(i);
         int x = i % getWidth();
         int y = i / getWidth();
@@ -321,6 +322,7 @@ public abstract class BoundedImageSheet
     public boolean drawFromCols(Graphics2D g2d, int i, int posX, int posY,
             int width ,int height, int scaleHints)
             throws IndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         checkLinearBounds(i);
         int x = i / getHeight();
         int y = i % getHeight();
@@ -367,6 +369,16 @@ public abstract class BoundedImageSheet
     public boolean canAccess(int x, int y) {
         return (0 <= x || x < getWidth()) ||
                 (0 <= y || y < getHeight());
+    }
+    
+    /**
+     * Creates a GUI image sheet based on this image sheet. <br>
+     * The created GUI sheet will only return this sheet for all states.
+     * 
+     * @return A GUI image sheet based on this image sheet.
+     */
+    public GUIImageSheet asGUIImageSheet() {
+        return new SingleGUIImageSheet(this);
     }
     
     

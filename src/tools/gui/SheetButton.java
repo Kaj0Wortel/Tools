@@ -19,14 +19,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 import javax.swing.AbstractButton;
+import javax.swing.border.Border;
 
 
 // Tools imports
-import javax.swing.border.Border;
 import tools.data.img.GUIImageSheet;
+import tools.data.img.ImageSheet;
 import tools.gui.border.SheetBorder;
 
 
@@ -54,7 +57,8 @@ import tools.gui.border.SheetBorder;
  * </table>
  * 
  * @todo
- * Add to string function for debugging.
+ * - Add to string function for debugging.
+ * - Add text to print over the button.
  * 
  * @version 1.0
  * @author Kaj Wortel
@@ -72,6 +76,14 @@ public class SheetButton
     private GUIImageSheet sheet;
     /** The scaling type of the button. */
     private int scaleType = Image.SCALE_DEFAULT;
+    
+    /** The image to be displayed on the button. */
+    private ImageSheet image;
+    
+    /** Denotes whether the mouse is currently over the button. */
+    private boolean mouseOver = false;
+    /** Denotes whether the button is currently pressed. */
+    private boolean pressed = false;
     
     
     /* -------------------------------------------------------------------------
@@ -92,15 +104,32 @@ public class SheetButton
      * @param sheet The image sheets to use.
      */
     public SheetButton(Insets in, GUIImageSheet sheet) {
+        this(in, sheet, null);
+    }
+    
+    /**
+     * Creates a new content button. <br>
+     * The size of the image sheets must be at least {@code 3x3},
+     * and must follow the following coordinate scheme:
+     * <table border='1'>
+     *   <tr><td> 0, 0 </td> <td> 1, 0 </td> <td> 2, 0 </td></tr>
+     *   <tr><td> 0, 1 </td> <td> 1, 1 </td> <td> 2, 1 </td></tr>
+     *   <tr><td> 0, 2 </td> <td> 1, 2 </td> <td> 2, 2 </td></tr>
+     * </table>
+     * <br>
+     * Additionally, displays the image at {@code (0, 0)} from the {@code image}
+     * image sheet at the center of the button.
+     * 
+     * @param in The insets of the border.
+     * @param sheet The image sheets used to generate the button.
+     * @param image The image to be displayed.
+     */
+    public SheetButton(Insets in, GUIImageSheet sheet, ImageSheet image) {
         setImageSheet(sheet);
         setBorder(new SheetBorder(in, sheet));
+        this.image = image;
         
         addMouseListener(new MouseAdapter() {
-            /** Denotes whether the mouse is currently over the button. */
-            private boolean mouseOver = false;
-            /** Denotes whether the button is currently pressed. */
-            private boolean pressed = false;
-            
             @Override
             public void mousePressed(MouseEvent e) {
                 if (getState() == GUIState.DISABLED) return;
@@ -112,8 +141,11 @@ public class SheetButton
             public void mouseReleased(MouseEvent e) {
                 if (getState() == GUIState.DISABLED) return;
                 pressed = false;
-                if (mouseOver) setState(GUIState.ROLL_OVER);
-                else setState(GUIState.DEFAULT);
+                if (mouseOver) {
+                    setState(GUIState.ROLL_OVER);
+                    fireActionPerformed(new ActionEvent(SheetButton.this, ActionEvent.ACTION_FIRST,
+                            "PRESSED", System.currentTimeMillis(), e.getModifiersEx()));
+                } else setState(GUIState.DEFAULT);
             }
             
             @Override
@@ -163,6 +195,15 @@ public class SheetButton
             ((SheetBorder) border).setState(state);
         }
         repaint();
+    }
+    
+    /**
+     * Resets the state of the button to the initial state.
+     */
+    public void reset() {
+        this.state = GUIState.DEFAULT;
+        this.pressed = false;
+        this.mouseOver = false;
     }
     
     /**
@@ -251,13 +292,11 @@ public class SheetButton
      * Repaints the image sheet only if the actual sheet changes.
      * 
      * @param sheet The new image sheet to use for rendering the button.
-     *     Must be non-null.
      */
     public void setImageSheet(GUIImageSheet sheet) {
-        if (sheet == null) throw new NullPointerException();
-        boolean equal = sheet.equals(this.sheet);
+        if (this.sheet == sheet) return;
         this.sheet = sheet;
-        if (!equal) repaint();
+        repaint();
     }
     
     /**
@@ -265,6 +304,24 @@ public class SheetButton
      */
     public GUIImageSheet getImageSheet() {
         return sheet;
+    }
+    
+    /**
+     * @return The image which is painted on top of all parts in the center part of the button.
+     */
+    public ImageSheet getImage() {
+        return image;
+    }
+    
+    /**
+     * Sets the image whic his painted on top of all parts in the center part of the button.
+     * 
+     * @param image The new image, or {@code null} for no image.
+     */
+    public void setImage(ImageSheet image) {
+        if (this.image == image) return;
+        this.image = image;
+        repaint();
     }
     
     @Override
@@ -275,7 +332,13 @@ public class SheetButton
         int w = getWidth() - in.left - in.right;
         int h = getHeight() - in.top - in.bottom;
         
-        sheet.get(state).draw(g2d, 1, 1, in.left, in.top, w, h, scaleType);
+        if (w <= 0 || h <= 0) return;
+        if (sheet != null) {
+            sheet.get(state).draw(g2d, 1, 1, in.left, in.top, w, h, scaleType);
+        }
+        if (image != null) {
+            image.draw(g2d, 0, 0, in.left, in.top, w, h, scaleType);
+        }
     }
     
     

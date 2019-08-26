@@ -170,7 +170,7 @@ public final class FontLoader {
      * 
      * @return The font with the given (font file) name if it was loaded. {@code null} otherwise.
      */
-    public static Font getFont(String name, int size) {
+    public static Font getFont(String name, float size) {
         Font font = FONTS.get(name);
         if (font == null) return null;
         else return font.deriveFont(size);

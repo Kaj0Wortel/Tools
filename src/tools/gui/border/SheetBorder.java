@@ -216,6 +216,7 @@ public class SheetBorder
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (i == 1 && j == 1) continue;
+                if (w[i] <= 0 || h[j] <= 0) continue;
                 sheet.draw(g2d, i, j, x[i], y[j], w[i], h[j], scaleType);
             }
         }

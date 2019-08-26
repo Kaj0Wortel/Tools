@@ -117,15 +117,16 @@ public abstract class ImageSheet {
      * @return The image sheet at {@code (x, y)} with the given width and height,
      *     and scaled using the scale hints.
      * 
+     * @throws IllegalArgumentException If the given width or height are zero.
      * @throws IndexOutOfBoundsException If the given indices {@code x} and {@code y}
      *     are out of bounds.
-     * @throws IllegalArgumentException If the given width and height are zero or negative.
      * 
      * @see #get(int, int)
      * @see Image#getScaledInstance(int, int, int)
      */
     public Image get(int x, int y, int width, int height, int scaleHints)
             throws IllegalArgumentException, IndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         return get(x, y).getScaledInstance(width, height, scaleHints);
     }
     
@@ -166,12 +167,44 @@ public abstract class ImageSheet {
     public abstract boolean canAccess(int x, int y);
     
     /**
-     * Converts {@code this} to a {@link BoundedImageSheet}
+     * Gets a part of this image sheet.
      * 
-     * @return A fresh bounded image sheet representing {@code this}, bounded .
+     * @param width The width of the new image sheet (in images).
+     * @param height The height of the new image sheet (in images).
+     * 
+     * @return An image sheet representing a part of this image sheet.
      */
-    public BoundedImageSheet toBoundedSheet(final int width, final int height) {
+    public BoundedImageSheet getPart(int width, int height) {
         return new SubImageSheet(this, width, height);
+    }
+    
+    /**
+     * Gets a part of this image sheet.
+     * 
+     * @param x The initial translation over the x-axis (in images).
+     * @param y The initial translation over the y-axis (in images).
+     * @param width The width of the new image sheet (in images).
+     * @param height The height of the new image sheet (in images).
+     * 
+     * @return An image sheet representing a part of this image sheet.
+     */
+    public BoundedImageSheet getPart(int x, int y, int width, int height) {
+        return new SubImageSheet(this, x, y, width, height);
+    }
+    
+    /**
+     * Creates a GUI image sheet based on the sub-image of this image sheet. <br>
+     * The created GUI sheet will only return the provided sub-sheet for all states.
+     * 
+     * @param x The initial translation over the x-axis (in images).
+     * @param y The initial translation over the y-axis (in images).
+     * @param width The width of the new image sheet (in images).
+     * @param height The height of the new image sheet (in images).
+     * 
+     * @return A GUI image sheet based on the sub-image of this image sheet.
+     */
+    public GUIImageSheet asGUIImageSheet(int x, int y, int width, int height) {
+        return new SingleGUIImageSheet(getPart(x, y, width, height));
     }
     
     /**
@@ -220,6 +253,7 @@ public abstract class ImageSheet {
      * 
      * @return {@code true} if anything was drawn on the graphics object. {@code false} otherwise.
      * 
+     * @throws IllegalArgumentException If the given width or height are zero.
      * @throws IndexOutOfBoundsException If the given indices {@code x} and {@code y}
      *     are out of bounds.
      * 
@@ -228,10 +262,26 @@ public abstract class ImageSheet {
     public boolean draw(Graphics2D g2d, int x, int y, int posX, int posY,
             int width, int height, int scaleHints)
             throws IndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         Image img = get(x, y, width, height, scaleHints);
         if (img == null) return false;
         g2d.drawImage(img, posX, posY, null);
         return true;
+    }
+    
+    /**
+     * Verifies that the given width and height are non-zero.
+     * 
+     * @param width The width to check.
+     * @param height The height to check.
+     * 
+     * @throws IllegalArgumentException If the given width or height are zero.
+     */
+    protected void checkWidthHeight(int width, int height) {
+        if (width == 0 || height == 0) {
+            throw new IllegalArgumentException("Width(" + width + ") and height("
+                    + height + ") must be non-zero.");
+        }
     }
     
     

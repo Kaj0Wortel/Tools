@@ -1022,10 +1022,11 @@ public final class MultiTool {
      * @param col The collection.
      * @param action The action that will be executed for all elements.
      * 
-     * @see Iterable#forEach(Consumer)
+     * @deprecated Replaced by
+     * {@link tools.data.array.ArrayTools#forEach(java.lang.Object, java.util.function.Consumer)}
      */
-    public static <V, C extends Collection<V>> void forEach(
-            C col, SourceConsumer<? super C, ? super V> action) {
+    @Deprecated(forRemoval = true)
+    public static <V, C extends Collection<V>> void forEach(C col, SourceConsumer<C, V> action) {
         for (V v : col) {
             action.accept(col, v);
         }

@@ -131,6 +131,7 @@ public class OverlayImageSheet
     @Override
     public Image get(int x, int y, int width, int height, int scaleHints)
             throws ArrayIndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         checkBounds(x, y);
         if (width > 0 && height > 0) {
             BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -181,6 +182,7 @@ public class OverlayImageSheet
     public boolean draw(Graphics2D g2d, int x, int y, int posX, int posY,
             int width, int height, int scaleHints)
             throws IndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         checkBounds(x, y);
         boolean drawn = false;
         for (int i = 0; i < sheets.length; i++) {

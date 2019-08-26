@@ -17,6 +17,8 @@ package tools.data.img;
 // Java imports
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import tools.MultiTool;
 
 
 /**
@@ -54,8 +56,8 @@ public class SubImageSheet
      * are directly fetched from the given sheet.
      * 
      * @param sheet The original image sheet to get all images from.
-     * @param sheetWidth The width of the sheet.
-     * @param sheetHeight The height of the sheet.
+     * @param sheetWidth The width of the sheet (in images).
+     * @param sheetHeight The height of the sheet (in images).
      * 
      * @see #SubImageSheet(tools.data.img.ImageSheet, int, int, int, int)
      */
@@ -70,15 +72,15 @@ public class SubImageSheet
      * by the given translations.
      * 
      * @param sheet The original image sheet to get all images from.
-     * @param tranxX The amount to translate the original image sheet in the x-axis.
-     * @param transY The amount to translate the original image sheet in the y-axis.
-     * @param sheetWidth The width of the sheet.
-     * @param sheetHeight The height of the sheet.
+     * @param transX The amount to translate the original image sheet in the x-axis (in images).
+     * @param transY The amount to translate the original image sheet in the y-axis (in images).
+     * @param sheetWidth The width of the sheet (in images).
+     * @param sheetHeight The height of the sheet (in images).
      * 
      * @see #setSize(int, int)
      * @see #setTranslate(int, int)
      */
-    public SubImageSheet(ImageSheet sheet, int tranxX, int transY, int sheetWidth, int sheetHeight) {
+    public SubImageSheet(ImageSheet sheet, int transX, int transY, int sheetWidth, int sheetHeight) {
         if ((this.sheet = sheet) == null) throw new NullPointerException();
         setSize(sheetWidth, sheetHeight);
         setTranslate(transX, transY);
@@ -89,6 +91,20 @@ public class SubImageSheet
      * Functions.
      * -------------------------------------------------------------------------
      */
+    /**
+     * @return The amount the image sheet is translated towards the x-axis.
+     */
+    public int getTranslateX() {
+        return transX;
+    }
+    
+    /**
+     * @return The amount the image sheet is translated towards the y-axis.
+     */
+    public int getTranslateY() {
+        return transY;
+    }
+    
     @Override
     public int getWidth() {
         return sheetWidth;
@@ -102,7 +118,7 @@ public class SubImageSheet
     @Override
     public Image get(int x, int y) {
         int newX = x - transX;
-        int newY = y = transY;
+        int newY = y - transY;
         checkBounds(newX, newY);
         if (!sheet.canAccess(newX, newY)) return null;
         return sheet.get(newX, newY);
@@ -110,8 +126,9 @@ public class SubImageSheet
     
     @Override
     public Image get(int x, int y, int width, int height, int scaleHints) {
+        checkWidthHeight(width, height);
         int newX = x - transX;
-        int newY = y = transY;
+        int newY = y - transY;
         checkBounds(newX, newY);
         if (!sheet.canAccess(newX, newY)) return null;
         return sheet.get(newX, newY, width, height, scaleHints);
@@ -126,7 +143,7 @@ public class SubImageSheet
     public boolean draw(Graphics2D g2d, int x, int y, int posX, int posY)
             throws IndexOutOfBoundsException {
         int newX = x - transX;
-        int newY = y = transY;
+        int newY = y - transY;
         checkBounds(newX, newY);
         if (!sheet.canAccess(newX, newY)) return false;
         sheet.draw(g2d, newX, newY, posX, posY);
@@ -137,8 +154,9 @@ public class SubImageSheet
     public boolean draw(Graphics2D g2d, int x, int y, int posX, int posY,
             int width, int height, int scaleHints)
             throws IndexOutOfBoundsException {
+        checkWidthHeight(width, height);
         int newX = x - transX;
-        int newY = y = transY;
+        int newY = y - transY;
         checkBounds(newX, newY);
         if (!sheet.canAccess(newX, newY)) return false;
         sheet.draw(g2d, newX, newY, posX, posY, width, height, scaleHints);

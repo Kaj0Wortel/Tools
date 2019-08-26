@@ -290,8 +290,8 @@ public final class ImageSheetLoader {
             
         } else if (dX % width != 0) {
             throw new IllegalArgumentException(
-                    "Given width (" + width + "), startX (" + startX
-                            + ") and/or endX (" + endX + ") is invalid.");
+                    "Given width(" + width + "), startX(" + startX
+                            + ") and/or endX(" + endX + ") is invalid.");
         }
         
         if (height == -1) {
@@ -299,8 +299,8 @@ public final class ImageSheetLoader {
             
         } else if (dY % height != 0) {
             throw new IllegalArgumentException(
-                    "Given width (" + height + "), startY (" + startY
-                            + ") and/or endY (" + endY + ") is invalid.");
+                    "Given height(" + height + "), startY(" + startY + ") and/or endY("
+                            + endY + ") is invalid (path=" + path + ").");
         }
         
         // Split the image into parts.

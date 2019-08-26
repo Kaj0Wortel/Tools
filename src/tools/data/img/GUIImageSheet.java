@@ -77,23 +77,31 @@ public abstract class GUIImageSheet {
     public abstract BoundedImageSheet getDisabled();
     
     /**
-     * @return The miniumum width of all sheets.
+     * @return The miniumum width of all sheets, or {@link Integer#MAX_VALUE}
+     *     If all sheets are {@code null}.
      */
     public int getMinWidth() {
-        int min =Integer.MAX_VALUE;
+        int min = Integer.MAX_VALUE;
         for (GUIState s : GUIState.values()) {
-            min = Math.min(min, get(s).getWidth());
+            BoundedImageSheet sheet = get(s);
+            if (sheet != null) {
+                min = Math.min(min, sheet.getWidth());
+            }
         }
         return min;
     }
     
     /**
-     * @return The minimum height of all sheets.
+     * @return The minimum height of all sheets, or {@link Integer#MAX_VALUE}
+     *     If all sheets are {@code null}.
      */
     public int getMinHeight() {
-        int min =Integer.MAX_VALUE;
+        int min = Integer.MAX_VALUE;
         for (GUIState s : GUIState.values()) {
-            min = Math.min(min, get(s).getHeight());
+            BoundedImageSheet sheet = get(s);
+            if (sheet != null) {
+                min = Math.min(min, sheet.getHeight());
+            }
         }
         return min;
     }
