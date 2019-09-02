@@ -17,6 +17,7 @@ package tools.data.array;
 // Java imports
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.RandomAccess;
@@ -27,6 +28,7 @@ import java.util.function.Consumer;
 import tools.MultiTool;
 import tools.Var;
 import tools.data.Wrapper;
+import tools.iterators.GeneratorIterator;
 
 
 /**
@@ -34,7 +36,7 @@ import tools.data.Wrapper;
  * primitive typed arrays mixed with object arrays.
  * <br>
  * It re-implements the get, set and length functions for primitive types
- * of the {@link java.lang.reflect.Array} class, and the toString function
+ * of the {@link java.lang.reflect.Array} class, and the toDeepString function
  * of the {@link java.util.Arrays} class in pure java code.
  * Because of this, JIT can optimize the code better compared to the
  * native implementations of the reflect array class. <br>
@@ -44,25 +46,74 @@ import tools.data.Wrapper;
  * conversion would occur.
  * 
  * @todo
- * - migrate deepEquals from MultiTool here: deepToString(Object[] a) (all types)
- * - equals(boolean[] a, boolean[] a2) (all types)
+ * - migrate calcHashCode from MultiTool here: deepHashCode(Object[] a) (all types)
  * - binarySearch(byte[] a, byte key) (all types)
  * - binarySearch(byte[] a, int fromIndex, int toIndex, byte key) (all types)
- * - migrate calcHashCode from MultiTool here: deepHashCode(Object[] a)
- * - hashCode(boolean[] a)
  * - fill(boolean[] a, boolean val) (all types) (all types)
  * - fill(boolean[] a, int fromIndex, int toIndex, boolean val) (all types)
  * - sort(byte[] a) (all types)
  * - sort(byte[] a, int fromIndex, int toIndex) (all types)
  * 
- * @version 1.0
+ * @version 1.2
  * @author Kaj Wortel
  * 
  * @see java.lang.reflect.Array
  * @see java.util.Arrays
  */
 public final class ArrayTools {
-
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    private static final String OUT_OF_RANGE_MSG = "The given range [%d, %d] "
+            + "does not fit in the range of the size of the array [%d, %d].";
+    
+    /* -------------------------------------------------------------------------
+     * Inner-classes.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Processor used to iterate over (a part of) a array.
+     */
+    @FunctionalInterface
+    public static interface ArrayProcessor {
+        
+        /**
+         * Returns the element to set at the given index in the array,
+         * or return {@code null} to skip this index.
+         * 
+         * @param index The index to set.
+         * 
+         * @return The new value of the array at the given index, or {@code null}
+         *     to not modify this index.
+         */
+        public Object process(int index);
+        
+        
+    }
+    
+    /**
+     * Generator used to generate indices for an array.
+     */
+    @FunctionalInterface
+    public static interface IndexGenerator {
+        
+        /**
+         * Generates the next index.
+         * 
+         * @param array The array to generate the next index for.
+         * @param prevIndex The previously returned index, or {@code -1} if it
+         *     is the first index.
+         * 
+         * @return The next index to process, or a negative number to stop iterating.
+         */
+        public int nextIndex(Object array, int prevIndex);
+        
+        
+    }
+    
+    
     /* -------------------------------------------------------------------------
      * Constructor.
      * -------------------------------------------------------------------------
@@ -85,40 +136,154 @@ public final class ArrayTools {
      * -------------------------------------------------------------------------
      */
     /**
-     * Entrypoint of the {@code Arrays.toString} function.
+     * Creates a deep string representation of the given multi-dimensional array. <br>
+     * <br>
+     * If the given object is not an array, then simply {@link Object#toString()}.
+     * is used for the string representation. This is also used the values
+     * inside the array. <br>
+     * <br>
+     * This function supports multi-dimensional arrays.
+     * <h2>Format</h2>
+     * The format of the returned string is as follows:
+     * <table border='1'>
+     *   <tr><th> #dimensions </th><th> #elements </th><th> Result </th></tr>
+     *   <tr><td align='center'>1</td><td align='center'>0</td><td>{@code "[]"}</td></tr>
+     *   <tr><td align='center'>1</td><td align='center'>1</td><td>{@code "[v1]"}</td></tr>
+     *   <tr><td align='center'>1</td><td align='center'>3</td><td>{@code "[v1, v2, v3]"}</td></tr>
+     *   <tr><td align='center'>2</td><td align='center'>0,0</td><td>{@code "[]"}</td></tr>
+     *   <tr><td align='center'>2</td><td align='center'>1,0</td><td>{@code "[[]]"}</td></tr>
+     *   <tr><td align='center'>2</td><td align='center'>2,0</td><td>{@code "[[], []]"}</td></tr>
+     *   <tr><td align='center'>2</td><td align='center'>2,1</td><td>{@code "[[v1], [v2]]"}</td></tr>
+     *   <tr><td align='center'>2</td><td align='center'>2,2</td><td>{@code "[[v1, v2], [v3, v4]]"}</td></tr>
+     * </table>
+     * Here, {@code v1, v2, ... , vn} are the string values are of the objects inside the array. <br>
+     * Note that the separators of both the elements and the arrays are {@code ", "}, or a colon
+     * followed by a space. <br>
+     * If an element or array is {@code null}, then the entire contents of that element or array
+     * is replaced by {@code "null"}.
      * 
      * @param array The array to print.
      * 
-     * @return The String representation as specified by {@link Arrays#toString(Object[])}.
-     * 
-     * @throws IllegalArgumentException If the given object is not an array.
-     * 
-     * @see Arrays#toString(Object[])
-     * @see Arrays#toString(boolean[])
-     * @see Arrays#toString(byte[])
-     * @see Arrays#toString(char[])
-     * @see Arrays#toString(short[])
-     * @see Arrays#toString(int[])
-     * @see Arrays#toString(long[])
-     * @see Arrays#toString(float[])
-     * @see Arrays#toString(double[])
+     * @return A string representation of the given array.
      */
-    public static String toString(Object array)
-            throws IllegalArgumentException {
-        if (array instanceof Object[]) return Arrays.toString((Object[]) array);
-        if (array instanceof boolean[]) return Arrays.toString((boolean[]) array);
-        if (array instanceof byte[]) return Arrays.toString((byte[]) array);
-        if (array instanceof char[]) return Arrays.toString((char[]) array);
-        if (array instanceof short[]) return Arrays.toString((short[]) array);
-        if (array instanceof int[]) return Arrays.toString((int[]) array);
-        if (array instanceof long[]) return Arrays.toString((long[]) array);
-        if (array instanceof float[]) return Arrays.toString((float[]) array);
-        if (array instanceof double[]) return Arrays.toString((double[]) array);
-        if (array == null) return "null";
-        if (!array.getClass().isArray()) {
-            throw new IllegalArgumentException("Argument was not an array!");
+    public static String toDeepString(Object array) {
+        StringBuilder sb = new StringBuilder();
+        ArrayTools.toDeepString(sb, array);
+        return sb.toString();
+    }
+    
+    /**
+     * Creates a deep string representation of the given array.
+     * 
+     * @param sb The builder to output the generated string to.
+     * @param array The array to create the representation of.
+     */
+    private static void toDeepString(StringBuilder sb, Object array) {
+        if (array instanceof Object[]) {
+            Object[] arr = (Object[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                ArrayTools.toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof boolean[]) {
+            boolean[] arr = (boolean[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                ArrayTools.toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof byte[]) {
+            byte[] arr = (byte[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof char[]) {
+            char[] arr = (char[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof short[]) {
+            short[] arr = (short[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof int[]) {
+            int[] arr = (int[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof long[]) {
+            long[] arr = (long[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                ArrayTools.toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof float[]) {
+            float[] arr = (float[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                ArrayTools.toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array instanceof double[]) {
+            double[] arr = (double[]) array;
+            sb.append("[");
+            boolean first = true;
+            for (int i = 0; i < arr.length; i++) {
+                if (first) first = false;
+                else sb.append(", ");
+                ArrayTools.toDeepString(sb, arr[i]);
+            }
+            sb.append("]");
+            
+        } else if (array == null) {
+            sb.append("null");
+            
+        } else {
+            sb.append(array.toString());
         }
-        throw new IllegalStateException();
     }
     
     /**
@@ -135,13 +300,30 @@ public final class ArrayTools {
      * 
      * @return The String representation as specified by {@link Arrays#toString(Object[])}.
      * 
-     * @throws IllegalArgumentException If the given object is not an array,
-     *     or has the wrong type.
+     * @throws IllegalArgumentException If the given object has the wrong type.
      * 
      * @see Integer#toString(int, int)
      * @see Long#toString(long, int)
      */
-    public static String toString(Object array, int radix)
+    public static String toDeepString(Object array, int radix)
+            throws IllegalArgumentException {
+        StringBuilder sb = new StringBuilder();
+        ArrayTools.toDeepString(sb, array, radix);
+        return sb.toString();
+    }
+    
+    /**
+     * Converts a integer typed multi-dimensional array to a string representation.
+     * 
+     * @param sb The string builder to store the result in.
+     * @param array The array to process.
+     * @param radix The radix used.
+     * 
+     * @throws IllegalArgumentException If the given object has the wrong type.
+     * 
+     * @see #toDeepString(Object, int)
+     */
+    public static void toDeepString(StringBuilder sb, Object array, int radix)
             throws IllegalArgumentException {
         if (array instanceof Object[]) {
             if (!(array instanceof Number[])) {
@@ -158,20 +340,19 @@ public final class ArrayTools {
                                 + "but found a floating point array (Double[]).");
                 
             } else {
-                StringBuilder sb = new StringBuilder("[");
+                sb.append("[");
                 Number[] arr = (Number[]) array;
                 boolean first = true;
                 for (int i = 0; i < arr.length; i++) {
                     if (first) first = false;
                     else sb.append(", ");
-                    sb.append(Long.toString((arr[i].longValue()), radix));
+                    toDeepString(sb, arr[i], radix);
                 }
                 sb.append("]");
-                return sb.toString();
             }
             
         } else if (array instanceof byte[]) {
-            StringBuilder sb = new StringBuilder("[");
+            sb.append("[");
             byte[] arr = (byte[]) array;
             boolean first = true;
             for (int i = 0; i < arr.length; i++) {
@@ -188,10 +369,9 @@ public final class ArrayTools {
                 }
             }
             sb.append("]");
-            return sb.toString();
             
         } else if (array instanceof char[]) {
-            StringBuilder sb = new StringBuilder("[");
+            sb.append("[");
             char[] arr = (char[]) array;
             boolean first = true;
             for (int i = 0; i < arr.length; i++) {
@@ -208,10 +388,9 @@ public final class ArrayTools {
                 }
             }
             sb.append("]");
-            return sb.toString();
             
         } else if (array instanceof short[]) {
-            StringBuilder sb = new StringBuilder("[");
+            sb.append("[");
             short[] arr = (short[]) array;
             boolean first = true;
             for (int i = 0; i < arr.length; i++) {
@@ -228,10 +407,9 @@ public final class ArrayTools {
                 }
             }
             sb.append("]");
-            return sb.toString();
             
         } else if (array instanceof int[]) {
-            StringBuilder sb = new StringBuilder("[");
+            sb.append("[");
             int[] arr = (int[]) array;
             boolean first = true;
             for (int i = 0; i < arr.length; i++) {
@@ -240,10 +418,9 @@ public final class ArrayTools {
                 sb.append(Integer.toString(arr[i], radix));
             }
             sb.append("]");
-            return sb.toString();
             
         } else if (array instanceof long[]) {
-            StringBuilder sb = new StringBuilder("[");
+            sb.append("[");
             long[] arr = (long[]) array;
             boolean first = true;
             for (int i = 0; i < arr.length; i++) {
@@ -252,7 +429,9 @@ public final class ArrayTools {
                 sb.append(Long.toString(arr[i], radix));
             }
             sb.append("]");
-            return sb.toString();
+            
+        } else if (array == null) {
+            sb.append("null");
             
         } else if (array instanceof boolean[]) {
             throw new IllegalArgumentException(
@@ -269,13 +448,40 @@ public final class ArrayTools {
                     "Expected an integer typed number array, "
                             + "but found a floating point array (double[]).");
             
-        } else if (array == null) {
-            throw new NullPointerException("Array was null!");
-            
-        } else if (!array.getClass().isArray()) {
-            throw new IllegalArgumentException("Argument was not an array!");
+        } else { // {@code array} is not an array.
+            if (array instanceof Byte) {
+                if (radix == 2) {
+                    sb.append(MultiTool.fillZero((byte) array & 0xFF, 8, radix));
+                    
+                } else if (radix == 16) {
+                    sb.append(MultiTool.fillZero((byte) array & 0xFF, 2, radix));    
+                    
+                } else {
+                    sb.append(Integer.toString((byte) array & 0xFF, radix));
+                }
+                
+            } else if (array instanceof Short) {
+                if (radix == 2) {
+                    sb.append(MultiTool.fillZero((short) array & 0xFF, 16, radix));
+                    
+                } else if (radix == 16) {
+                    sb.append(MultiTool.fillZero((short) array & 0xFF, 32, radix));    
+                    
+                } else {
+                    sb.append(Integer.toString((short) array & 0xFF, radix));
+                }
+                
+            } else if (array instanceof Integer) {
+                sb.append(Integer.toString((int) array, radix));
+                
+            } else if (array instanceof Long) {
+                sb.append(Long.toString((long) array, radix));
+                
+            } else {
+                throw new IllegalArgumentException(
+                        "Expected an integer typed number, but found: " + array);
+            }
         }
-        throw new IllegalStateException();
     }
     
     /**
@@ -287,7 +493,7 @@ public final class ArrayTools {
      */
     public static String deepToString(Object array) {
         if (array instanceof Object[]) return Arrays.deepToString((Object[]) array);
-        return toString(array);
+        return ArrayTools.toDeepString(array);
     }
     
     /**
@@ -326,7 +532,7 @@ public final class ArrayTools {
             throw new IllegalArgumentException("Argument was not an array!");
         }
         if (!array.getClass().getComponentType().isArray()) {
-            sb.append(toString(array, radix));
+            sb.append(toDeepString(array, radix));
             return;
         }
         
@@ -2751,6 +2957,452 @@ public final class ArrayTools {
     public static void forEach(double[] arr, Consumer<Double> action) {
         for (double d : arr) {
             action.accept(d);
+        }
+    }
+    
+    /* -------------------------------------------------------------------------
+     * Deep equals function.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Compares two N-dimensional arrays and their contents recursively. It ignores
+     * the type of the arrays, so primitive and non-primitive arrays can be mixed.
+     * <h2>Examples</h2>
+     * <pre>{@code
+     * deepEquals(1, 1) == true;
+     * deepEquals(0, 1) == false;
+     * deepEquals("text", "text") == true;
+     * deepEquals(new int[] {1, 2}, new int[] {1, 2}) == true;
+     * deepEquals(new int[] {1, 2}, new int[] {2, 1}) == false;
+     * deepEquals(new int[] {1, 2}, new Integer[] {1, 2}) == true;
+     * deepEquals(new Integer[][] {new Integer[] {1, 2}, new Integer[] {3, 4}},
+     *         new int[][] {new int[] {1, 2}, new int[] {3, 4}}) == true;
+     * deepEquals(new int[][] {new int[] {1, 2}, new int[] {3, 4}},
+     *         new int[][] {new int[] {9, 2}, new int[] {3, 4}}) == false;
+     * }</pre>
+     * 
+     * 
+     * @apiNote
+     * <ul>
+     *   <li> The result of this function is undefined if the arrays contain recursive references. </li>
+     *   <li> If objects are compared, then the {@link Object#equals(Object)} function of the of the
+     *        objects in the first array is used. </li>
+     * </ul>
+     * 
+     * @param obj1 The first array to be compared.
+     * @param obj2 The second array to be compared.
+     * 
+     * @return {@code true} if both arrays and all their values are equal.
+     *     {@code false} otherwise.
+     */
+    public static boolean deepEquals(Object obj1, Object obj2) {
+        if (obj1 == obj2) return true;
+        if (obj1 == null ^ obj2 == null) return false;
+        // assert(obj1 != null && obj2 != null);
+        
+        if (obj1.getClass().isArray()) {
+            if (!obj2.getClass().isArray()) return false;
+            // obj1 and obj2 are both arrays.
+            if (obj1 instanceof Object[] && obj2 instanceof Object[]) {
+                // obj1 and obj2 are both object arrays.
+                Object[] arr1 = (Object[]) obj1;
+                Object[] arr2 = (Object[]) obj2;
+                if (arr1.length != arr2.length) return false;
+                
+                for (int i = 0; i < arr1.length; i++) {
+                    if (!deepEquals(arr1[i], arr2[i])) return false;
+                }
+                
+            } else {
+                // obj1 and/or obj2 is a primitive array.
+                int length = length(obj1);
+                if (length != length(obj2)) return false;
+                for (int i = 0; i < length; i++) {
+                    if (!deepEquals(get(obj1, i), get(obj2, i))) return false;
+                }
+            }
+            
+        } else {
+            if (obj2.getClass().isArray()) return false;
+            // obj1 and obj2 are not arrays.
+            return obj1.equals(obj2);
+        }
+        
+        return true;
+    }
+    
+    /* -------------------------------------------------------------------------
+     * Set/get range function.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Sets the values of the array generated by the array processor.
+     * This function is faster values compared to {@link #set(Object, int, Object)}
+     * when setting multiple.
+     * 
+     * @apiNote
+     * The indices are set in increasing order from {@code off} to {@code off + len}.
+     * 
+     * @todo
+     * test
+     * 
+     * @param array The array set the data for.
+     * @param off The offset to start setting values.
+     * @param len The number of values to set.
+     * @param proc The array processor used to generate the values.
+     */
+    @SuppressWarnings("MismatchedReadAndWriteOfArray")
+    public static void setRange(Object array, int off, int len, ArrayProcessor proc) {
+        if (off < 0 || length(array) < off + len) {
+            throw new IndexOutOfBoundsException("The range [" + off + ", " + (off + len)
+                    + "] lies outside the bounds of the array (length=" + length(array));
+        }
+        
+        if (array instanceof Object[]) {
+            Object[] arr = (Object[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = proc.process(i);
+            }
+            
+        } else if (array instanceof boolean[]) {
+            boolean[] arr = (boolean[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (boolean) proc.process(i);
+            }
+            
+        } else if (array instanceof byte[]) {
+            byte[] arr = (byte[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (byte) proc.process(i);
+            }
+            
+        } else if (array instanceof short[]) {
+            short[] arr = (short[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (short) proc.process(i);
+            }
+            
+        } else if (array instanceof char[]) {
+            char[] arr = (char[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (char) proc.process(i);
+            }
+            
+        } else if (array instanceof int[]) {
+            int[] arr = (int[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (int) proc.process(i);
+            }
+            
+        } else if (array instanceof long[]) {
+            long[] arr = (long[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (long) proc.process(i);
+            }
+            
+        } else if (array instanceof float[]) {
+            float[] arr = (float[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (float) proc.process(i);
+            }
+            
+        } else if (array instanceof double[]) {
+            double[] arr = (double[]) array;
+            for (int i = off; i < len; i++) {
+                arr[i] = (double) proc.process(i);
+            }
+            
+        } else if (array == null) {
+            throw new NullPointerException();
+            
+        } else if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("The given object is not an array!");
+            
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+    
+    /**
+     * Sets the values of the array generated by the array processor.
+     * This function is faster values compared to {@link #set(Object, int, Object)}
+     * when setting multiple.
+     * 
+     * @todo
+     * test
+     * 
+     * @apiNote
+     * The indices are set in increasing order from {@code off} to {@code off + len}.
+     * 
+     * @param array The array set the data for.
+     * @param gen The generator used to generate the indices.
+     * @param proc The array processor used to generate the values.
+     */
+    public static void setRange(Object array, IndexGenerator gen, ArrayProcessor proc) {
+        if (array instanceof Object[]) {
+            Object[] arr = (Object[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = obj;
+            }
+            
+        } else if (array instanceof boolean[]) {
+            boolean[] arr = (boolean[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (boolean) obj;
+            }
+            
+        } else if (array instanceof byte[]) {
+            byte[] arr = (byte[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (byte) obj;
+            }
+            
+        } else if (array instanceof short[]) {
+            short[] arr = (short[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (short) obj;
+            }
+            
+        } else if (array instanceof char[]) {
+            char[] arr = (char[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (char) obj;
+            }
+            
+        } else if (array instanceof int[]) {
+            int[] arr = (int[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (int) obj;
+            }
+            
+        } else if (array instanceof long[]) {
+            long[] arr = (long[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (long) obj;
+            }
+            
+        } else if (array instanceof float[]) {
+            float[] arr = (float[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (float) obj;
+            }
+            
+        } else if (array instanceof double[]) {
+            double[] arr = (double[]) array;
+            int i = -1;
+            while ((i = gen.nextIndex(arr, i)) > 0) {
+                Object obj = proc.process(i);
+                if (obj != null) arr[i] = (double) obj;
+            }
+            
+        } else if (array == null) {
+            throw new NullPointerException();
+            
+        } else if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("The given object is not an array!");
+            
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+    
+    /**
+     * Generates an iterator over the given array.
+     * It will iterate from {@code off} to {@code off + len}.
+     * 
+     * @todo
+     * test
+     * 
+     * @apiNote
+     * The iterator will throw an {@link ClassCastException} <u>when iterating</u> if the
+     * provided type is wrong.
+     * 
+     * @param <V> The type of the return value.
+     * 
+     * @param array The array to get the elements from.
+     * @param off The offset to start reading from the array.
+     * @param len The number of elements to read. A negative number will result in reading
+     *     the array backwards
+     * 
+     * @return An iterator over the elements of the array.
+     */
+    public static <V> Iterator<V> getRangeIterator(Object array, int off, int len) {
+        if (off < 0) throw new IndexOutOfBoundsException("Expected a positive offset, but found: " + off);
+        final int end = off + len;
+        if (end < 0 || length(array) < end) {
+            throw new IndexOutOfBoundsException(String.format(OUT_OF_RANGE_MSG,
+                    off, off + len, 0, length(array)));
+        }
+        final boolean incr = (len > 0);
+        
+        if (array instanceof Object[]) {
+            Object[] arr = (Object[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof boolean[]) {
+            boolean[] arr = (boolean[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Boolean) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof byte[]) {
+            byte[] arr = (byte[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Byte) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof short[]) {
+            short[] arr = (short[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Short) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof char[]) {
+            char[] arr = (char[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Character) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof int[]) {
+            int[] arr = (int[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Integer) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof long[]) {
+            long[] arr = (long[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Long) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof float[]) {
+            float[] arr = (float[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Float) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array instanceof double[]) {
+            double[] arr = (double[]) array;
+            return new GeneratorIterator<V>() {
+                private int i = off;
+                @Override
+                protected V generateNext() {
+                    if ((incr && i < end) || (!incr && i > end)) {
+                        return (V) (Double) arr[(incr ? i++ : i--)];
+                        
+                    } else {
+                        done();
+                        return (V) null;
+                    }
+                }
+            };
+            
+        } else if (array == null) {
+            throw new NullPointerException();
+            
+        } else if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("The given object is not an array!");
+            
+        } else {
+            throw new IllegalStateException();
         }
     }
     

@@ -1139,7 +1139,7 @@ public final class MultiTool {
      */
     public static void logStackTrace(Thread thread) {
         StackTraceElement[] ste = thread.getStackTrace();
-        Logger.write(Var.LS + ArrayTools.toString(ste).replaceAll(", ", "," + Var.LS));
+        Logger.write(Var.LS + ArrayTools.toDeepString(ste).replaceAll(", ", "," + Var.LS));
     }
     
     /**
@@ -1342,6 +1342,71 @@ public final class MultiTool {
         }
         return ((data[0] & 0xFF) << 8)
                 | (data[1] & 0xFF);
+    }
+    
+    /**
+     * Returns the primitive type of the provided class, or {@code null}
+     * if the given class doesn't have a corresponding primitive type.
+     * 
+     * @param c The provided class.
+     * 
+     * @return The primitive type of provided class if it exists. {@code null} otherwise.
+     */
+    public static Class<?> getPrimitiveTypeOf(Class<?> c) {
+        if (c == Boolean.class) return Boolean.TYPE;
+        if (c == Byte.class) return Byte.TYPE;
+        if (c == Short.class) return Short.TYPE;
+        if (c == Character.class) return Character.TYPE;
+        if (c == Integer.class) return Integer.TYPE;
+        if (c == Long.class) return Long.TYPE;
+        if (c == Float.class) return Float.TYPE;
+        if (c == Double.class) return Double.TYPE;
+        if (c == Void.class) return Void.TYPE;
+        return null;
+    }
+    
+    /**
+     * Returns the base class of a primitive type, or {@code null}
+     * if the given class it not a primitive type.
+     * 
+     * @param c The provided class.
+     * 
+     * @return The base class of the provided class if it exists. {@code null} otherwise.
+     */
+    public static Class<?> getBaseClassOf(Class<?> c) {
+        if (c == Boolean.TYPE) return Boolean.class;
+        if (c == Byte.TYPE) return Byte.class;
+        if (c == Short.TYPE) return Short.class;
+        if (c == Character.TYPE) return Character.class;
+        if (c == Integer.TYPE) return Integer.class;
+        if (c == Long.TYPE) return Long.class;
+        if (c == Float.TYPE) return Float.class;
+        if (c == Double.TYPE) return Double.class;
+        if (c == Void.TYPE) return Void.class;
+        return null;
+    }
+    
+    /**
+     * Returns the default value for a primitive type. If the given class isn't a
+     * primitive type, then {@code null} is returned.
+     * 
+     * @param <T> The base class of the primitive type.
+     * 
+     * @param c The class of the primitive type.
+     * 
+     * @return The default value of the primitive type, or {@code null}
+     *     if the given class doesn't have a primitive value.
+     */
+    public static <T> T getDefaultPrim(Class<T> c) {
+        if (c == Boolean.TYPE) return (T) Boolean.FALSE;
+        if (c == Byte.TYPE) return (T) (Byte) (byte) 0;
+        if (c == Short.TYPE) return (T) (Short) (short) 0;
+        if (c == Character.TYPE) return (T) (Character) (char) 0;
+        if (c == Integer.TYPE) return (T) (Integer) 0;
+        if (c == Long.TYPE) return (T) (Long) 0L;
+        if (c == Float.TYPE) return (T) (Float) 0.0f;
+        if (c == Double.TYPE) return (T) (Double) 0.0;
+        return null;
     }
     
     
