@@ -203,7 +203,7 @@ public class MultiZipInputStream
     }
     
     @Override
-    public int read(final byte[] b, final int off, final int len)
+    public int read(byte[] b, int off, int len)
             throws IOException {
         if (closed) throw new IOException("The stream was already closed.");
         if (entryFinished) return -1;
