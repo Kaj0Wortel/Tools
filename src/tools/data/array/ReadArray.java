@@ -30,7 +30,7 @@ public interface ReadArray<V> {
      * 
      * @return The element at the given index.
      */
-    public V get(final int index);
+    public V get(int index);
     
     
 }

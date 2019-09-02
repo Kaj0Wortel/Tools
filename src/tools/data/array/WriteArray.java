@@ -31,7 +31,7 @@ public interface WriteArray<V> {
      * 
      * @return The previous value at the given location.
      */
-    public V set(final V value, final int index);
+    public V set(V value, int index);
     
     
 }

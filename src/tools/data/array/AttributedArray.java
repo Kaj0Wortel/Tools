@@ -56,7 +56,7 @@ public abstract class AttributedArray<V>
      * 
      * @param arr The backening array of any type.
      */
-    public AttributedArray(final Object arr) {
+    public AttributedArray(Object arr) {
         this(new Wrapper(arr));
     }
     
@@ -65,7 +65,7 @@ public abstract class AttributedArray<V>
      * 
      * @param arr The backening array.
      */
-    public AttributedArray(final V... arr) {
+    public AttributedArray(V... arr) {
         this(new Wrapper<V[]>(arr));
     }
     
@@ -77,7 +77,7 @@ public abstract class AttributedArray<V>
      * @throws NullPointerException If {@code arr == null}.
      * @throws IllegalArgumentException If {@code arr} is not an array.
      */
-    public AttributedArray(final Wrapper<V[]> arr) {
+    public AttributedArray(Wrapper<V[]> arr) {
         if (arr == null) throw new NullPointerException();
         if (!arr.isArray()) {
             throw new IllegalArgumentException("Expected an array, but found: "
@@ -98,7 +98,7 @@ public abstract class AttributedArray<V>
      * 
      * @return The element at the given index.
      */
-    protected V get(final int index) {
+    protected V get(int index) {
         return (V) arr.get(index);
     }
     
@@ -110,7 +110,7 @@ public abstract class AttributedArray<V>
      * 
      * @return The previous value at the given location.
      */
-    protected V set(final V value, final int index) {
+    protected V set(V value, int index) {
         V old = (V) arr.get(index);
         arr.set(value, index);
         return old;
@@ -129,7 +129,7 @@ public abstract class AttributedArray<V>
     }
     
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (obj instanceof AttributedArray) {
             return Objects.deepEquals(arr, ((AttributedArray) obj).arr);
             
@@ -174,7 +174,7 @@ public abstract class AttributedArray<V>
      * 
      * @see #copyOf(Object[], int, int, int)
      */
-    public V[] copyOf(final V[] copy)
+    public V[] copyOf(V[] copy)
             throws IllegalArgumentException {
         return copyOf(copy, 0, 0, Math.min(arr.length(), copy.length));
     }
@@ -198,7 +198,7 @@ public abstract class AttributedArray<V>
      *         <li> {@code offCopy + len >= copy.length} </li>
      *     </ul>
      */
-    public V[] copyOf(final V[] copy, final int offOrig, final int offCopy, final int len)
+    public V[] copyOf(V[] copy, int offOrig, int offCopy, int len)
             throws IllegalArgumentException {
         if (offOrig < 0)
             throw new IllegalArgumentException("offOrig(" + offOrig + ") < 0");
@@ -238,7 +238,7 @@ public abstract class AttributedArray<V>
      * 
      * @see #copyOf(Object, int, int, int)
      */
-    public <A> A copyOf(final A copy)
+    public <A> A copyOf(A copy)
             throws IllegalArgumentException {
         return copyOf(copy, 0, 0, Math.min(arr.length(), ArrayTools.length(copy)));
     }
@@ -262,7 +262,7 @@ public abstract class AttributedArray<V>
      *         <li> {@code offCopy + len >= copy.length} </li>
      *     </ul>
      */
-    public <A> A copyOf(final A copy, final int offOrig, final int offCopy, final int len)
+    public <A> A copyOf(A copy, int offOrig, int offCopy, int len)
             throws IllegalArgumentException {
         if (offOrig < 0)
             throw new IllegalArgumentException("offOrig < 0: " + offOrig);
@@ -292,7 +292,7 @@ public abstract class AttributedArray<V>
      * 
      * @return The given list.
      */
-    public List<V> asList(final List<V> list) {
+    public List<V> asList(List<V> list) {
         if (list == null) throw new NullPointerException();
         list.addAll(asList());
         return list;

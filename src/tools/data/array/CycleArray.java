@@ -50,7 +50,7 @@ public class CycleArray<V>
      * 
      * @param arr The backening array of any type.
      */
-    public CycleArray(final Object arr) {
+    public CycleArray(Object arr) {
         super(arr);
     }
     
@@ -59,7 +59,7 @@ public class CycleArray<V>
      * 
      * @param arr The backening array.
      */
-    public CycleArray(final V... arr) {
+    public CycleArray(V... arr) {
         super(arr);
     }
     
@@ -71,7 +71,7 @@ public class CycleArray<V>
      * @throws NullPointerException If {@code arr == null}.
      * @throws IllegalArgumentException If {@code arr} is not an array.
      */
-    public CycleArray(final Wrapper<V[]> arr) {
+    public CycleArray(Wrapper<V[]> arr) {
         super(arr);
     }
     
@@ -81,12 +81,12 @@ public class CycleArray<V>
      * -------------------------------------------------------------------------
      */
     @Override
-    public V get(final int index) {
+    public V get(int index) {
         return super.get(mod(index));
     }
     
     @Override
-    public V set(final V value, final int index) {
+    public V set(V value, int index) {
         return super.set(value, mod(index));
     }
     
@@ -97,7 +97,7 @@ public class CycleArray<V>
      * 
      * @return The index modulo the length of the array.
      */
-    private int mod(final int index) {
+    private int mod(int index) {
         int i = index % length();
         if (i < 0) i += length();
         return i;

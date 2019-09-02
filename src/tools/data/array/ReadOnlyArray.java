@@ -37,7 +37,7 @@ public class ReadOnlyArray<V>
      * 
      * @param arr The backening array of any type.
      */
-    public ReadOnlyArray(final Object arr) {
+    public ReadOnlyArray(Object arr) {
         super();
     }
     
@@ -46,7 +46,7 @@ public class ReadOnlyArray<V>
      * 
      * @param arr The backening array.
      */
-    public ReadOnlyArray(final V... arr) {
+    public ReadOnlyArray(V... arr) {
         super(arr);
     }
     
@@ -55,7 +55,7 @@ public class ReadOnlyArray<V>
      * 
      * @param arr The backening array in a wrapper.
      */
-    public ReadOnlyArray(final Wrapper<V[]> arr) {
+    public ReadOnlyArray(Wrapper<V[]> arr) {
         super(arr);
     }
     
@@ -65,7 +65,7 @@ public class ReadOnlyArray<V>
      * -------------------------------------------------------------------------
      */
     @Override
-    public V get(final int index) {
+    public V get(int index) {
         return super.get(index);
     }
     
