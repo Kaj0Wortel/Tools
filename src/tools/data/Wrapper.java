@@ -15,13 +15,12 @@ package tools.data;
 
 
 // Java imports
-import tools.data.array.ArrayTools;
-import java.util.Objects;
+import java.util.RandomAccess;
 
 
 // Tools imports
-import java.util.RandomAccess;
 import tools.MultiTool;
+import tools.data.array.ArrayTools;
 
 
 /**
@@ -29,7 +28,11 @@ import tools.MultiTool;
  * This class can be used to overcome the difficulty of accepting both object
  * and primitive typed arrays. <br>
  * This class can now be used instead of fully copying an object array
- * to a primitive typed array, or vice verca.<br>
+ * to a primitive typed array, or vice verca. <br>
+ * <br>
+ * Additionally, the wrapper maintains no state of the source object. Therefore,
+ * you can use it as if it was the reference of the actual source (i.e. no new
+ * wrappers are needed when copying objects). <br>
  * <br>
  * <b>Example</b><br>
  * Suppose you have have as input the integer array {@code new int[] {1, 2, 3}},
@@ -53,7 +56,10 @@ import tools.MultiTool;
  * Now you can simply call {@code MyClass<Integer>(new Wrapper(int[] {1, 2, 3}))}
  * to instantiate the class, and no unneeded array copies are needed.
  * 
- * @version 1.0
+ * @todo
+ * - Add equals function which ignores primitive typed arrays.
+ * 
+ * @version 1.1
  * @author Kaj Wortel
  */
 public class Wrapper<V>
@@ -149,10 +155,12 @@ public class Wrapper<V>
     
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        Object v1 = data;
-        Object v2 = (obj instanceof Wrapper ? ((Wrapper) obj).get() : obj);
-        return Objects.deepEquals(v1, v2);
+        if (obj instanceof Wrapper) {
+            return ArrayTools.deepEquals(data, ((Wrapper) obj).data);
+            
+        } else {
+            return ArrayTools.deepEquals(data, obj);
+        }
     }
     
     @Override
@@ -161,38 +169,28 @@ public class Wrapper<V>
     }
     
     /**
-     * {@inheritDoc}
+     * Returns a string representation of the underlying data object.
      * 
-     * This class uses the wrapped object only for generating a string
-     * representation. This is done because the wrapper should be
-     * as see-through as possible. There are three cases:
-     * <table border='1'>
-     *   <tr>
-     *     <th> Condition </th>
-     *     <th> Output </th>
-     *   </tr>
-     *   <tr>
-     *     <td> The wrapped object is {@code null} </td>
-     *     <td> "null" </td>
-     *   </tr>
-     *   <tr>
-     *     <td> The wrapped object is an array. </td>
-     *     <td> {@link ArrayTools#toString(Object)} </td>
-     *   </tr>
-     *   <tr>
-     *     <td> The wrapped object is not an array. </td>
-     *     <td> {@link Object#toString()} </td>
-     *   </tr>
-     * </table>
+     * @return A string representation of the underlying data object.
      */
     @Override
     public String toString() {
-        if (data == null) return "null";
-        if (data.getClass().isArray()) {
-            return ArrayTools.toString(data);
-        } else {
-            return data.toString();
-        }
+        return ArrayTools.toDeepString(data);
+    }
+    
+    /**
+     * Returns the data value of the wrapped object, or {@code null}
+     * if the provided wrapper is null.
+     * 
+     * @param <T> The type of the wrapped data object.
+     * 
+     * @param wrap The wrapper to unwrap.
+     * 
+     * @return {@code wrap.get()} if {@code wrap != null}. {@code null} otherwise.
+     */
+    public static <T> T get(Wrapper<T> wrap) {
+        if (wrap == null) return null;
+        else return wrap.get();
     }
     
     
