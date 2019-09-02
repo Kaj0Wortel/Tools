@@ -168,7 +168,7 @@ public final class ArrayTools {
      */
     public static String toDeepString(Object array) {
         StringBuilder sb = new StringBuilder();
-        ArrayTools.toDeepString(sb, array);
+        toDeepString(sb, array);
         return sb.toString();
     }
     
@@ -186,7 +186,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                ArrayTools.toDeepString(sb, arr[i]);
+                toDeepString(sb, arr[i]);
             }
             sb.append("]");
             
@@ -197,7 +197,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                ArrayTools.toDeepString(sb, arr[i]);
+                sb.append(Boolean.toString(arr[i]));
             }
             sb.append("]");
             
@@ -208,7 +208,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                toDeepString(sb, arr[i]);
+                sb.append(Byte.toString(arr[i]));
             }
             sb.append("]");
             
@@ -219,7 +219,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                toDeepString(sb, arr[i]);
+                sb.append(Character.toString(arr[i]));
             }
             sb.append("]");
             
@@ -230,7 +230,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                toDeepString(sb, arr[i]);
+                sb.append(Short.toString(arr[i]));
             }
             sb.append("]");
             
@@ -241,7 +241,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                toDeepString(sb, arr[i]);
+                sb.append(Integer.toString(arr[i]));
             }
             sb.append("]");
             
@@ -252,7 +252,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                ArrayTools.toDeepString(sb, arr[i]);
+                sb.append(Long.toString(arr[i]));
             }
             sb.append("]");
             
@@ -263,7 +263,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                ArrayTools.toDeepString(sb, arr[i]);
+                sb.append(Float.toString(arr[i]));
             }
             sb.append("]");
             
@@ -274,7 +274,7 @@ public final class ArrayTools {
             for (int i = 0; i < arr.length; i++) {
                 if (first) first = false;
                 else sb.append(", ");
-                ArrayTools.toDeepString(sb, arr[i]);
+                sb.append(Double.toString(arr[i]));
             }
             sb.append("]");
             
@@ -308,7 +308,7 @@ public final class ArrayTools {
     public static String toDeepString(Object array, int radix)
             throws IllegalArgumentException {
         StringBuilder sb = new StringBuilder();
-        ArrayTools.toDeepString(sb, array, radix);
+        toDeepString(sb, array, radix);
         return sb.toString();
     }
     
@@ -493,7 +493,7 @@ public final class ArrayTools {
      */
     public static String deepToString(Object array) {
         if (array instanceof Object[]) return Arrays.deepToString((Object[]) array);
-        return ArrayTools.toDeepString(array);
+        return toDeepString(array);
     }
     
     /**
@@ -611,17 +611,17 @@ public final class ArrayTools {
      * @see #getFloat(Object, int)
      * @see #getDouble(Object, int)
      */
-    public static Object get(Object array, int index)
+    public static <T> T get(Object array, int index)
             throws IllegalArgumentException {
-        if (array instanceof Object[]) return ((Object[]) array)[index];
-        else if (array instanceof boolean[]) return ((boolean[]) array)[index];
-        else if (array instanceof byte[]) return ((byte[]) array)[index];
-        else if (array instanceof short[]) return ((short[]) array)[index];
-        else if (array instanceof char[]) return ((char[]) array)[index];
-        else if (array instanceof int[]) return ((int[]) array)[index];
-        else if (array instanceof long[]) return ((long[]) array)[index];
-        else if (array instanceof float[]) return ((float[]) array)[index];
-        else if (array instanceof double[]) return ((double[]) array)[index];
+        if (array instanceof Object[]) return (T) ((Object[]) array)[index];
+        else if (array instanceof boolean[]) return (T) (Boolean) ((boolean[]) array)[index];
+        else if (array instanceof byte[]) return (T) (Byte) ((byte[]) array)[index];
+        else if (array instanceof short[]) return (T) (Short) ((short[]) array)[index];
+        else if (array instanceof char[]) return (T) (Character) ((char[]) array)[index];
+        else if (array instanceof int[]) return (T) (Integer) ((int[]) array)[index];
+        else if (array instanceof long[]) return (T) (Long) ((long[]) array)[index];
+        else if (array instanceof float[]) return (T) (Float) ((float[]) array)[index];
+        else if (array instanceof double[]) return (T) (Double) ((double[]) array)[index];
         else if (array == null) {
             throw new NullPointerException("Array was null!");    
         } else if (!array.getClass().isArray()) {
@@ -1263,7 +1263,7 @@ public final class ArrayTools {
      * @see #copyOf(Object, Object, int, int, int)
      */
     public static <V> V copyOf(Object src, V dst) {
-        return copyOf(src, dst, 0, 0, Math.min(ArrayTools.length(src), ArrayTools.length(dst)));
+        return copyOf(src, dst, 0, 0, Math.min(length(src), length(dst)));
     }
     
     /**
@@ -1478,7 +1478,7 @@ public final class ArrayTools {
      * @see #copyOf(boolean[], boolean[], int, int, int)
      */
     public static boolean[] copyOf(boolean[] src, boolean[] dst) {
-        return copyOf(src, dst, 0, 0, Math.min(ArrayTools.length(src), ArrayTools.length(dst)));
+        return copyOf(src, dst, 0, 0, Math.min(length(src), length(dst)));
     }
     
     /**
@@ -3053,62 +3053,63 @@ public final class ArrayTools {
      */
     @SuppressWarnings("MismatchedReadAndWriteOfArray")
     public static void setRange(Object array, int off, int len, ArrayProcessor proc) {
-        if (off < 0 || length(array) < off + len) {
-            throw new IndexOutOfBoundsException("The range [" + off + ", " + (off + len)
+        final int end = off + len;
+        if (off < 0 || length(array) < end) {
+            throw new IndexOutOfBoundsException("The range [" + off + ", " + end
                     + "] lies outside the bounds of the array (length=" + length(array));
         }
         
         if (array instanceof Object[]) {
             Object[] arr = (Object[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = 0; i < end; i++) {
                 arr[i] = proc.process(i);
             }
             
         } else if (array instanceof boolean[]) {
             boolean[] arr = (boolean[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (boolean) proc.process(i);
             }
             
         } else if (array instanceof byte[]) {
             byte[] arr = (byte[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (byte) proc.process(i);
             }
             
         } else if (array instanceof short[]) {
             short[] arr = (short[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (short) proc.process(i);
             }
             
         } else if (array instanceof char[]) {
             char[] arr = (char[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (char) proc.process(i);
             }
             
         } else if (array instanceof int[]) {
             int[] arr = (int[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (int) proc.process(i);
             }
             
         } else if (array instanceof long[]) {
             long[] arr = (long[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (long) proc.process(i);
             }
             
         } else if (array instanceof float[]) {
             float[] arr = (float[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (float) proc.process(i);
             }
             
         } else if (array instanceof double[]) {
             double[] arr = (double[]) array;
-            for (int i = off; i < len; i++) {
+            for (int i = off; i < end; i++) {
                 arr[i] = (double) proc.process(i);
             }
             

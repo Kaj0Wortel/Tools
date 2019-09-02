@@ -872,94 +872,94 @@ public class Array2DTest
      */
     @Test
     public void setArray6() {
-        final Array2D<Integer> dst = new Array2D<>(5, 6, Integer.class, 0);
-        final Array2D<Integer> src1 = new Array2D<>(10, 11, Integer.class, 1);
-        final Integer[][] src2 = fill(new Integer[10][11], 1);
-        final int[][] src3 = fill(new int[10][11], 1);
+        final Array2D<Integer> src = new Array2D<>(5, 6, Integer.class, 0);
+        final Array2D<Integer> dst1 = new Array2D<>(10, 11, Integer.class, 1);
+        final Integer[][] dst2 = fill(new Integer[10][11], 1);
+        final int[][] dst3 = fill(new int[10][11], 1);
         
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, -1, 0, 1, 1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, -1, 0, 1, 1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, -1, 0, 1, 1, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 0, -1, 1, 1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 0, -1, 1, 1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 0, -1, 1, 1, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, -1, -1, 1, 1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, -1, -1, 1, 1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, -1, -1, 1, 1, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 1, 1, -1, 0, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 1, 1, -1, 0, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 1, 1, -1, 0, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 1, 1, 0, -1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 1, 1, 0, -1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 1, 1, 0, -1, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 1, 1, -1, -1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 1, 1, -1, -1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 1, 1, -1, -1, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, -1, -1, -1, -1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, -1, -1, -1, -1, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, -1, -1, -1, -1, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, -1, 0, 1, 1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, -1, 0, 1, 1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, -1, 0, 1, 1, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 0, -1, 1, 1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 0, -1, 1, 1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 0, -1, 1, 1, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, -1, -1, 1, 1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, -1, -1, 1, 1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, -1, -1, 1, 1, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 1, 1, -1, 0, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 1, 1, -1, 0, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 1, 1, -1, 0, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 1, 1, 0, -1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 1, 1, 0, -1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 1, 1, 0, -1, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 1, 1, -1, -1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 1, 1, -1, -1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 1, 1, -1, -1, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, -1, -1, -1, -1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, -1, -1, -1, -1, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, -1, -1, -1, -1, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
         
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src1, 0, 0, 0, 0, -1, 1));
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src2, 0, 0, 0, 0, -1, 1));
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src3, 0, 0, 0, 0, -1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src1, 0, 0, 0, 0, 1, -1));
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src2, 0, 0, 0, 0, 1, -1));
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src3, 0, 0, 0, 0, 1, -1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src1, 0, 0, 0, 0, -1, -1));
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src2, 0, 0, 0, 0, -1, -1));
-        expEx(IllegalArgumentException.class, () -> dst.getArray(src3, 0, 0, 0, 0, -1, -1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst1, 0, 0, 0, 0, -1, 1));
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst2, 0, 0, 0, 0, -1, 1));
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst3, 0, 0, 0, 0, -1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst1, 0, 0, 0, 0, 1, -1));
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst2, 0, 0, 0, 0, 1, -1));
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst3, 0, 0, 0, 0, 1, -1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst1, 0, 0, 0, 0, -1, -1));
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst2, 0, 0, 0, 0, -1, -1));
+        expEx(IllegalArgumentException.class, () -> src.getArray(dst3, 0, 0, 0, 0, -1, -1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
         
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 10, 11, 0, 0, 1, 0));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 10, 11, 0, 0, 1, 0));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 10, 11, 0, 0, 1, 0));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 10, 11, 0, 0, 0, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 10, 11, 0, 0, 0, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 10, 11, 0, 0, 0, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 10, 11, 0, 0, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 10, 11, 0, 0, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 10, 11, 0, 0, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 0, 0, 10, 11, 1, 0));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 0, 0, 10, 11, 1, 0));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 0, 0, 10, 11, 1, 0));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 0, 0, 10, 11, 0, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 0, 0, 10, 11, 0, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 0, 0, 10, 11, 0, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 0, 0, 10, 11, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 0, 0, 10, 11, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 0, 0, 10, 11, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
         
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 0, 0, 5, 6, 1, 0));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 0, 0, 5, 6, 1, 0));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 0, 0, 5, 6, 1, 0));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 0, 0, 5, 6, 0, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 0, 0, 5, 6, 0, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 0, 0, 5, 6, 0, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src1, 0, 0, 5, 6, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src2, 0, 0, 5, 6, 1, 1));
-        expEx(IndexOutOfBoundsException.class, () -> dst.getArray(src3, 0, 0, 5, 6, 1, 1));
-        assertSize(dst, 5, 6);
-        assertValue(dst, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 5, 6, 0, 0, 1, 0));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 5, 6, 0, 0, 1, 0));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 5, 6, 0, 0, 1, 0));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 5, 6, 0, 0, 0, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 5, 6, 0, 0, 0, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 5, 6, 0, 0, 0, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst1, 5, 6, 0, 0, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst2, 5, 6, 0, 0, 1, 1));
+        expEx(IndexOutOfBoundsException.class, () -> src.getArray(dst3, 5, 6, 0, 0, 1, 1));
+        assertSize(src, 5, 6);
+        assertValue(src, 0);
     }
     
     /**
@@ -1412,8 +1412,8 @@ public class Array2DTest
     /**
      * Test for {@link Array2D#getPrimRow(int)}, {@link Array2D#getRow(int)},
      * {@link Array2D#getRow(Object, int)}, {@link Array2D#getRow(Object[] int)},
-     * {@link Array2D#getRow(Object, int, int, int)} and
-     * {@link Array2D#getRow(Object[], int, int, int)}. <br>
+     * {@link Array2D#getRow(Object, int, int, int, int)} and
+     * {@link Array2D#getRow(Object[], int, int, int, int)}. <br>
      * Tests default behaviour.
      */
     @Test
@@ -1423,33 +1423,69 @@ public class Array2DTest
         incrFill(arr, 0);
         for (int j = 0; j < arr.getHeight(); j++) {
             Integer[][] objRows = new Integer[][] {
+                // Equal.
                 arr.getRow(j),
                 arr.getRow(new Integer[w], j),
-                arr.getRow(new Integer[w], 0, j, w),
+                arr.getRow(new Integer[w], 0, j, 0, w),
+                arr.getRow(new Integer[w - 2], j), // Last two values are not written.
                 
-                arr.getRow(new Integer[w - 2], j),
-                arr.getRow(new Integer[w - 2], 2, j, w - 4)
+                // First two values are not written.
+                arr.getRow(new Integer[w], 2, j, 2, w - 2),
+                arr.getRow(new Integer[w - 2], 2, j, 2, w - 4),
+                
+                // All values are shifted two positions right.
+                arr.getRow(new Integer[w], 0, j, 2, w - 2),
+                
+                // All values are shifted two positions left.
+                arr.getRow(new Integer[w], 2, j, 0, w - 2),
             };
             int[][] primRows = new int[][] {
+                // Equal.
                 arr.getPrimRow(j),
                 arr.getRow(new int[w], j),
-                arr.getRow(new int[w], 0, j, w),
+                arr.getRow(new int[w], 0, j, 0, w),
+                arr.getRow(new int[w - 2], j), // Last two values are not written.
                 
-                arr.getRow(new int[w - 2], j),
-                arr.getRow(new int[w - 2], 2, j, w - 4)
+                // First two values are not written.
+                arr.getRow(new int[w], 2, j, 2, w - 2),
+                arr.getRow(new int[w - 2], 2, j, 2, w - 4),
+                
+                // All values are shifted two positions right.
+                arr.getRow(new int[w], 0, j, 2, w - 2),
+                
+                // All values are shifted two positions left.
+                arr.getRow(new int[w], 2, j, 0, w - 2),
             };
+            
             for (int i = 0; i < w; i++) {
                 Integer exp = i + j*arr.getWidth();
-                for (int k = 0; k < 3; k++) {
-                    assertEquals(genIndex(i, j), exp, objRows[k][i]);
-                    assertEquals(genIndex(i, j), exp, (Integer) primRows[k][i]);
+                int k = 0;
+                for (; k < 4; k++) {
+                    if (k == 3 && i >= w - 2) continue;
+                    assertEquals(genIndex(k, i, j), exp, (Object) objRows[k][i]);
+                    assertEquals(genIndex(k, i, j), exp, (Object) primRows[k][i]);
                 }
-                if (i >= w - 2) continue;
-                assertEquals(genIndex(i, j), exp, objRows[3][i]);
-                assertEquals(genIndex(i, j), exp, (Integer) primRows[3][i]);
-                if (i < 2 || w - 4 <= i) continue;
-                assertEquals(genIndex(i, j), exp, objRows[4][i - 2]);
-                assertEquals(genIndex(i, j), exp, (Integer) primRows[4][i - 2]);
+                
+                for (; k < 6; k++) {
+                    if (k == 5 && i >= w - 2) continue;
+                    assertEquals(genIndex(k, i, j), (i < 2 ? null : exp), (Object) objRows[k][i]);
+                    assertEquals(genIndex(k, i, j), (i < 2 ? 0 : exp), (Object) primRows[k][i]);
+                }
+                
+                if (i < 2) {
+                    assertEquals(genIndex(k, i, j), null, (Object) objRows[k][i]);
+                    assertEquals(genIndex(k, i, j), 0, (Object) primRows[k][i]);
+                }
+                if (i < w - 2) {
+                    assertEquals(genIndex(k, i + 2, j), exp, (Object) objRows[k][i + 2]);
+                    assertEquals(genIndex(k, i + 2, j), exp, (Object) primRows[k][i + 2]);
+                }
+                k++;
+                
+                if (i >= 2) {
+                    assertEquals(genIndex(k, i - 2, j), exp, (Object) objRows[k][i - 2]);
+                    assertEquals(genIndex(k, i - 2, j), exp, (Object) primRows[k][i - 2]);
+                }
             }
         }
     }
@@ -1470,18 +1506,18 @@ public class Array2DTest
                 arr.getRow(new Double[w], j);
             });
             expEx(IllegalArgumentException.class, () -> {
-                arr.getRow(new Double[w], 0, j, w);
+                arr.getRow(new Double[w], 0, j, 0, w);
             });
             expEx(IllegalArgumentException.class, () -> {
                 arr.getRow(new double[w], j);
             });
             expEx(IllegalArgumentException.class, () -> {
-                arr.getRow(new double[w], 0, j, w);
+                arr.getRow(new double[w], 0, j, 0, w);
             });
             
             Number[][] rows = new Number[][] {
                 arr.getRow(new Number[w], j),
-                arr.getRow(new Number[w], 0, j, w)
+                arr.getRow(new Number[w], 0, j, 0, w)
             };
             
             for (int i = 0; i < w; i++) {
@@ -1508,7 +1544,7 @@ public class Array2DTest
             int[][] rows = new int[][] {
                 arr.getPrimRow(j),
                 arr.getRow(new int[w], j),
-                arr.getRow(new int[w], 0, j, w)
+                arr.getRow(new int[w], 0, j, 0, w)
             };
             for (int i = 0; i < arr.getWidth(); i++) {
                 for (int k = 0; k < 3; k++) {
@@ -1533,34 +1569,70 @@ public class Array2DTest
         Array2D<Integer> arr = new Array2D<Integer>(10, h, Integer.class);
         incrFill(arr, 0);
         for (int i = 0; i < arr.getWidth(); i++) {
-            Integer[][] objCols = new Integer[][] {
+            Integer[][] objRows = new Integer[][] {
+                // Equal.
                 arr.getColumn(i),
                 arr.getColumn(new Integer[h], i),
-                arr.getColumn(new Integer[h], i, 0, h),
+                arr.getColumn(new Integer[h], i, 0, 0, h),
+                arr.getColumn(new Integer[h - 2], i), // Last two values are not written.
                 
-                arr.getColumn(new Integer[h - 2], i),
-                arr.getColumn(new Integer[h - 2], i, 2, h - 4)
+                // First two values are not written.
+                arr.getColumn(new Integer[h], i, 2, 2, h - 2),
+                arr.getColumn(new Integer[h - 2], i, 2, 2, h - 4),
+                
+                // All values are shifted two positions right.
+                arr.getColumn(new Integer[h], i, 0, 2, h - 2),
+                
+                // All values are shifted two positions left.
+                arr.getColumn(new Integer[h], i, 2, 0, h - 2),
             };
-            int[][] primCols = new int[][] {
+            int[][] primRows = new int[][] {
+                // Equal.
                 arr.getPrimColumn(i),
                 arr.getColumn(new int[h], i),
-                arr.getColumn(new int[h], i, 0, h),
+                arr.getColumn(new int[h], i, 0, 0, h),
+                arr.getColumn(new int[h - 2], i), // Last two values are not written.
                 
-                arr.getColumn(new int[h - 2], i),
-                arr.getColumn(new int[h - 2], i, 2, h - 4)
+                // First two values are not written.
+                arr.getColumn(new int[h], i, 2, 2, h - 2),
+                arr.getColumn(new int[h - 2], i, 2, 2, h - 4),
+                
+                // All values are shifted two positions right.
+                arr.getColumn(new int[h], i, 0, 2, h - 2),
+                
+                // All values are shifted two positions left.
+                arr.getColumn(new int[h], i, 2, 0, h - 2),
             };
+            
             for (int j = 0; j < h; j++) {
                 Integer exp = i + j*arr.getWidth();
-                for (int k = 0; k < 3; k++) {
-                    assertEquals(genIndex(i, j), exp, objCols[k][j]);
-                    assertEquals(genIndex(i, j), exp, (Integer) primCols[k][j]);
+                int k = 0;
+                for (; k < 4; k++) {
+                    if (k == 3 && j >= h - 2) continue;
+                    assertEquals(genIndex(k, i, j), exp, (Object) objRows[k][j]);
+                    assertEquals(genIndex(k, i, j), exp, (Object) primRows[k][j]);
                 }
-                if (j >= h - 2) continue;
-                assertEquals(genIndex(i, j), exp, objCols[3][j]);
-                assertEquals(genIndex(i, j), exp, (Integer) primCols[3][j]);
-                if (j < 2 || h - 4 <= j) continue;
-                assertEquals(genIndex(i, j), exp, objCols[4][j - 2]);
-                assertEquals(genIndex(i, j), exp, (Integer) primCols[4][j - 2]);
+                
+                for (; k < 6; k++) {
+                    if (k == 5 && j >= h - 2) continue;
+                    assertEquals(genIndex(k, i, j), (j < 2 ? null : exp), (Object) objRows[k][j]);
+                    assertEquals(genIndex(k, i, j), (j < 2 ? 0 : exp), (Object) primRows[k][j]);
+                }
+                
+                if (j < 2) {
+                    assertEquals(genIndex(k, i, j), null, (Object) objRows[k][j]);
+                    assertEquals(genIndex(k, i, j), 0, (Object) primRows[k][j]);
+                }
+                if (j < h - 2) {
+                    assertEquals(genIndex(k, i, j + 2), exp, (Object) objRows[k][j + 2]);
+                    assertEquals(genIndex(k, i, j + 2), exp, (Object) primRows[k][j + 2]);
+                }
+                k++;
+                
+                if (j >= 2) {
+                    assertEquals(genIndex(k, j - 2, i), exp, (Object) objRows[k][j - 2]);
+                    assertEquals(genIndex(k, j - 2, i), exp, (Object) primRows[k][j - 2]);
+                }
             }
         }
     }
@@ -1581,18 +1653,18 @@ public class Array2DTest
                 arr.getColumn(new Double[h], i);
             });
             expEx(IllegalArgumentException.class, () -> {
-                arr.getColumn(new Double[h], i, 0, h);
+                arr.getColumn(new Double[h], i, 0, 0, h);
             });
             expEx(IllegalArgumentException.class, () -> {
                 arr.getColumn(new double[h], i);
             });
             expEx(IllegalArgumentException.class, () -> {
-                arr.getColumn(new double[h], i, 0, h);
+                arr.getColumn(new double[h], i, 0, 0, h);
             });
             
             Number[][] cols = new Number[][] {
                 arr.getColumn(new Number[h], i),
-                arr.getColumn(new Number[h], i, 0, h)
+                arr.getColumn(new Number[h], i, 0, 0, h)
             };
             
             for (int j = 0; j < h; j++) {
@@ -1619,7 +1691,7 @@ public class Array2DTest
             int[][] cols = new int[][] {
                 arr.getPrimColumn(i),
                 arr.getColumn(new int[h], i),
-                arr.getColumn(new int[h], i, 0, h)
+                arr.getColumn(new int[h], i, 0, 0, h)
             };
             for (int j = 0; j < arr.getHeight(); j++) {
                 for (int k = 0; k < 3; k++) {

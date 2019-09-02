@@ -24,7 +24,6 @@ import java.util.RandomAccess;
 import tools.MultiTool;
 import tools.PublicCloneable;
 import tools.Var;
-import tools.data.Wrapper;
 
 
 /**
@@ -55,7 +54,7 @@ public class Array2D<V>
     /** The primitive type of the array, or {@code null} if it doesn't have a primitive type. */
     private final Class<?> primType;
     /** The array containing the data. */
-    protected Wrapper<V>[][] array;
+    protected V[][] array;
     /** The height of the array. */
     private int arrayHeight;
     
@@ -84,7 +83,7 @@ public class Array2D<V>
             throw new IllegalArgumentException("Expected positive or zero as size, but found: ["
                     + width + " x " + height + "].");
         }
-        array = new Wrapper[width][arrayHeight = height];
+        array = (V[][]) new Object[width][arrayHeight = height]; // TODO
         this.type = type;
         primType = MultiTool.getPrimitiveTypeOf(type);
     }
@@ -117,7 +116,7 @@ public class Array2D<V>
      * @param source The 2D array to clone.
      */
     public Array2D(Array2D<V> source) {
-        array = new Wrapper[source.getWidth()][arrayHeight = source.getHeight()];
+        array = (V[][]) new Object[source.getWidth()][arrayHeight = source.getHeight()];
         for (int i = 0; i < array.length; i++) {
             for (int j = 0; j < array[i].length; j++) {
                 array[i][j] = source.array[i][j];
@@ -159,7 +158,7 @@ public class Array2D<V>
      */
     public Array2D(Array2D<V> source, int x, int y, int width, int height) {
         source.checkBounds(x, y, width, height);
-        array = new Wrapper[width][arrayHeight = height];
+        array = (V[][]) new Object[width][arrayHeight = height];
         for (int i = 0; i < array.length; i++) {
             for (int j = 0; j < array[i].length; j++) {
                 array[i][j] = source.array[x + i][y + j];
@@ -232,7 +231,7 @@ public class Array2D<V>
      * @param depth The expected depth of the array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
+     *     or the type of the array is invalid.
      */
     private void checkArrayType(Object arr, int depth)
             throws IllegalArgumentException {
@@ -263,7 +262,7 @@ public class Array2D<V>
      * @param depth The expected depth of the array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
+     *     or the type of the array is invalid.
      */
     private void checkArrayStoreType(Object arr, int depth)
             throws IllegalArgumentException {
@@ -328,7 +327,7 @@ public class Array2D<V>
      * @throws NegativeArraySizeException If the given width and/or height are negative.
      */
     public void setSize(int width, int height) {
-        array = new Wrapper[width][height];
+        array = (V[][]) new Object[width][height];
         arrayHeight = height;
     }
     
@@ -348,7 +347,7 @@ public class Array2D<V>
      */
     public void setSizeAndCopy(int width, int height) {
         if (width == getWidth() && height == getHeight()) return;
-        Wrapper<V>[][] newArr = new Wrapper[width][height];
+        V[][] newArr = (V[][]) new Object[width][height];
         for (int i = 0; i < array.length && i < newArr.length; i++) {
             for (int j = 0; j < array[i].length && j < newArr[i].length; j++) {
                 newArr[i][j] = array[i][j];
@@ -373,9 +372,7 @@ public class Array2D<V>
      */
     public V get(int x, int y)
             throws IndexOutOfBoundsException {
-        Wrapper<V> value = array[x][y];
-        if (value == null) return null;
-        return value.get();
+        return array[x][y];
     }
     
     /**
@@ -394,8 +391,8 @@ public class Array2D<V>
      */
     public V set(int x, int y, V value)
             throws IndexOutOfBoundsException {
-        V old = Wrapper.get(array[x][y]);
-        array[x][y] = new Wrapper(value);
+        V old = array[x][y];
+        array[x][y] = value;
         return old;
     }
     
@@ -444,7 +441,7 @@ public class Array2D<V>
         }
         
         for (int i = 0; i < len; i++) {
-            array[targetX + i][targetY] = new Wrapper<>(arr[sourceOff + i]);
+            array[targetX + i][targetY] = arr[sourceOff + i];
         }
     }
     
@@ -504,7 +501,7 @@ public class Array2D<V>
             
             int i = targetX;
             for (Iterator<V> it = ArrayTools.<V>getRangeIterator(arr, sourceOff, len); it.hasNext(); ) {
-                array[i++][targetY] = new Wrapper<>(it.next());
+                array[i++][targetY] = it.next();
             }
         }
     }
@@ -612,7 +609,7 @@ public class Array2D<V>
             
             int i = targetY;
             for (Iterator<V> it = ArrayTools.<V>getRangeIterator(arr, sourceOff, len); it.hasNext(); ) {
-                array[targetX][i++] = new Wrapper<>(it.next());
+                array[targetX][i++] = it.next();
             }
         }
     }
@@ -681,7 +678,7 @@ public class Array2D<V>
         
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
-                array[i][j] = new Wrapper<V>(source[i][j]);
+                array[i][j] = source[i][j];
             }
         }
     }
@@ -710,7 +707,7 @@ public class Array2D<V>
         
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                array[destX + i][destY + j] = new Wrapper<V>(source[sourceX + i][sourceY + j]);
+                array[destX + i][destY + j] = source[sourceX + i][sourceY + j];
             }
         }
     }
@@ -741,7 +738,7 @@ public class Array2D<V>
             int j = 0;
             for (Iterator<V> it = ArrayTools.<V>getRangeIterator(
                     source[i], 0, h); it.hasNext(); ) {
-                array[i][j++] = new Wrapper<V>(it.next());
+                array[i][j++] = it.next();
             }
         }
     }
@@ -781,7 +778,7 @@ public class Array2D<V>
             int j = 0;
             for (Iterator<V> it = ArrayTools.<V>getRangeIterator(
                     source[sourceX + i], sourceY, height); it.hasNext(); ) {
-                array[destX + i][destY + j++] = new Wrapper<V>(it.next());
+                array[destX + i][destY + j++] = it.next();
             }
         }
     }
@@ -857,7 +854,7 @@ public class Array2D<V>
         
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
-                array[i][j] = new Wrapper<V>(source[i][j]);
+                array[i][j] = source[i][j];
             }
         }
     }
@@ -888,7 +885,7 @@ public class Array2D<V>
         
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                array[i][j] = new Wrapper<V>(source[sourceX + i][sourceY + j]);
+                array[i][j] = source[sourceX + i][sourceY + j];
             }
         }
     }
@@ -923,7 +920,7 @@ public class Array2D<V>
         for (int i = 0; i < w; i++) {
             int j = 0;
             for (Iterator<V> it = ArrayTools.<V>getRangeIterator(source[i], 0, h); it.hasNext(); ) {
-                array[i][j++] = new Wrapper<V>(it.next());
+                array[i][j++] = it.next();
             }
         }
     }
@@ -966,7 +963,7 @@ public class Array2D<V>
             int j = 0;
             for (Iterator<V> it = ArrayTools.<V>getRangeIterator(
                     source[sourceX + i], sourceY, height); it.hasNext(); ) {
-                array[i][j++] = new Wrapper<V>(it.next());
+                array[i][j++] = it.next();
             }
         }
     }
@@ -1008,10 +1005,9 @@ public class Array2D<V>
     public void fill(int x, int y, int width, int height, V value)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkBounds(x, y, width, height);
-        Wrapper<V> v = new Wrapper<V>(value);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                array[x + i][y + j] = v;
+                array[x + i][y + j] = value;
             }
         }
     }
@@ -1093,7 +1089,7 @@ public class Array2D<V>
     public V[] getRow(int y) {
         int width = getWidth();
         V[] arr = (V[]) Array.newInstance(type, width);
-        getRow(arr, 0, y, width);
+        getRow(arr, 0, y, 0, width);
         return arr;
     }
     
@@ -1117,7 +1113,7 @@ public class Array2D<V>
      */
     public V[] getRow(V[] dest, int y)
             throws IndexOutOfBoundsException {
-        return getRow(dest, 0, y, Math.min(dest.length, getWidth()));
+        return getRow(dest, 0, y, 0, Math.min(dest.length, getWidth()));
     }
     
     /**
@@ -1134,6 +1130,7 @@ public class Array2D<V>
      * @param dest The destination array.
      * @param x The x-coordinate to start copying values from. Default is {@code 0}.
      * @param y The y-coordinate to start copying values from.
+     * @param off The offset to start placing values in the destination array.
      * @param len The maximum number of elements to return.
      * 
      * @return The destination array.
@@ -1141,16 +1138,12 @@ public class Array2D<V>
      * @throws IndexOutOfBoundsException If the given {@code x} and/or {@code y}
      *     values lie outside the bounds of this array or the destination array.
      */
-    public V[] getRow(V[] dest, int x, int y, int len)
+    public V[] getRow(V[] dest, int x, int y, int off, int len)
             throws IndexOutOfBoundsException {
-        if (dest.length < len) {
-            throw new IndexOutOfBoundsException(
-                    "The expected amount of expected data(" + len
-                            + ") doesn't fit in the buffer(" + dest.length + ").");
-        }
+        checkArea(off, 0, len, 1, ArrayTools.length(dest), 1);
         checkBounds(x, y, len, 1);
         for (int i = 0; i < len; i++) {
-            dest[i] = Wrapper.get(array[x + i][y]);
+            dest[off + i] = array[x + i][y];
         }
         return dest;
     }
@@ -1174,13 +1167,13 @@ public class Array2D<V>
      * @return The destination array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
+     *     or the type of the array is invalid.
      * @throws IndexOutOfBoundsException If the given {@code y} value lies outside
      *     the bounds of this array.
      */
     public <T> T getRow(T dest, int y)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        return getRow(dest, 0, y, Math.min(ArrayTools.length(dest), getWidth()));
+        return getRow(dest, 0, y, 0, Math.min(ArrayTools.length(dest), getWidth()));
     }
     
     /**
@@ -1200,34 +1193,29 @@ public class Array2D<V>
      * @param dest The destination array.
      * @param x The x-coordinate to start copying values from. Default is {@code 0}.
      * @param y The y-coordinate to start copying values from.
+     * @param off The offset to start placing values in the destination array.
      * @param len The maximum number of elements to return.
      * 
      * @return The destination array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
+     *     or the type of the array is invalid.
      * @throws IndexOutOfBoundsException If the given {@code x}  and /or {@code y}
      *     values lie outside the bounds of this array.
      */
-    public <T> T getRow(T dest, int x, int y, int len)
+    public <T> T getRow(T dest, int x, int y, int off, int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArrayStoreType(dest, 1);
         if (dest instanceof Object[]) {
-            return (T) getRow((V[]) dest, x, y, len);
+            return (T) getRow((V[]) dest, x, y, off, len);
             
         } else {
-            if (ArrayTools.length(dest) < len) {
-                throw new IndexOutOfBoundsException(
-                        "The expected amount of expected data(" + len
-                                + ") doesn't fit in the buffer(" + ArrayTools.length(dest) + ").");
-            }
-            
+            checkArea(off, 0, len, 1, ArrayTools.length(dest), 1);
             checkBounds(x, y, len, 1);
             Object defValue = MultiTool.getDefaultPrim(primType);
-            ArrayTools.setRange(dest, 0, len, (int i) -> {
-                Wrapper<V> obj = array[x + i][y];
-                if (obj != null && obj.get() != null) return obj.get();
-                else return defValue;
+            ArrayTools.setRange(dest, off, len, (int i) -> {
+                V val = array[x + i - off][y];
+                return (val == null ? defValue : val);
             });
             return dest;
         }
@@ -1286,7 +1274,7 @@ public class Array2D<V>
     public V[] getColumn(int x) {
         int height = getHeight();
         V[] arr = (V[]) Array.newInstance(type, height);
-        getColumn(arr, x, 0, height);
+        getColumn(arr, x, 0, 0, height);
         return arr;
     }
     
@@ -1310,7 +1298,7 @@ public class Array2D<V>
      */
     public V[] getColumn(V[] dest, int x)
             throws IndexOutOfBoundsException {
-        return getColumn(dest, x, 0, Math.min(dest.length, getHeight()));
+        return getColumn(dest, x, 0, 0, Math.min(dest.length, getHeight()));
     }
     
     /**
@@ -1327,23 +1315,20 @@ public class Array2D<V>
      * @param dest The destination array.
      * @param x The x-coordinate to start copying values from.
      * @param y The y-coordinate to start copying values from. Default is {@code 0}.
+     * @param off The offset to start placing values in the destination array.
+     * @param len The number of values to set in the array.
      * 
      * @return The destination array.
      * 
      * @throws IndexOutOfBoundsException If the given {@code x} and/or {@code y}
      *     values lie outside the bounds of this array or the destination array.
      */
-    public V[] getColumn(V[] dest, int x, int y, int len)
+    public V[] getColumn(V[] dest, int x, int y, int off, int len)
             throws IndexOutOfBoundsException {
-        if (dest.length < len) {
-            throw new IndexOutOfBoundsException(
-                    "The expected amount of expected data(" + len
-                            + ") doesn't fit in the buffer(" + dest.length + ").");
-        }
-        
+        checkArea(off, 0, len, 1, dest.length, 1);
         checkBounds(x, y, 1, len);
         for (int i = 0; i < len; i++) {
-            dest[i] = Wrapper.get(array[x][y + i]);
+            dest[off + i] = array[x][y + i];
         }
         return dest;
     }
@@ -1372,13 +1357,13 @@ public class Array2D<V>
      * @return The destination array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
+     *     or the type of the array is invalid.
      * @throws IndexOutOfBoundsException If the given {@code x} value lies outside
      *     the bounds of this array.
      */
     public <T> T getColumn(T dest, int x)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        return getColumn(dest, x, 0, Math.min(ArrayTools.length(dest), getHeight()));
+        return getColumn(dest, x, 0, 0, Math.min(ArrayTools.length(dest), getHeight()));
     }
     
     /**
@@ -1396,40 +1381,34 @@ public class Array2D<V>
      * This function runs in <i>O</i>({@code len}).
      * 
      * @implSpec
-     * This function should only be used for primitive typed arrays, or super classes.
+     * This function should only be used for primitive typed arrays or super classes.
      * 
      * @param dest The destination array.
      * @param x The x-coordinate to start copying values from.
      * @param y The y-coordinate to start copying values from. Default is {@code 0}.
-     * @param len The maximum number of elements to return.
+     * @param off The offset to start placing values in the destination array.
+     * @param len The number of values to set in the array.
      * 
      * @return The destination array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
+     *     or the type of the array is invalid.
      * @throws IndexOutOfBoundsException If the given {@code x} or {@code y} values
      *     lie outside the bounds of this array.
      */
-    public <T> T getColumn(T dest, int x, int y, int len)
+    public <T> T getColumn(T dest, int x, int y, int off, int len)
             throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArrayStoreType(dest, 1);
         if (dest instanceof Object[]) {
-            return (T) getColumn((V[]) dest, x, y, len);
+            return (T) getColumn((V[]) dest, x, y, off, len);
             
         } else {
-            if (ArrayTools.length(dest) < len) {
-                throw new IndexOutOfBoundsException(
-                        "The expected amount of expected data(" + len
-                                + ") doesn't fit in the buffer("
-                                + ArrayTools.length(dest) + ").");
-            }
-            
+            checkArea(off, 0, len, 1, ArrayTools.length(dest), 1);
             checkBounds(x, y, 1, len);
             Object defValue = MultiTool.getDefaultPrim(primType);
-            ArrayTools.setRange(dest, 0, len, (int i) -> {
-                Wrapper<V> obj = array[x][y + i];
-                if (obj != null && obj.get() != null) return obj.get();
-                else return defValue;
+            ArrayTools.setRange(dest, off, len, (int i) -> {
+                V val = array[x][y + i - off];
+                return (val == null ? defValue : val);
             });
             return dest;
         }
@@ -1465,9 +1444,8 @@ public class Array2D<V>
         Object defValue = MultiTool.getDefaultPrim(primType);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                Wrapper<V> wrap = array[i][j];
-                if (wrap == null || wrap.get() == null) arr[i][j] = defValue;
-                else arr[i][j] = wrap.get();
+                V val = array[i][j];
+                return (T) (val == null ? defValue : val);
             }
         }
         
@@ -1491,14 +1469,14 @@ public class Array2D<V>
         V[][] arr = (V[][]) Array.newInstance(type, width, height);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                arr[i][j] = Wrapper.get(array[i][j]);
+                arr[i][j] = array[i][j];
             }
         }
         
         return arr;
     }
     
-    /**TODO
+    /**
      * Copies the data inside the given bounds from the source array to {@code this} array. <br>
      * If the provided width or height are negative, then the values are mirrored in
      * respectively the width or height. The values which are copied are inside the area
@@ -1507,46 +1485,32 @@ public class Array2D<V>
      * If the given array is a primitive typed array, then all {@code null} values are converted
      * to the default value the primitive type of this array.
      * 
-     * <h2>Examples</h2>
-     * Let's consider the following source and destination:
-     * <pre>{@code
-     *   source = [[ 1,  2,  3], [ 4,  5,  6], [ 7,  8,  9]];
-     *   dest   = [[11, 12, 13], [14, 15, 16], [17, 18, 19]];
-     * }</pre>
-     * Then the following holds:
-     * <pre>{@code
-     *   dest.getArray(source, 0, 0,  2,  2) = [[ 1,  2, 13], [ 4,  5, 16], [17, 18, 19]];
-     *   dest.getArray(source, 1, 1,  2,  2) = [[11, 12, 13], [14,  5,  6], [17,  8,  9]];
-     * }</pre>
-     * 
      * @apiNote
-     * This function runs in <i>O</i>({@code width * height + width}).
+     * This function runs in <i>O</i>({@code width * height}).
      * 
-     * @param source The 2D array to copy the values from.
-     * @param sourceX The x-coordinate to start copying from.
-     * @param sourceY The y-coordinate to start copying from.
-     * @param destX The x-coordinate to start pasting to.
-     * @param destY The y-coordinate to start pasting to.
+     * @param dest The destination array.
+     * @param x The x-coordinate to start copying from.
+     * @param y The y-coordinate to start copying from.
+     * @param offX The x-coordinate to start pasting to.
+     * @param offY The y-coordinate to start pasting to.
      * @param width The width of the area to copy.
      * @param height The height of the area to copy.
      * 
-     * @see #Array2D(Array2D, int, int, int, int)
-     * 
      * @throws IllegalArgumentException If the provided width and/or height are negative.
      * @throws IndexOutOfBoundsException If the provided bounds are not within
-     *     the bounds of this array or the source array.
+     *     the bounds of this array or the destination array.
      */
-    public Array2D<V> getArray(Array2D<V> source, int sourceX, int sourceY, int destX, int destY,
+    public Array2D<V> getArray(Array2D<V> dest, int x, int y, int offX, int offY,
             int width, int height)
             throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkBounds(destX, destY, width, height);
-        source.checkBounds(sourceX, sourceY, width, height);
+        checkBounds(x, y, width, height);
+        dest.checkBounds(offX, offY, width, height);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                array[destX + i][destY + j] = source.array[sourceX + i][sourceY + j];
+                array[offX + i][offY + j] = dest.array[x + i][y + j];
             }
         }
-        return source;
+        return dest;
     }
     
     /**
@@ -1562,7 +1526,15 @@ public class Array2D<V>
      * @return The destination array.
      */
     public V[][] getArray(V[][] dest) {
-        return getArray(dest, 0, 0, dest.length, (dest.length == 0 ? 0 : dest[0].length));
+        int w = Math.min(dest.length, getWidth());
+        int h = Math.min(dest[0].length, getHeight());
+        
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                dest[i][j] = array[i][j];
+            }
+        }
+        return dest;
     }
     
     /**
@@ -1574,24 +1546,28 @@ public class Array2D<V>
      * This function runs in <i>O</i>({@code width * height}).
      * 
      * @param dest The destination array.
-     * @param x The starting column
-     * @param y The starting row.
+     * @param x The x-coordinate to start copying from.
+     * @param y The y-coordinate to start copying from.
+     * @param offX The x-coordinate to start writing the values to.
+     * @param offY The y-coordinate to start writing the values to.
      * @param width The width of the area to get.
      * @param height The height of the area to get.
      * 
      * @return The destination array.
      * 
-     * @throws IndexOutOfBoundsException If the given bound lies outside the bounds of this array.
+     * @throws IndexOutOfBoundsException If the provided bounds are not within
+     *     the bounds of this array or the destination array.
      */
-    public V[][] getArray(V[][] dest, int x, int y, int width, int height) {
+    public V[][] getArray(V[][] dest, int x, int y, int offX, int offY, int width, int height)
+            throws IndexOutOfBoundsException {
         checkBounds(x, y, width, height);
         int w = dest.length;
         int h = (w == 0 ? 0 : dest[0].length);
-        checkArea(0, 0, width, height, w, h);
+        checkArea(offX, offY, width, height, w, h);
         
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                dest[i][j] = Wrapper.get(array[i][j]);
+                dest[offX + i][offY + j] = array[x + i][y + j];
             }
         }
         
@@ -1617,18 +1593,31 @@ public class Array2D<V>
      * @return The destination array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
-     * @throws NullPointerException If the destination array is a primitive typed array
-     *     and at least one null-value was attempted to be copied.
+     *     or the type of the array is invalid.
      */
     public <T> T[] getArray(T[] dest)
-            throws IllegalArgumentException, IndexOutOfBoundsException, NullPointerException {
+            throws IllegalArgumentException {
+        checkArrayStoreType(dest, 2);
+        if (dest instanceof Object[][]) {
+            return (T[]) getArray((V[][]) dest);
+        }
+        @SuppressWarnings("null") // NullPointerException should be thrown anyways if null.
         int w = Math.min(dest.length, getWidth());
         int h = Math.min(ArrayTools.length(dest[0]), getHeight());
-        return getArray(dest, 0, 0, w, h);
+        
+        Object defValue = MultiTool.getDefaultPrim(primType);
+        for (int index = 0; index < w; index++) {
+            final int i = index;
+            ArrayTools.setRange(dest, 0, h, (j) -> {
+                V val = array[i][j];
+                if (val == null) return defValue;
+                return val;
+            });
+        }
+        return dest;
     }
     
-    /**TODO
+    /**
      * Copies the values of this array to the provided 2D array.
      * The indices in the destination array which lie outside
      * the bounds of the array will remain unchanged. <br>
@@ -1643,129 +1632,44 @@ public class Array2D<V>
      * This function should only be used for primitive typed arrays, or super classes.
      * 
      * @param dest The destination array.
-     * @param x The starting column
-     * @param y The starting row.
+     * @param x The x-coordinate to start copying from.
+     * @param y The y-coordinate to start copying from.
+     * @param offX The x-coordinate to start writing the values to.
+     * @param offY The y-coordinate to start writing the values to.
      * @param width The width of the area to get.
      * @param height The height of the area to get.
      * 
      * @return The destination array.
      * 
      * @throws IllegalArgumentException If the depth of the array is incorrect,
-     *     or the type of the array is an invallid type.
-     * @throws IndexOutOfBoundsException If the given bound lies outside the bounds of this array.
-     * @throws NullPointerException If the destination array is a primitive typed array
-     *     and at least one null-value was attempted to be copied.
+     *     or the type of the array is invalid.
+     * @throws IndexOutOfBoundsException If the provided bounds are not within
+     *     the bounds of this array or the source array.
      */
-    public <T> T[] getArray(T[] dest, int x, int y, int width, int height)
-            throws IllegalArgumentException, IndexOutOfBoundsException, NullPointerException {
+    public <T> T[] getArray(T[] dest, int x, int y, int offX, int offY, int width, int height)
+            throws IllegalArgumentException, IndexOutOfBoundsException {
         checkArrayStoreType(dest, 2);
         if (dest instanceof Object[][]) {
-            return (T[]) getArray((V[][]) dest, x, y, width, height);
-            
-        } else {
-            checkBounds(x, y, width, height);
-            @SuppressWarnings("null") // NullPointerException should be thrown anyways if null.
-            int w = dest.length;
-            int h = (w == 0 ? 0 : ArrayTools.length(dest[0]));
-            checkArea(0, 0, width, height, w, h);
-            
-            for (int index = 0; index < width; index++) {
-                final int i = index;
-                ArrayTools.setRange(dest[i], 0, height, (j) -> {
-                    return Wrapper.get(array[i][j]);
-                });
-            }
-            
-            return dest;
+            return (T[]) getArray((V[][]) dest, x, y, offX, offY, width, height);
         }
-    }
-    
-    /**TODO
-     * Copies a part of the given source array to this array. <br>
-     * <br>
-     * Take a look at {@link #getArray(Array2D, int, int, int, int, int, int)}
-     * for more information.
-     * 
-     * @apiNote
-     * This function runs in <i>O</i>({@code width * height + width}).
-     * 
-     * @param source The 2D array to copy the values from.
-     * @param sourceX The x-coordinate to start copying from.
-     * @param sourceY The y-coordinate to start copying from.
-     * @param destX The x-coordinate to start pasting to.
-     * @param destY The y-coordinate to start pasting to.
-     * @param width The width of the area to copy.
-     * @param height The height of the area to copy. 
-     * 
-     * @throws IllegalArgumentException If the given width and/or height are negative.
-     * @throws IndexOutOfBoundsException If the given bounds do not lie within
-     *     the bounds of this array or the source array.
-     * 
-     * @see #getArray(Array2D, int, int, int, int, int, int)
-     */
-    public V[][] getArray(V[][] source, int sourceX, int sourceY, int destX, int destY,
-            int width, int height)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkBounds(destX, destY, width, height);
-        int sw = source.length;
-        int sh = (sw == 0 ? 0 : source[0].length);
-        checkArea(sourceX, sourceY, width, height, sw, sh);
         
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                array[destX + i][destY + j] = new Wrapper<>(source[sourceX + i][sourceY + j]);
-            }
+        checkBounds(x, y, width, height);
+        @SuppressWarnings("null") // NullPointerException should be thrown anyways if null.
+        int w = dest.length;
+        int h = (w == 0 ? 0 : ArrayTools.length(dest[0]));
+        checkArea(offX, offY, width, height, w, h);
+        
+        Object defValue = MultiTool.getDefaultPrim(primType);
+        for (int index = 0; index < width; index++) {
+            final int i = index;
+            ArrayTools.setRange(dest[offX + i], offY, height, (j) -> {
+                V val = array[x + i][y + j - offY];
+                if (val == null) return defValue;
+                return val;
+            });
         }
-        return source;
-    }
-    
-    /**TODO
-     * Copies a part of the given source array to this array. <br>
-     * <br>
-     * Take a look at {@link #getArray(Array2D, int, int, int, int, int, int)}
-     * for more information.
-     * 
-     * @apiNote
-     * This function runs in <i>O</i>({@code width * height + width}).
-     * 
-     * @implSpec
-     * This function should only be used for primitive typed arrays.
-     * 
-     * @param source The 2D array to copy the values from.
-     * @param sourceX The x-coordinate to start copying from.
-     * @param sourceY The y-coordinate to start copying from.
-     * @param destX The x-coordinate to start pasting to.
-     * @param destY The y-coordinate to start pasting to.
-     * @param width The width of the area to copy.
-     * @param height The height of the area to copy.
-     * 
-     * @throws IllegalArgumentException If the given width and/or height are negative,
-     *     or if the given source is not a 2D array.
-     * @throws IndexOutOfBoundsException If the given bounds do not lie within
-     *     the bounds of this array or the source array.
-     */
-    public <T> T[] getArray(T[] source, int sourceX, int sourceY, int destX, int destY,
-            int width, int height)
-            throws IllegalArgumentException, IndexOutOfBoundsException {
-        checkArrayType(source, 2);
-        if (source instanceof Object[][]) {
-            return (T[]) getArray((V[][]) source, sourceX, sourceY, destX, destY, width, height);
-            
-        } else {
-            checkBounds(destX, destY, width, height);
-            @SuppressWarnings("null") // NullPointerException should be thrown anyways if null.
-            int sw = source.length;
-            int sh = (sw == 0 ? 0 : ArrayTools.length(source[0]));
-            checkArea(sourceX, sourceY, width, height, sw, sh);
-
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    array[destX + i][destY + j] = new Wrapper(ArrayTools.get(source[sourceX + i], sourceY + j));
-                }
-            }
-            
-            return source;
-        }
+        
+        return dest;
     }
     // </editor-fold>
     
