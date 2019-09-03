@@ -31,9 +31,16 @@ import tools.iterators.ArrayIterator;
  * Base class for array extension classes. <br>
  * The aim of this class is to simplify creating array-like data classes which
  * allow certain read and/or write permission and differend kind of
- * read and/or write operations.
+ * read and/or write operations. <br>
+ * <br>
+ * An important key-feature of these classes is that they only act as a wrapper
+ * around the actual array. This implies that modifications in the given source
+ * array will also occur in this array and vice verca. <br>
+ * Because these classes only acts as a wrapper, they can be created in
+ * constant time, which makes them very handy for exporting an array with
+ * restricted or additional operations.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public abstract class AttributedArray<V>
@@ -44,7 +51,7 @@ public abstract class AttributedArray<V>
      * -------------------------------------------------------------------------
      */
     /** The backening array. */
-    protected final Wrapper<V[]> arr;
+    protected final Wrapper<V[]> array;
     
     
     /* -------------------------------------------------------------------------
@@ -57,7 +64,11 @@ public abstract class AttributedArray<V>
      * @param arr The backening array of any type.
      */
     public AttributedArray(Object arr) {
-        this(new Wrapper(arr));
+        if (arr == null) throw new NullPointerException();
+        if (!arr.getClass().isArray()) {
+            throw new IllegalArgumentException("The given object is not an array.");
+        }
+        array = new Wrapper(arr);
     }
     
     /**
@@ -66,16 +77,18 @@ public abstract class AttributedArray<V>
      * @param arr The backening array.
      */
     public AttributedArray(V... arr) {
-        this(new Wrapper<V[]>(arr));
+        if (arr == null) throw new NullPointerException();
+        array = new Wrapper<V[]>(arr);
     }
     
     /**
-     * Creates a attributed array from the given array.
+     * Creates a attributed array from the given array. <br>
+     * Note 
      * 
      * @param arr The backening array in a wrapper.
      * 
-     * @throws NullPointerException If {@code arr == null}.
-     * @throws IllegalArgumentException If {@code arr} is not an array.
+     * @throws NullPointerException If {@code array == null}.
+     * @throws IllegalArgumentException If {@code array} is not an array.
      */
     public AttributedArray(Wrapper<V[]> arr) {
         if (arr == null) throw new NullPointerException();
@@ -83,7 +96,7 @@ public abstract class AttributedArray<V>
             throw new IllegalArgumentException("Expected an array, but found: "
                     + arr.get().getClass().getName());
         }
-        this.arr = arr;
+        this.array = arr;
     }
     
     
@@ -99,7 +112,7 @@ public abstract class AttributedArray<V>
      * @return The element at the given index.
      */
     protected V get(int index) {
-        return (V) arr.get(index);
+        return (V) array.get(index);
     }
     
     /**
@@ -111,8 +124,8 @@ public abstract class AttributedArray<V>
      * @return The previous value at the given location.
      */
     protected V set(V value, int index) {
-        V old = (V) arr.get(index);
-        arr.set(value, index);
+        V old = (V) array.get(index);
+        array.set(value, index);
         return old;
     }
     
@@ -120,32 +133,32 @@ public abstract class AttributedArray<V>
      * @return The length of the array.
      */
     public int length() {
-        return arr.length();
+        return array.length();
     }
     
     @Override
     public Iterator<V> iterator() {
-        return new ArrayIterator<V>(arr);
+        return new ArrayIterator<V>(array);
     }
     
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof AttributedArray) {
-            return Objects.deepEquals(arr, ((AttributedArray) obj).arr);
+            return Objects.deepEquals(array, ((AttributedArray) obj).array);
             
         } else {
-            return Objects.deepEquals(arr, obj);
+            return Objects.deepEquals(array, obj);
         }
     }
     
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(arr);
+        return MultiTool.calcHashCode(array);
     }
     
     @Override
     public String toString() {
-        return arr.toString();
+        return array.toString();
     }
     
     @Override
@@ -176,7 +189,7 @@ public abstract class AttributedArray<V>
      */
     public V[] copyOf(V[] copy)
             throws IllegalArgumentException {
-        return copyOf(copy, 0, 0, Math.min(arr.length(), copy.length));
+        return copyOf(copy, 0, 0, Math.min(array.length(), copy.length));
     }
     
     /**
@@ -204,9 +217,9 @@ public abstract class AttributedArray<V>
             throw new IllegalArgumentException("offOrig(" + offOrig + ") < 0");
         if (offCopy < 0)
             throw new IllegalArgumentException("offCopy(" + offCopy + ") < 0");
-        if (offOrig + len > arr.length()) {
+        if (offOrig + len > array.length()) {
             throw new IllegalArgumentException("offOrig(" + offOrig+ ") + len(" + len
-                    + ") > thislength(" + arr.length() + ")");
+                    + ") > thislength(" + array.length() + ")");
         }
         if (offOrig + len > copy.length) {
             throw new IllegalArgumentException("offCopy(" + offCopy + ") + len(" + len
@@ -214,7 +227,7 @@ public abstract class AttributedArray<V>
         }
         
         for (int i = 0; i < len; i++) {
-            copy[i + offCopy] = (V) arr.get(i + offOrig);
+            copy[i + offCopy] = (V) array.get(i + offOrig);
         }
         
         return copy;
@@ -240,7 +253,7 @@ public abstract class AttributedArray<V>
      */
     public <A> A copyOf(A copy)
             throws IllegalArgumentException {
-        return copyOf(copy, 0, 0, Math.min(arr.length(), ArrayTools.length(copy)));
+        return copyOf(copy, 0, 0, Math.min(array.length(), ArrayTools.length(copy)));
     }
     
     /**
@@ -268,13 +281,13 @@ public abstract class AttributedArray<V>
             throw new IllegalArgumentException("offOrig < 0: " + offOrig);
         if (offCopy < 0)
             throw new IllegalArgumentException("offCopy < 0: " + offCopy);
-        if (offOrig + len >= arr.length())
+        if (offOrig + len >= array.length())
             throw new IllegalArgumentException("offOrig + len >= length()");
         if (offOrig + len >= ArrayTools.length(copy))
             throw new IllegalArgumentException("offCopy + len >= copy.length");
         
         for (int i = 0; i < len; i++) {
-            ArrayTools.set(copy, i + offCopy, arr.get(i + offOrig));
+            ArrayTools.set(copy, i + offCopy, array.get(i + offOrig));
         }
         
         return copy;
@@ -302,7 +315,7 @@ public abstract class AttributedArray<V>
      * @return A list from the given array.
      */
     public List<V> asList() {
-        return ArrayTools.asList(arr.get());
+        return ArrayTools.asList(array.get());
     }
     
     

@@ -27,7 +27,7 @@ import tools.data.Wrapper;
  * Array data class for preventing an {@link IndexOutOfBoundsException}
  * when requesting non-existing elements from an array.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public class DefaultValueArray<V>
@@ -99,8 +99,8 @@ public class DefaultValueArray<V>
      */
     @Override
     public V get(int index) {
-        if (index < arr.length() && index >= 0) {
-            return (V) arr.get(index);
+        if (index < array.length() && index >= 0) {
+            return (V) array.get(index);
         } else {
             return def.get();
         }
@@ -108,14 +108,14 @@ public class DefaultValueArray<V>
     
     @Override
     public int hashCode() {
-        return MultiTool.calcHashCode(new Object[] {arr, def});
+        return MultiTool.calcHashCode(new Object[] {array, def});
     }
     
     @Override
     public String toString() {
         return getClass().getName()
                 + "[def=" + def.toString()
-                + ",arr=" + arr.toString() + "]";
+                + ",arr=" + array.toString() + "]";
     }
     
     @Override
@@ -123,7 +123,7 @@ public class DefaultValueArray<V>
         if (this == obj) return true;
         if (!(obj instanceof DefaultValueArray)) return false;
         DefaultValueArray dva = (DefaultValueArray) obj;
-        return this.def == dva.def && Objects.equals(this.arr, dva.arr);
+        return this.def == dva.def && Objects.equals(this.array, dva.array);
     }
     
     

@@ -21,7 +21,7 @@ import tools.data.Wrapper;
 /**
  * Data class for making any array read-only.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public class ReadOnlyArray<V>
@@ -71,7 +71,7 @@ public class ReadOnlyArray<V>
     
     @Override
     public ReadOnlyArray<V> clone() {
-        return new ReadOnlyArray<V>(arr);
+        return new ReadOnlyArray<V>(array);
     }
     
     

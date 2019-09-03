@@ -21,20 +21,19 @@ import tools.data.Wrapper;
 /**
  * Array extension class implementation which takes the get and set indices modulo
  * the length of the array.
- * <br>
- * Example: <br>
- * Assume that <br>
+ * <h2>Examples</h2>
+ * Assume that we have the following array.
  * <blockquote><pre>{@code
- * CycleArray cycle = new CycleArray(new int[] {0, 1, 3});
+ * CycleArray cycle = new CycleArray(new int[] {0, 1, 2});
  * }</pre></blockquote>
  * Then it holds that <br>
  * <blockquote><pre>{@code
- * cycle.get(0) == cycle.get(4) == cycle.get(-4) == cycle.get(0 + n) == 0
- * cycle.get(1) == cycle.get(5) == cycle.get(-3) == cycle.get(1 + n) == 1
- * etc...
+ * cycle.get(0) == cycle.get(3) == cycle.get(-3) == cycle.get(0 + 3n) == 0
+ * cycle.get(1) == cycle.get(4) == cycle.get(-2) == cycle.get(1 + 3n) == 1
+ * cycle.get(1) == cycle.get(5) == cycle.get(-1) == cycle.get(2 + 3n) == 2
  * }</pre></blockquote>
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
 public class CycleArray<V>
@@ -68,8 +67,8 @@ public class CycleArray<V>
      * 
      * @param arr The backening array in a wrapper.
      * 
-     * @throws NullPointerException If {@code arr == null}.
-     * @throws IllegalArgumentException If {@code arr} is not an array.
+     * @throws NullPointerException If {@code array == null}.
+     * @throws IllegalArgumentException If {@code array} is not an array.
      */
     public CycleArray(Wrapper<V[]> arr) {
         super(arr);
@@ -105,7 +104,7 @@ public class CycleArray<V>
     
     @Override
     public CycleArray clone() {
-        return new CycleArray(arr);
+        return new CycleArray(array);
     }
     
     
