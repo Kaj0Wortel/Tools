@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 
 // Tools imports
 import tools.MultiTool;
+import tools.data.array.ReadOnlyArray;
 
 
 /**
@@ -29,7 +30,7 @@ import tools.MultiTool;
  * The first image in the array is drawn first, hence it will appear
  * on the bottom layer of the image.
  * 
- * @version 2.0
+ * @version 2.1
  * @author Kaj Wortel
  */
 public class OverlayImageSheet
@@ -39,12 +40,12 @@ public class OverlayImageSheet
      * Variables.
      * -------------------------------------------------------------------------
      */
-    /** The width of the sheets. */
+    /** The width of the sheetArr. */
     private final int sheetWidth;
-    /** The height of the sheets. */
+    /** The height of the sheetArr. */
     private final int sheetHeight;
-    /** The image sheets to be processed. */
-    private final BoundedImageSheet[] sheets;
+    /** The read-only array variant of the image sheetArr. */
+    private ReadOnlyArray<BoundedImageSheet> sheetArr;
     
     
     /* -------------------------------------------------------------------------
@@ -53,7 +54,7 @@ public class OverlayImageSheet
      */
     /**
      * Creates a new image sheet with the given images. <br>
-     * Overlays the image sheets from the lower index towards the higher index.
+     * Overlays the image sheet from the lower index towards the higher index.
      * 
      * @implNote
      * The images should be given in the following format: <br>
@@ -70,32 +71,55 @@ public class OverlayImageSheet
      */
     public OverlayImageSheet(int sheetWidth, int sheetHeight, Image[][]... imgs) {
         this(sheetWidth, sheetHeight, MultiTool.createObject(() -> {
-            BoundedImageSheet[] sheets = new BoundedImageSheet[imgs.length];
+            BoundedImageSheet[] bis = new BoundedImageSheet[imgs.length];
             for (int i = 0; i < imgs.length; i++) {
-                sheets[i] = new SourceImageSheet(imgs[i]);
+                bis[i] = new SourceImageSheet(imgs[i]);
             }
-            return sheets;
+            return bis;
         }));
     }
     
     /**
      * Creates a new image sheet with the given image sheets. <br>
-     * Overlays the image sheets from the lower index towards the higher index.
+     * Overlays the image sheet from the lower index towards the higher index.
      * 
      * @param sheetWidth The number of images which are in the width of the sheet.
      * @param sheetHeight The number of images which are in the height of the sheet.
-     * @param sheets The image sheets to be processed.
+     * @param sheets The image sheet to be processed.
      */
     public OverlayImageSheet(int sheetWidth, int sheetHeight, BoundedImageSheet... sheets) {
         if (sheets == null) throw new NullPointerException();
         if (sheetWidth < 0 || sheetHeight < 0) {
             throw new IllegalArgumentException(
-                    "Expected a non-negative width and height, but found ("
+                    "Expected a non-zero and non-negative width and height, but found ("
                             + sheetWidth + ", " + sheetHeight + ")");
         }
         this.sheetWidth = sheetWidth;
         this.sheetHeight = sheetHeight;
-        for (BoundedImageSheet sheet : this.sheets = sheets) {
+        setSheets(sheets);
+    }
+    
+    
+    /* -------------------------------------------------------------------------
+     * Functions.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * @return The overlaying sheets.
+     */
+    public ReadOnlyArray<BoundedImageSheet> getSheets() {
+        return new ReadOnlyArray<>(sheetArr);
+    }
+    
+    /**
+     * Sets the given sheets as sheets to overlay. <br>
+     * Overlays the image sheet from the lower index towards the higher index.
+     * 
+     * @param sheets The new sheets.
+     */
+    public void setSheets(BoundedImageSheet... sheets) {
+        sheetArr = new ReadOnlyArray<>(sheets);
+        for (BoundedImageSheet sheet : sheets) {
             if (sheet.getWidth() < sheetWidth || sheet.getHeight() < sheetHeight) {
                 throw new IllegalArgumentException(
                         "Expected all sheets to have at least the given width(" + sheetWidth
@@ -105,11 +129,6 @@ public class OverlayImageSheet
         }
     }
     
-    
-    /* -------------------------------------------------------------------------
-     * Functions.
-     * -------------------------------------------------------------------------
-     */
     @Override
     public Image[][] getSheet() {
         if (sheetWidth < 0 || sheetHeight < 0) return null;
@@ -145,11 +164,11 @@ public class OverlayImageSheet
             }
             
         } else {
-            Image[] imgs = new Image[sheets.length];
+            Image[] imgs = new Image[sheetArr.length()];
             int maxWidth = 1;
             int maxHeight = 1;
             for (int i = 0; i < imgs.length; i++) {
-                imgs[i] = sheets[i].get(x, y);
+                imgs[i] = sheetArr.get(i).get(x, y);
                 if (imgs[i] != null) {
                     maxWidth = Math.max(maxWidth, imgs[i].getWidth(null));
                     maxHeight = Math.max(maxHeight, imgs[i].getHeight(null));
@@ -185,8 +204,8 @@ public class OverlayImageSheet
         checkWidthHeight(width, height);
         checkBounds(x, y);
         boolean drawn = false;
-        for (int i = 0; i < sheets.length; i++) {
-            drawn = sheets[i].draw(g2d, x, y, posX, posY, width, height, scaleHints) || drawn;
+        for (int i = 0; i < sheetArr.length(); i++) {
+            drawn = sheetArr.get(i).draw(g2d, x, y, posX, posY, width, height, scaleHints) || drawn;
         }
         return drawn;
     }
