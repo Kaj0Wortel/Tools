@@ -3225,6 +3225,26 @@ public final class ArrayTools {
     
     /**
      * Generates an iterator over the given array.
+     * 
+     * @apiNote
+     * The iterator will throw an {@link ClassCastException} <u>when iterating</u> if the
+     * provided type is wrong.
+     * 
+     * @param <V> The type of the return value.
+     * 
+     * @param array The array to get the elements from.
+     * 
+     * @return An iterator over all the elements of the array from low to high index.
+     * 
+     * @throws IllegalArgumentException If the given object is not an array.
+     */
+    public static <V> Iterator<V> getRangeIterator(Object array)
+            throws IllegalArgumentException {
+        return getRangeIterator(array, 0, ArrayTools.length(array));
+    }
+    
+    /**
+     * Generates an iterator over the given array.
      * It will iterate from {@code off} to {@code off + len}.
      * 
      * @todo
@@ -3241,9 +3261,12 @@ public final class ArrayTools {
      * @param len The number of elements to read. A negative number will result in reading
      *     the array backwards
      * 
-     * @return An iterator over the elements of the array.
+     * @return An iterator over all the elements of the array from low to high index.
+     * 
+     * @throws IllegalArgumentException If the given object is not an array.
      */
-    public static <V> Iterator<V> getRangeIterator(Object array, int off, int len) {
+    public static <V> Iterator<V> getRangeIterator(Object array, int off, int len)
+            throws IllegalArgumentException {
         if (off < 0) throw new IndexOutOfBoundsException("Expected a positive offset, but found: " + off);
         final int end = off + len;
         if (end < 0 || length(array) < end) {
