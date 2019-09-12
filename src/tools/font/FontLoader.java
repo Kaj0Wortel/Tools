@@ -21,20 +21,20 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.UIManager;
 
 
 // Tools packages
-import tools.MultiTool;
 import tools.log.Logger;
 import tools.Var;
 import tools.data.file.FileTree;
+import tools.data.file.TreeFile;
 
 
 /**
@@ -279,9 +279,10 @@ public final class FontLoader {
             Set<Font> allFonts = new HashSet<>(Arrays.asList(GraphicsEnvironment
                     .getLocalGraphicsEnvironment().getAllFonts()));
             
-            for (Path path : MultiTool.toIterable(fileTree.walk(fontPath))) {
-                if (fileTree.isDirectory(path)) continue;
-                String fontLoc = fileTree.toAbsolutePath(path.toString());
+            for (Iterator<TreeFile> it = fileTree.walk(fontPath); it.hasNext(); ) {
+                TreeFile file = it.next();
+                if (fileTree.isDirectory(file)) continue;
+                String fontLoc = fileTree.toAbsolutePath(file.toString());
                 
                 if (fontLoc.toLowerCase().endsWith(".ttf")) {
                     Font font = loadFont(fileTree, fontLoc, getStyle(fontLoc), Font.TRUETYPE_FONT);

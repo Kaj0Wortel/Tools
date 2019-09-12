@@ -22,8 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 // Tools imports
@@ -40,16 +41,16 @@ import tools.iterators.GeneratorIterator;
  * @author Kaj Wortel
  */
 public class DirFileTree
-        extends AbstractFileTreeFileImpl {
+        extends FileTree {
      
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
     /** The token used to identify this file tree. */
-    private final FileTreeToken<DirFileTree, File> token;
+    private final FileTreeToken<DirFileTree, TreeFile> token;
     /** The root directory of this tree. */
-    private final File root;
+    private final TreeFile root;
     
     
     /* -------------------------------------------------------------------------
@@ -64,17 +65,19 @@ public class DirFileTree
      * @throws IllegalArgumentException If the given file isn't a directory.
      * @throws IOException If the given root file doesn't exist.
      */
-    protected DirFileTree(File root)
+    protected DirFileTree(TreeFile root)
             throws IllegalArgumentException, IOException {
-        if (!root.exists()) {
+        if (!root.getFile().exists()) {
             throw new FileNotFoundException("The file '" + root.toString() + "' does not exist!");
         }
-        if (root.isFile()) {
+        if (root.getFile().isFile()) {
             throw new IllegalArgumentException("The given file '" + root.toString()
                     + "' is not a directory!");
         }
         
-        this.root = root;
+        this.root = (root.getPathName().endsWith(Var.FS)
+                ? root
+                : new TreeFile(root.getPathName() + Var.FS));
         token = new FileTreeToken<>(DirFileTree.class, root);
     }
     
@@ -83,44 +86,6 @@ public class DirFileTree
      * Functions.
      * -------------------------------------------------------------------------
      */
-    /**
-     * Returns a {@link DirFileTree} of the root directory of the file with the given name. <br>
-     * If a file tree was already created with the given path, then the
-     * old file tree is returned. <br>
-     * <br>
-     * This function replaces the constructor.
-     * 
-     * @param path The name of the file of the root directory of the file tree.
-     * 
-     * @return A file tree starting at the the root directory the given class originates from.
-     * 
-     * @throws IllegalStateException If the name does not denote a directory.
-     * @throws IOException If the root directory could not be accessed.
-     */
-    public static DirFileTree getTree(String path)
-            throws IllegalArgumentException, IOException {
-        return getTree(new File(path));
-    }
-    
-    /**
-     * Returns a {@link DirFileTree} of the root directory of the file with the given path. <br>
-     * If a file tree was already created with the given path, then the
-     * old file tree is returned. <br>
-     * <br>
-     * This function replaces the constructor.
-     * 
-     * @param path The path of the file of the root directory of the file tree.
-     * 
-     * @return A file tree starting at the the root directory the given class originates from.
-     * 
-     * @throws IllegalStateException If the given path does not denote a direoctory.
-     * @throws IOException If the root directory could not be accessed.
-     */
-    public static DirFileTree getTree(Path path)
-            throws IllegalArgumentException, IOException {
-        return getTree(path.toFile());
-    }
-    
     /**
      * Returns a {@link DirFileTree} of the root directory of the given file. <br>
      * If a file tree was already created with the given path, then the
@@ -135,9 +100,9 @@ public class DirFileTree
      * @throws IllegalStateException If the given file is not a directory.
      * @throws IOException If the root directory could not be accessed.
      */
-    public static DirFileTree getTree(File file)
+    public static DirFileTree getTree(TreeFile file)
             throws IllegalArgumentException, IOException {
-        FileTreeToken<DirFileTree, File> token = new FileTreeToken<>(
+        FileTreeToken<DirFileTree, TreeFile> token = new FileTreeToken<>(
                 DirFileTree.class, file);
         DirFileTree tree = (DirFileTree) FILE_TREE_MAP.get(token);
         if (tree == null) {
@@ -164,66 +129,98 @@ public class DirFileTree
      */
     public static DirFileTree getTree(Class<?> c)
             throws IllegalStateException, IOException {
-        return getTree(getProjectSourceFile(c));
+        return getTree(new TreeFile(getProjectSourceFile(c)));
     }
     
     @Override
     public String getBasePath() {
-        return root.toString() + Var.FS;
+        return root.toString();
     }
     
     @Override
-    public FileTreeToken<DirFileTree, File> getToken() {
+    public FileTreeToken<DirFileTree, TreeFile> getToken() {
         return token;
     }
     
+    /**
+     * Converts an absolute or local tree file to an absolute file.
+     * 
+     * @param tf The tree file to convert.
+     * 
+     * @return An absolute file.
+     */
+    private File getAbsFile(TreeFile tf) {
+        return new File(toAbsolutePath(tf.getPathName()));
+    }
+    
     @Override
-    public Iterator<Path> walk(File file, FileVisitOption... options)
+    public Iterator<TreeFile> walk(TreeFile file, FileVisitOption... options)
             throws IOException {
-        File absFile = new File(toAbsolutePath(file.toString()));
+        File absFile = getAbsFile(file);
+        String entryPath = absFile.getAbsolutePath();
         Iterator<PartFile> it = new FileIterator(absFile, true);
-        return new Iterator<Path>() {
+        return new GeneratorIterator<TreeFile>() {
             @Override
-            public boolean hasNext() {
-                return it.hasNext();
-            }
-            
-            @Override
-            public Path next() {
-                return it.next().toPath();
+            public TreeFile generateNext() {
+                while (it.hasNext()) {
+                    PartFile pf = it.next();
+                    String name = pf.getAbsolutePath();
+                    if (name.startsWith(entryPath)) {
+                        if (pf.isDirectory()) {
+                            return new TreeFile(name + Var.FS);
+                        } else {
+                            return new TreeFile(name);
+                        }
+                    }
+                }
+                done();
+                return null;
             }
         };
     }
     
     @Override
-    public long size(File file) {
-        File absFile = new File(toAbsolutePath(file.toString()));
+    public long size(TreeFile file) {
+        File absFile = getAbsFile(file);
         if (absFile.exists()) return absFile.length();
         else return 0;
     }
     
     @Override
-    public boolean exists(File file) {
-        return new File(toAbsolutePath(file.toString())).exists();
+    public boolean exists(TreeFile file) {
+        return getAbsFile(file).exists();
     }
     
     @Override
-    public InputStream getStream(File file)
+    public InputStream getStream(TreeFile file)
             throws IOException, SecurityException {
-        return new FileInputStream(new File(toAbsolutePath(file.toString())));
+        return new FileInputStream(getAbsFile(file));
     }
     
     @Override
-    public byte[] readAllBytes(File file)
+    public byte[] readAllBytes(TreeFile file)
             throws IOException, OutOfMemoryError, SecurityException {
-        return Files.readAllBytes((new File(toAbsolutePath(file.toString()))).toPath());
+        return Files.readAllBytes(getAbsFile(file).toPath());
     }
     
     @Override
-    public boolean isDirectory(File file)
+    public boolean isDirectory(TreeFile file)
             throws IOException {
-        //System.out.println(file.isDirectory());
-        return file.isDirectory();
+        return getAbsFile(file).isDirectory();
+    }
+    
+    @Override
+    public TreeFile[] list(TreeFile parent)
+            throws IOException {
+        List<TreeFile> children = new ArrayList<>();
+        for (File f : getAbsFile(parent).listFiles()) {
+            if (f.isDirectory()) {
+                children.add(new TreeFile(f.getPath() + Var.FS));
+            } else {
+                children.add(new TreeFile(f));
+            }
+        }
+        return children.toArray(new TreeFile[children.size()]);
     }
     
     

@@ -15,21 +15,21 @@ package tools.data.file;
 
 
 // Java imports
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.FileVisitOption;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 
 // Tools imports
 import tools.Var;
+import tools.data.array.ArrayTools;
 import tools.iterators.GeneratorIterator;
 
 
@@ -40,14 +40,22 @@ import tools.iterators.GeneratorIterator;
  * @author Kaj Wortel
  */
 public class JarFileTree
-        extends AbstractFileTreeStringImpl {
+        extends FileTree {
+    
+    /* -------------------------------------------------------------------------
+     * Constants.
+     * -------------------------------------------------------------------------
+     */
+    /** The regex used in {@link #list(TreeFile)}. */
+    private final static String REGEX = ".+" + Var.FS + ".+";
+    
     
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
      */
     /** The token used to identify this file tree. */
-    private final FileTreeToken<JarFileTree, String> token;
+    private final FileTreeToken<JarFileTree, TreeFile> token;
     /** The jar file instance used to access data. */
     private final JarFile jarFile;
     
@@ -57,28 +65,16 @@ public class JarFileTree
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a new file tree from a jar file.
-     * 
-     * @param path The path of the jar file.
-     * 
-     * @throws IOException If the file could not be read.
-     */
-    protected JarFileTree(Path path)
-            throws IOException {
-        this(path.toString());
-    }
-    
-    /**
      * Creates a new file tree of a jar file.
      * 
-     * @param path The path of the jar file.
+     * @param file The jar file.
      * 
-     * @throws IOException If the jar file could not be read.
+     * @throws IOException If some I/O error occured.
      */
-    protected JarFileTree(String path)
+    protected JarFileTree(TreeFile file)
             throws IOException {
-        jarFile = new JarFile(path);
-        token = new FileTreeToken<>(JarFileTree.class, path);
+        jarFile = new JarFile(file.getPathName());
+        token = new FileTreeToken<>(JarFileTree.class, file);
     }
     
     
@@ -86,49 +82,6 @@ public class JarFileTree
      * Constructor functions.
      * -------------------------------------------------------------------------
      */
-    /**
-     * Returns a {@link JarFileTree} of the given jar file. <br>
-     * If a file tree was already created with the given path, then the old
-     * file tree is returned. <br>
-     * <br>
-     * This function replaces the constructor.
-     * 
-     * @param path The path of the jar file.
-     * 
-     * @return A file tree of the given jar file.
-     * 
-     * @throws IOException If the jar file could not be read.
-     */
-    public static JarFileTree getTree(String path)
-            throws IOException {
-        FileTreeToken<JarFileTree, String> token = new FileTreeToken<>(JarFileTree.class, path);
-        JarFileTree tree = (JarFileTree) FILE_TREE_MAP.get(token);
-        if (tree == null) {
-            FILE_TREE_MAP.put(token, tree = new JarFileTree(path));
-        }
-        
-        return tree;
-    }
-    
-    /**
-     * Returns a {@link JarFileTree} from the given path. <br>
-     * <br>
-     * This function should be used instead of the constructor. <br>
-     * <br>
-     * If a file tree was already created with the given path, then the
-     * old file tree is returned.
-     * 
-     * @param path The path of the jar file.
-     * 
-     * @return A new {@link JarFileTree}
-     * 
-     * @throws IOException If the jar file could not be read.
-     * @throws URISyntaxException If the provided path is not parsable to a URI.
-     */
-    public static JarFileTree getTree(Path path)
-            throws IOException {
-        return getTree(path.toString());
-    }
     
     /**
      * Returns a {@link JarFileTree} of the given jar file. <br>
@@ -143,9 +96,15 @@ public class JarFileTree
      * 
      * @throws IOException If the jar file could not be read.
      */
-    public static JarFileTree getTree(File file)
+    public static JarFileTree getTree(TreeFile file)
             throws IOException {
-        return getTree(file.toString());
+        FileTreeToken<JarFileTree, TreeFile> token = new FileTreeToken<>(JarFileTree.class, file);
+        JarFileTree tree = (JarFileTree) FILE_TREE_MAP.get(token);
+        if (tree == null) {
+            FILE_TREE_MAP.put(token, tree = new JarFileTree(file));
+        }
+        
+        return tree;
     }
     
     /**
@@ -164,7 +123,7 @@ public class JarFileTree
      */
     public static JarFileTree getTree(Class<?> c)
             throws IllegalStateException, IOException {
-        return getTree(getProjectSourceFile(c));
+        return getTree(new TreeFile(getProjectSourceFile(c)));
     }
     
     
@@ -206,19 +165,24 @@ public class JarFileTree
     }
     
     @Override
-    public Iterator<Path> walk(String path, FileVisitOption... options)
+    public Iterator<TreeFile> walk(TreeFile file, FileVisitOption... options)
             throws IOException {
-        JarEntry entry = getEntry(path);
+        JarEntry entry = getEntry(file.getPathName());
         final String entryPath = (entry == null ? "" : entry.getName());
         
         final Enumeration<JarEntry> entries = jarFile.entries();
-        return new GeneratorIterator<Path>() {
+        return new GeneratorIterator<TreeFile>() {
             @Override
-            protected Path generateNext() {
+            protected TreeFile generateNext() {
                 while (entries.hasMoreElements()) {
-                    String name = entries.nextElement().getName();
+                    JarEntry entry = entries.nextElement();
+                    String name = entry.getName();
                     if (name.startsWith(entryPath)) {
-                        return new File(toAbsolutePath(name)).toPath();
+                        if (entry.isDirectory()) {
+                            return new TreeFile(toAbsolutePath(name));
+                        } else {
+                            return new TreeFile(toAbsolutePath(name));
+                        }
                     }
                 }
                 done();
@@ -228,36 +192,55 @@ public class JarFileTree
     }
     
     @Override
-    public long size(String path) {
-        JarEntry entry = jarFile.getJarEntry(toLocalPath(path));
+    public long size(TreeFile file) {
+        JarEntry entry = jarFile.getJarEntry(toLocalPath(file.getPathName()));
         if (entry == null) return 0;
         return entry.getSize();
     }
     
     @Override
-    public boolean exists(String path) {
-        String localPath = toLocalPath(path);
+    public boolean exists(TreeFile file) {
+        String localPath = toLocalPath(file.getPathName());
         if ("".equals(localPath)) return true;
         return jarFile.getJarEntry(localPath) != null;
     }
     
     @Override
-    public InputStream getStream(String path)
+    public InputStream getStream(TreeFile file)
             throws IOException, SecurityException {
-        JarEntry entry = getEntry(path);
+        JarEntry entry = getEntry(toLocalPath(file.getPathName()));
         return jarFile.getInputStream(entry);
     }
     
     @Override
-    public byte[] readAllBytes(String path)
+    public byte[] readAllBytes(TreeFile file)
             throws IOException, OutOfMemoryError, SecurityException {
-        return getStream(path).readAllBytes();
+        return getStream(file).readAllBytes();
     }
     
     @Override
-    public boolean isDirectory(String path)
+    public boolean isDirectory(TreeFile file)
             throws IOException {
-        return getEntry(path).isDirectory();
+        return getEntry(toLocalPath(file.getPathName())).isDirectory();
+    }
+    
+    @Override
+    public TreeFile[] list(TreeFile file)
+            throws IOException {
+        List<TreeFile> children = new ArrayList<>();
+        JarEntry entry = getEntry(file.getPathName());
+        String entryPath = (entry == null ? "" : entry.getName());
+        
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            String name = entries.nextElement().getName();
+            if (name.startsWith(entryPath) && name.length() > entryPath.length() &&
+                    !name.substring(entryPath.length() + 1).matches(REGEX)) {
+                children.add(new TreeFile(name));
+            }
+        }
+        
+        return children.toArray(new TreeFile[children.size()]);
     }
     
     

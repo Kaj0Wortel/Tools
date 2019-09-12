@@ -22,7 +22,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Objects;
+import java.awt.geom.Rectangle2D;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
 import javax.swing.AbstractButton;
 import javax.swing.border.Border;
 
@@ -59,6 +61,7 @@ import tools.gui.border.SheetBorder;
  * @todo
  * - Add to string function for debugging.
  * - Add text to print over the button.
+ * - Implement change adapter.
  * 
  * @version 1.0
  * @author Kaj Wortel
@@ -104,7 +107,7 @@ public class SheetButton
      * @param sheet The image sheets to use.
      */
     public SheetButton(Insets in, GUIImageSheet sheet) {
-        this(in, sheet, null);
+        this(in, sheet, null, null);
     }
     
     /**
@@ -125,9 +128,35 @@ public class SheetButton
      * @param image The image to be displayed.
      */
     public SheetButton(Insets in, GUIImageSheet sheet, ImageSheet image) {
+        this(in, sheet, image, null);
+    }
+
+    public SheetButton(Insets in, GUIImageSheet sheet, String text) {
+        this(in, sheet, null, text);
+    }
+    
+    /**
+     * Creates a new content button. <br>
+     * The size of the image sheets must be at least {@code 3x3},
+     * and must follow the following coordinate scheme:
+     * <table border='1'>
+     *   <tr><td> 0, 0 </td> <td> 1, 0 </td> <td> 2, 0 </td></tr>
+     *   <tr><td> 0, 1 </td> <td> 1, 1 </td> <td> 2, 1 </td></tr>
+     *   <tr><td> 0, 2 </td> <td> 1, 2 </td> <td> 2, 2 </td></tr>
+     * </table>
+     * <br>
+     * Also displays the image at {@code (0, 0)} from the {@code image} image sheet at the
+     * center of the button. The text is displayed on top of the given image.
+     * 
+     * @param in The insets of the border.
+     * @param sheet The image sheets used to generate the button.
+     * @param image The image to be displayed.
+     */
+    public SheetButton(Insets in, GUIImageSheet sheet, ImageSheet image, String text) {
         setImageSheet(sheet);
         setBorder(new SheetBorder(in, sheet));
         this.image = image;
+        setText(text);
         
         addMouseListener(new MouseAdapter() {
             @Override
@@ -198,12 +227,40 @@ public class SheetButton
     }
     
     /**
+     * @return {@code true} if the button is enabled. {@code false} otherwise.
+     */
+    public boolean isEnabled() {
+        return state != GUIState.DISABLED;
+    }
+    
+    /**
+     * Enables or disables the button.
+     * 
+     * @param enable If {@code true}, then enable the button. If {@code false},
+     *     then thisable the button.
+     */
+    public void setEnabled(boolean enable) {
+        if (!enable) {
+            state = GUIState.DISABLED;
+            
+        } else if (pressed) {
+            state = GUIState.PRESSED;
+            
+        } else if (mouseOver) {
+            state = GUIState.ROLL_OVER;
+            
+        } else {
+            state = GUIState.DEFAULT;
+        }
+    }
+    
+    /**
      * Resets the state of the button to the initial state.
      */
     public void reset() {
-        this.state = GUIState.DEFAULT;
-        this.pressed = false;
-        this.mouseOver = false;
+        state = GUIState.DEFAULT;
+        pressed = false;
+        mouseOver = false;
     }
     
     /**
@@ -338,6 +395,14 @@ public class SheetButton
         }
         if (image != null) {
             image.draw(g2d, 0, 0, in.left, in.top, w, h, scaleType);
+        }
+        String text = getText();
+        if (text != null) {
+            g2d.setFont(getFont());
+            Rectangle2D bounds = g2d.getFontMetrics().getStringBounds(text, g2d);
+            int x = (int) ((getWidth() - bounds.getWidth()) / 2 - bounds.getX());
+            int y = (int) ((getHeight() - bounds.getHeight()) / 2 - bounds.getY());
+            g2d.drawString(text, x, y);
         }
     }
     

@@ -15,12 +15,10 @@ package tools.data.file;
 
 
 // Java imports
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.FileVisitOption;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -96,10 +94,10 @@ public abstract class FileTree {
         try {
             String path = getProjectSourceFile(c);
             if (path.endsWith(".jar")) {
-                return JarFileTree.getTree(path);
+                return JarFileTree.getTree(new TreeFile(path));
                 
             } else {
-                return DirFileTree.getTree(path);
+                return DirFileTree.getTree(new TreeFile(path));
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);
@@ -157,7 +155,7 @@ public abstract class FileTree {
      * 
      * @param path The path to convert.
      * 
-     * @return The absolute path of the entry.
+     * @return The absolute path of the path.
      */
     public String toAbsolutePath(String path) {
         if (path.startsWith(getBasePath())) return path;
@@ -170,11 +168,22 @@ public abstract class FileTree {
     }
     
     /**
+     * Converts a local or absolute file to an absolute file.
+     * 
+     * @param tf The file to convert.
+     * 
+     * @return The absolute file of the given file.
+     */
+    public TreeFile toAbsoluteFile(TreeFile tf) {
+        return new TreeFile(toAbsolutePath(tf.getPathName()));
+    }
+    
+    /**
      * Converts a local or absolute path to a local path.
      * 
      * @param path The path to convert.
      * 
-     * @return The absolute path of the entry.
+     * @return The local path of the given path.
      */
     public String toLocalPath(String path) {
         String localPath = path;
@@ -185,6 +194,17 @@ public abstract class FileTree {
             return localPath.substring(1);
         }
         return localPath;
+    }
+    
+    /**
+     * Converts a local or absolute file to a local file.
+     * 
+     * @param tf The file to convert.
+     * 
+     * @return The local file of the given file.
+     */
+    public TreeFile tolocalFile(TreeFile tf) {
+        return new TreeFile(toLocalPath(tf.getPathName()));
     }
     
     /**
@@ -200,19 +220,6 @@ public abstract class FileTree {
     /**
      * Returns an iterator which iterates over all paths from the given directory.
      * 
-     * @param path The name of the starting directory.
-     * @param options The walk options.
-     * 
-     * @return An iterator over all paths in the tree.
-     * 
-     * @throws IOException If some I/O error occured.
-     */
-    public abstract Iterator<Path> walk(String path, FileVisitOption... options)
-            throws IOException;
-    
-    /**
-     * Returns an iterator which iterates over all paths from the given directory.
-     * 
      * @param path The path of the starting directory.
      * @param options The walk options.
      * 
@@ -220,8 +227,10 @@ public abstract class FileTree {
      * 
      * @throws IOException If some I/O error occured.
      */
-    public abstract Iterator<Path> walk(Path path, FileVisitOption... options)
-            throws IOException;
+    public Iterator<TreeFile> walk(String path, FileVisitOption... options)
+            throws IOException {
+        return walk(new TreeFile(path), options);
+    }
     
     /**
      * Returns an iterator which iterates over all paths from the given directory.
@@ -233,28 +242,20 @@ public abstract class FileTree {
      * 
      * @throws IOException If some I/O error occured.
      */
-    public abstract Iterator<Path> walk(File file, FileVisitOption... options)
+    public abstract Iterator<TreeFile> walk(TreeFile file, FileVisitOption... options)
             throws IOException;
     
     /**
-     * Determines the size of the file with the given name in this file tree.
+     * Determines the size of the given file in this file tree.
      * If the file doesn't exist or cannot be accessed, then {@code -1} is returned.
      * 
-     * @param path The name of the file.
+     * @param path The path of the file to get the size of.
      * 
      * @return The size of a file in bytes, or {@code 0} if the file could not be accessed.
      */
-    public abstract long size(String path);
-    
-    /**
-     * Determines the size of the file with the given path in this file tree.
-     * If the file doesn't exist or cannot be accessed, then {@code -1} is returned.
-     * 
-     * @param path The path of the file.
-     * 
-     * @return The size of a file in bytes, or {@code 0} if the file could not be accessed.
-     */
-    public abstract long size(Path path);
+    public long size(String path) {
+        return size(new TreeFile(path));
+    }
     
     /**
      * Determines the size of the given file in this file tree.
@@ -264,29 +265,20 @@ public abstract class FileTree {
      * 
      * @return The size of a file in bytes, or {@code 0} if the file could not be accessed.
      */
-    public abstract long size(File file);
+    public abstract long size(TreeFile file);
     
     /**
-     * Checks whether the given file name exists.
+     * Checks whether the given file exists.
      * 
-     * @param path The name of the file to check.
+     * @param path The path of the file to check for existance.
      * 
      * @return {@code true} if the path exists. {@code false} otherwise.
      * 
      * @throws IOException If some I/O error occured.
      */
-    public abstract boolean exists(String path);
-    
-    /**
-     * Checks whether the given path exists.
-     * 
-     * @param path The path of the file to check.
-     * 
-     * @return {@code true} if the path exists. {@code false} otherwise.
-     * 
-     * @throws IOException If some I/O error occured.
-     */
-    public abstract boolean exists(Path path);
+    public boolean exists(String path) {
+        return exists(new TreeFile(path));
+    }
     
     /**
      * Checks whether the given file exists.
@@ -297,33 +289,22 @@ public abstract class FileTree {
      * 
      * @throws IOException If some I/O error occured.
      */
-    public abstract boolean exists(File file);
+    public abstract boolean exists(TreeFile file);
     
     /**
-     * Creates an input stream from the provided file name.
+     * Creates an input stream from the provided file.
      * 
-     * @param path The name of the file.
+     * @param path The path of the file to get the stream from.
      * 
-     * @return The stream of the file with the given file name.
+     * @return The stream of the file with the given file.
      * 
      * @throws IOException If some I/O error occured.
      * @throws SecurityException If the security manager denies reading access of the file.
      */
-    public abstract InputStream getStream(String path)
-            throws IOException, SecurityException;
-    
-    /**
-     * Creates an input stream from the provided path.
-     * 
-     * @param path The path of the file.
-     * 
-     * @return The stream of the file with the given path.
-     * 
-     * @throws IOException If some I/O error occured.
-     * @throws SecurityException If the security manager denies reading access of the file.
-     */
-    public abstract InputStream getStream(Path path)
-            throws IOException, SecurityException;
+    public InputStream getStream(String path)
+            throws IOException, SecurityException {
+        return getStream(new TreeFile(path));
+    }
     
     /**
      * Creates an input stream from the provided file.
@@ -335,27 +316,13 @@ public abstract class FileTree {
      * @throws IOException If some I/O error occured.
      * @throws SecurityException If the security manager denies reading access of the file.
      */
-    public abstract InputStream getStream(File file)
+    public abstract InputStream getStream(TreeFile file)
             throws IOException, SecurityException;
     
     /**
-     * Reads all bytes from the file with the given file name and puts them in an array.
+     * Reads all bytes from the given file and puts them in an array.
      * 
-     * @param path The name of the file.
-     * 
-     * @return A byte array containing all bytes of the file.
-     * 
-     * @throws IOException If an I/O error occurs while reading from the stream.
-     * @throws OutOfMemoryError If the array of the required size cannot be allocated.
-     * @throws SecurityException If the security manager denies reading access of the file.
-     */
-    public abstract byte[] readAllBytes(String path)
-            throws IOException, OutOfMemoryError, SecurityException;
-    
-    /**
-     * Reads all bytes from the file with the given path name and puts them in an array.
-     * 
-     * @param path The path of the file.
+     * @param path The path of the file to read all bytes of.
      * 
      * @return A byte array containing all bytes of the file.
      * 
@@ -363,8 +330,10 @@ public abstract class FileTree {
      * @throws OutOfMemoryError If the array of the required size cannot be allocated.
      * @throws SecurityException If the security manager denies reading access of the file.
      */
-    public abstract byte[] readAllBytes(Path path)
-            throws IOException, OutOfMemoryError, SecurityException;
+    public byte[] readAllBytes(String path)
+            throws IOException, OutOfMemoryError, SecurityException {
+        return readAllBytes(new TreeFile(path));
+    }
     
     /**
      * Reads all bytes from the given file and puts them in an array.
@@ -377,42 +346,25 @@ public abstract class FileTree {
      * @throws OutOfMemoryError If the array of the required size cannot be allocated.
      * @throws SecurityException If the security manager denies reading access of the file.
      */
-    public abstract byte[] readAllBytes(File file)
+    public abstract byte[] readAllBytes(TreeFile file)
             throws IOException, OutOfMemoryError, SecurityException;
-    
     /**
-     * Checks whether the file with the given path name is a directory.
+     * Checks whether the given path denotes a directory.
      * 
      * @implNote
-     * If the file denoted by this path name does not exist, then this function will
-     * return {@code false}.
+     * If the path does not exist, then this function will return {@code false}.
      * 
-     * @param path The path to check.
+     * @param path The path of the file to check.
      * 
-     * @return {@code true} if the file with the given path name is a directory.
+     * @return {@code true} if the given file is a directory.
      *     {@code false} otherwise.
      * 
      * @throws IOException If some I/O error occured.
      */
-    public abstract boolean isDirectory(String path)
-            throws IOException;
-    
-    /**
-     * Checks whether the file with the given path is a directory.
-     * 
-     * @implNote
-     * If the file denoted by this path does not exist, then this function will
-     * return {@code false}.
-     * 
-     * @param path The path to check.
-     * 
-     * @return {@code true} if the file with the given path is a directory.
-     *     {@code false} otherwise.
-     * 
-     * @throws IOException If some I/O error occured.
-     */
-    public abstract boolean isDirectory(Path path)
-            throws IOException;
+    public boolean isDirectory(String path)
+            throws IOException {
+        return isDirectory(new TreeFile(path));
+    }
     
     /**
      * Checks whether the given file is a directory.
@@ -427,7 +379,33 @@ public abstract class FileTree {
      * 
      * @throws IOException If some I/O error occured.
      */
-    public abstract boolean isDirectory(File file)
+    public abstract boolean isDirectory(TreeFile file)
+            throws IOException;
+    
+    /**
+     * Returns an array describing all children of the given file.
+     * 
+     * @param path The path of the parent file.
+     * 
+     * @return An array containing the children of the parent file.
+     * 
+     * @throws IOException If some I/O error occured.
+     */
+    public TreeFile[] list(String path)
+            throws IOException {
+        return list(new TreeFile(path));
+    }
+    
+    /**
+     * Returns an array describing all children of the given file.
+     * 
+     * @param file The parent file.
+     * 
+     * @return An array containing the children of the parent file.
+     * 
+     * @throws IOException If some I/O error occured.
+     */
+    public abstract TreeFile[] list(TreeFile file)
             throws IOException;
     
     

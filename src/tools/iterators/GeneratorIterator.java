@@ -53,11 +53,6 @@ public abstract class GeneratorIterator<E>
             generated = true;
         }
         return !done;
-        
-        /*
-        if (nextElem != null) return true;
-        return (nextElem = generateNext()) != null;
-        */
     }
     
     @Override
@@ -65,13 +60,6 @@ public abstract class GeneratorIterator<E>
         if (!hasNext()) throw new NoSuchElementException();
         generated = false;
         return nextElem;
-        
-        /*
-        if (!hasNext()) throw new NoSuchElementException();
-        E elem = nextElem;
-        nextElem = null;
-        return elem;
-        */
     }
     
     /**
