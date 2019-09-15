@@ -145,6 +145,48 @@ public abstract class FileTree {
         }
     }
     
+    /**
+     * Gets the parent directory of a file.
+     * 
+     * @param file The file to get the parent for.
+     * 
+     * @return The parent directory of the given file.
+     */
+    public TreeFile getParent(TreeFile file) {
+        return new TreeFile(file.getFile().getParent());
+    }
+    
+    /**
+     * Gets the given child directory.
+     * 
+     * @param file The parent directory.
+     * @param child The name of the child directory.
+     * 
+     * @return The child file.
+     */
+    public TreeFile getChild(TreeFile file, String child) {
+        return new TreeFile(file.getPathName() + Var.FS + child);
+    }
+    
+    /**
+     * Traverses from the given file using the given child directories.
+     * 
+     * @param file The file to start traversing from.
+     * @param children The directories to traverse through.
+     * 
+     * @return A file in the format {@code file/children[0]/children[1]/.../children[n]}.
+     */
+    public TreeFile traverse(TreeFile file, String... children) {
+        if (children == null) throw new NullPointerException();
+        if (children.length == 0) return file;
+        StringBuilder sb = new StringBuilder(file.getPathName());
+        for (String child : children) {
+            sb.append(Var.FS);
+            sb.append(child);
+        }
+        return new TreeFile(sb.toString());
+    }
+    
     
     /* -------------------------------------------------------------------------
      * Functions.
@@ -303,7 +345,7 @@ public abstract class FileTree {
      */
     public InputStream getStream(String path)
             throws IOException, SecurityException {
-        return getStream(new TreeFile(path));
+        return getInputStream(new TreeFile(path));
     }
     
     /**
@@ -316,7 +358,7 @@ public abstract class FileTree {
      * @throws IOException If some I/O error occured.
      * @throws SecurityException If the security manager denies reading access of the file.
      */
-    public abstract InputStream getStream(TreeFile file)
+    public abstract InputStream getInputStream(TreeFile file)
             throws IOException, SecurityException;
     
     /**

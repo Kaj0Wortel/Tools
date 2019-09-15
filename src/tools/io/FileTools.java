@@ -18,23 +18,17 @@ package tools.io;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.CopyOption;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.function.Consumer;
 
@@ -558,16 +552,16 @@ public class FileTools {
     }
     
     /**
-     * Deletes all files in a directory, or deletes a single file
+     * Deletes all files in the given directory, or deletes a single file
      * if {@code file} is a file.
      *
      * @param dir The directory to delete all files of.
-     * @param deleteSelf Whether to delete the directory itself.
+     * @param deleteSelf Whether to delete the file itself. Only applies
+     *     if the first argument denotes a directory.
      */
-    public static void deleteAll(File dir, boolean deleteSelf) {
-        if (dir.isFile()) {
-            if (deleteSelf) dir.delete();
-            return;
+    public static boolean deleteAll(File dir, boolean deleteSelf) {
+        if (!dir.isDirectory()) {
+            return dir.delete();
         }
         
         File[] files = dir.listFiles();
@@ -577,7 +571,8 @@ public class FileTools {
             }
         }
         
-        if (deleteSelf) dir.delete();
+        if (deleteSelf) return dir.delete();
+        return (dir.list().length == 0);
     }
     
     /**

@@ -206,7 +206,7 @@ public class JarFileTree
     }
     
     @Override
-    public InputStream getStream(TreeFile file)
+    public InputStream getInputStream(TreeFile file)
             throws IOException, SecurityException {
         JarEntry entry = getEntry(toLocalPath(file.getPathName()));
         return jarFile.getInputStream(entry);
@@ -215,7 +215,7 @@ public class JarFileTree
     @Override
     public byte[] readAllBytes(TreeFile file)
             throws IOException, OutOfMemoryError, SecurityException {
-        return getStream(file).readAllBytes();
+        return getInputStream(file).readAllBytes();
     }
     
     @Override

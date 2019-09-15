@@ -15,11 +15,14 @@ package tools.data.file;
 
 
 // Java imports
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import java.util.List;
 
 // Tools imports
 import tools.Var;
+import tools.io.FileTools;
 import tools.io.PartFile;
 import tools.iterators.FileIterator;
 import tools.iterators.GeneratorIterator;
@@ -41,7 +45,7 @@ import tools.iterators.GeneratorIterator;
  * @author Kaj Wortel
  */
 public class DirFileTree
-        extends FileTree {
+        extends WritableFileTree {
      
     /* -------------------------------------------------------------------------
      * Variables.
@@ -192,7 +196,7 @@ public class DirFileTree
     }
     
     @Override
-    public InputStream getStream(TreeFile file)
+    public InputStream getInputStream(TreeFile file)
             throws IOException, SecurityException {
         return new FileInputStream(getAbsFile(file));
     }
@@ -221,6 +225,58 @@ public class DirFileTree
             }
         }
         return children.toArray(new TreeFile[children.size()]);
+    }
+    
+    @Override
+    public boolean mkdir(TreeFile dir)
+            throws IOException {
+        return getAbsFile(dir).mkdir();
+    }
+    
+    @Override
+    public boolean mkdirs(TreeFile dir)
+            throws IOException {
+        return getAbsFile(dir).mkdirs();
+    }
+    
+    @Override
+    public void writeFile(TreeFile file, boolean append, InputStream data)
+            throws IOException {
+        try (BufferedOutputStream bos = new BufferedOutputStream(getOutputStream(file, append))) {
+            data.transferTo(bos);
+        }
+    }
+    
+    @Override
+    public OutputStream getOutputStream(TreeFile file, boolean append)
+            throws IOException {
+        return new FileOutputStream(getAbsFile(file), append);
+    }
+    
+    @Override
+    public boolean delete(TreeFile file) {
+        File abs = getAbsFile(file);
+        if (!abs.exists()) return true;
+        return FileTools.deleteAll(abs, true);
+    }
+    
+    @Override
+    public boolean deleteFile(TreeFile file)
+            throws IOException, IllegalArgumentException {
+        File abs = getAbsFile(file);
+        if (!abs.exists()) return true;
+        if (abs.isDirectory()) throw new IllegalArgumentException("Expected a non-directory file.");
+        return abs.delete();
+    }
+    
+    @Override
+    public boolean deleteDir(TreeFile file, boolean deleteChildren)
+            throws IOException, IllegalArgumentException {
+        File abs = getAbsFile(file);
+        if (!abs.exists()) return true;
+        if (!abs.isDirectory()) throw new IllegalArgumentException("Expected a directory file.");
+        if (!deleteChildren && abs.list().length != 0) return false;
+        return FileTools.deleteAll(abs, true);
     }
     
     

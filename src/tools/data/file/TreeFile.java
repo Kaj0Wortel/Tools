@@ -27,6 +27,7 @@ import tools.MultiTool;
 /**
  * File type for the classes in the {@code tools.data.file} package.
  * 
+ * @version 1.0
  * @author Kaj Wortel
  */
 public class TreeFile {

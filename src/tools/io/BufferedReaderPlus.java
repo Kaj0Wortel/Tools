@@ -51,6 +51,7 @@ import java.util.Objects;
  * @todo
  * - Check constructors.
  * - Add implementation of the {@link #read()} function.
+ * - Add implementation for a full read of a config file to a map.
  * 
  * @version 1.0
  * @author Kaj Wortel
