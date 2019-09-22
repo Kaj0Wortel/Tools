@@ -14,13 +14,19 @@
 package tools;
 
 
+import java.util.Objects;
+import tools.data.array.ArrayTools;
+
+
+
 /**
  * Class for coupling two objects together.
  * 
  * @version 1.0
  * @author Kaj Wortel
  */
-public final class Pair<V1, V2> {
+public final class Pair<V1, V2>
+        implements PublicCloneable {
     
     /* -------------------------------------------------------------------------
      * Variables.
@@ -119,6 +125,24 @@ public final class Pair<V1, V2> {
             throw new IllegalStateException(
                     "Tried to modify an unmodifiable pair!");
         }
+    }
+    
+    @Override
+    public int hashCode() {
+        return MultiTool.calcHashCode(new Object[] {v1, v2});
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Pair)) return false;
+        Pair<V1, V2> other = (Pair<V1, V2>) obj;
+        return ArrayTools.deepEquals(v1, other.v1) &&
+                ArrayTools.deepEquals(v2, other.v2);
+    }
+    
+    @Override
+    public Pair<V1, V2> clone() {
+        return new Pair<V1, V2>(v1, v2);
     }
     
     
