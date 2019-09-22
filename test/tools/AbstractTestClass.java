@@ -14,17 +14,17 @@
 package tools;
 
 
+// JUnit imports
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import tools.data.array.ArrayTools;
 
+
+// Tools imports
+import tools.data.array.ArrayTools;
 
 
 /**
  * This is an abstract testing class which should be extended by all testing classes.
- * 
- * @todo
- * - All
  * 
  * @version 1.0
  * @author Kaj Wortel
@@ -156,6 +156,34 @@ public abstract class AbstractTestClass {
             }
         }
         return arr;
+    }
+    
+    /**
+     * Creates and runs {@code amt} threads and waits until they are all done.
+     * 
+     * @param r The runnable to run for each thread.
+     * @param amt The amount of threads to spawn.
+     * @param millis The timeout in milliseconds.
+     */
+    public static void runAndWait(Runnable r, int amt, long millis) {
+        Thread[] threads = new Thread[amt];
+        for (int i = 0; i < amt; i++) {
+            threads[i] = new Thread(r);
+        }
+        for (int i = 0; i < amt; i++) {
+            threads[i].start();
+        }
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < amt; i++) {
+            try {
+                long timeout = start - System.currentTimeMillis() + millis;
+                if (timeout <= 0) fail("Timed out!");
+                threads[i].join(timeout);
+                
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
     
     

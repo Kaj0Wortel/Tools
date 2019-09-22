@@ -21,12 +21,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 
-// Test imports.
+// Tools imports
 import tools.AbstractTestClass;
 
 
 /**
- * Test class for the {@link Array2D} class
+ * Test class for the {@link Array2D} class.
  * 
  * @version 1.0
  * @author Kaj Wortel

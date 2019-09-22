@@ -22,6 +22,8 @@ import java.nio.file.FileVisitOption;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 // Tools impors
@@ -50,6 +52,15 @@ public abstract class FileTree {
     /** The map containing all file trees. */
     protected static final Map<FileTreeToken<? extends FileTree, ?>, FileTree> FILE_TREE_MAP
             = new HashMap<>();
+    /** Set containing all current file locks. */
+    private static final Map<String, ReentrantLock> LOCKED_MAP = new HashMap<>();
+    /** The lock used for concurrent access for (un-)locking files. */
+    private static final ReentrantLock FILE_LOCK = new ReentrantLock(true);
+    /** The condition used to wait and signal that a file is in use/became free. */
+    private static final Condition FILE_IN_USE = FILE_LOCK.newCondition();
+    
+    /** The lock used for concurrent access for creating file trees. */
+    protected static final ReentrantLock TREE_LOCK = new ReentrantLock();
     
     
     /* -------------------------------------------------------------------------
@@ -91,6 +102,7 @@ public abstract class FileTree {
      */
     public static FileTree getLocalFileTree(Class<?> c)
             throws IllegalArgumentException {
+        TREE_LOCK.lock();
         try {
             String path = getProjectSourceFile(c);
             if (path.endsWith(".jar")) {
@@ -101,6 +113,9 @@ public abstract class FileTree {
             }
         } catch (IOException e) {
             throw new IllegalStateException(e);
+            
+        } finally {
+            TREE_LOCK.unlock();
         }
     }
     
@@ -135,6 +150,7 @@ public abstract class FileTree {
      */
     public static String getProjectSourceFile(Class<?> c)
             throws IllegalStateException {
+        TREE_LOCK.lock();
         try {
             // DO NOT REMOVE THIS LINE:
             //return new File(c.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
@@ -142,6 +158,9 @@ public abstract class FileTree {
             
         } catch (URISyntaxException e) {
             throw new IllegalStateException(e);
+            
+        } finally {
+            TREE_LOCK.unlock();
         }
     }
     
@@ -150,10 +169,13 @@ public abstract class FileTree {
      * 
      * @param file The file to get the parent for.
      * 
-     * @return The parent directory of the given file.
+     * @return The parent directory of the given file, or {@code null}
+     *     if no such directory exists.
      */
     public TreeFile getParent(TreeFile file) {
-        return new TreeFile(file.getFile().getParent());
+        String str = file.getFile().getParent();
+        if (str == null) return null;
+        return new TreeFile(str);
     }
     
     /**
@@ -185,6 +207,183 @@ public abstract class FileTree {
             sb.append(child);
         }
         return new TreeFile(sb.toString());
+    }
+    
+    /**
+     * Generates the path used in the {@link #LOCKED_MAP}.
+     * 
+     * @param path The path to parse.
+     * 
+     * @return The path as it would be stored in {@link #LOCKED_MAP}.
+     */
+    private static String getLockPath(String path) {
+        if (path == null) return null;
+        if (path.length() == 0) {
+            return path;
+            
+        } else if (path.length() >= 2) {
+            return path.substring((path.startsWith(Var.FS) ? 1 : 0),
+                    path.length() - (path.endsWith(Var.FS) ? 1 : 0));
+                    
+        } else if (path.length() == Var.FS.length()) {
+            if (path.equals(Var.FS)) return "";
+            else return path;
+            
+        } else {
+            return path;
+        }
+    }
+    
+    /**
+     * Locks the given file.
+     * 
+     * @param file The file to lock.
+     */
+    public void lock(TreeFile file) {
+        lock(this, file);
+    }
+    
+    /**
+     * Locks the file relative to the given tree.
+     * 
+     * @param tree The file tree used as basis path for local files.
+     * @param file The file to lock.
+     */
+    public static void lock(FileTree tree, TreeFile file) {
+        final TreeFile abs = tree.toAbsoluteFile(file);
+        TreeFile f = abs;
+        FILE_LOCK.lock();
+        try {
+            String path = getLockPath(f.getPathName());
+            while (path != null && path.length() != 0 && !Var.FS.equals(path)) {
+                boolean reset = false;
+                ReentrantLock lock;
+                while ((lock = LOCKED_MAP.get(path)) != null) {
+                    if (lock.isLocked() && !lock.isHeldByCurrentThread()) {
+                        reset = true;
+                        FILE_IN_USE.await();
+                    }
+                }
+                
+                if (reset) f = abs;
+                else f = tree.getParent(f);
+                path = getLockPath(f.getPathName());
+            }
+            
+            path = getLockPath(abs.getPathName());
+            ReentrantLock lock = LOCKED_MAP.get(path);
+            if (lock == null) {
+                LOCKED_MAP.put(path, lock = new ReentrantLock());
+            }
+            lock.lock();
+            
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+            
+        } finally {
+            FILE_LOCK.unlock();
+        }
+    }
+    
+    /**
+     * Checks whether the given file or any parent directory of it is locked.
+     * 
+     * @param file The file to check.
+     * 
+     * @return {@code true} if the file is locked. {@code false} otherwise.
+     */
+    public boolean isLocked(TreeFile file) {
+        return isLocked(this, file);
+    }
+    
+    /**
+     * Checks whether the given file or any parent directory of it is locked.
+     * This includes the case where the file was locked by the current thread.
+     * 
+     * @param tree The file tree used as basis path for local files.
+     * @param file The file to check.
+     * 
+     * @return {@code true} if the file is locked. {@code false} otherwise.
+     */
+    public static boolean isLocked(FileTree tree, TreeFile file) {
+        TreeFile f = tree.toAbsoluteFile(file);
+        FILE_LOCK.lock();
+        try {
+            String path = getLockPath(f.getPathName());
+            while (path.length() != 0 && !Var.FS.equals(path)) {
+                path = getLockPath(f.getPathName());
+                ReentrantLock lock = LOCKED_MAP.get(path);
+                if (lock != null) {
+                    if (lock.isLocked()) return true;
+                }
+                f = tree.getParent(f);
+            }
+            return false;
+            
+        } finally {
+            FILE_LOCK.unlock();
+        }
+    }
+    
+    /**
+     * Unlocks the given file.
+     * 
+     * @param file The file to unlock.
+     */
+    public void unlock(TreeFile file) {
+        unlock(this, file);
+    }
+    
+    /**
+     * Unlocks the file relative to the given tree.
+     * 
+     * @param tree The file tree used as basis path for local files.
+     * @param file The file to unlock.
+     * 
+     * @throws IllegalMonitorStateException If the file was not locked.
+     */
+    public static void unlock(FileTree tree, TreeFile file)
+            throws IllegalMonitorStateException {
+        String path = getLockPath(tree.toAbsolutePath(file.getPathName()));
+        FILE_LOCK.lock();
+        try {
+            ReentrantLock lock = LOCKED_MAP.get(path);
+            if (lock == null) {
+                throw new IllegalMonitorStateException();
+            }
+            lock.unlock();
+            if (!lock.isLocked()) {
+                FILE_IN_USE.signal();
+                if (!LOCKED_MAP.remove(path, lock)) {
+                    throw new IllegalStateException();
+                }
+            }
+            
+        } finally {
+            FILE_LOCK.unlock();
+        }
+    }
+    
+    /**
+     * Obtains the lock for the given file, but only if it is not locked.
+     * 
+     * @param tree The file tree used as basis path for local files.
+     * @param file The file to unlock.
+     * 
+     * @return {@code true} if the lock was obtained. {@code false} otherwise.
+     */
+    public static boolean tryLock(FileTree tree, TreeFile file) {
+        FILE_LOCK.lock();
+        try {
+            if (isLocked(tree, file)) return false;
+            else {
+                lock(tree, file);
+                return true;
+            }
+            
+        } finally {
+            FILE_LOCK.unlock();
+        }
     }
     
     
