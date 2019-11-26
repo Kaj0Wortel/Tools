@@ -258,6 +258,7 @@ public class RBNode<D extends RBKey> {
         return right == null || right.color == RBColor.BLACK;
     }
     
+    @Override
     public String toString() {
         return "Node[" + Var.LS +
                 "  this  : " + (data == null ? "null" : data.toString()) + Var.LS + 
@@ -266,6 +267,25 @@ public class RBNode<D extends RBKey> {
                 "  left  : " + (left == null || left.data == null ? "null" : left.data.toString()) + Var.LS +
                 "  right : " + (right == null || right.data == null ? "null" : right.data.toString()) + Var.LS +
                 "]";
+    }
+    
+    @Override
+    public int hashCode() {
+        return data.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (obj instanceof RBNode) {
+            RBNode<D> node = (RBNode<D>) obj;
+            return (node.value == value && node.hashCode() == hashCode() && node.data.equals(data));
+            
+        } else if (obj instanceof RBKey) {
+            RBKey key = (RBKey) obj;
+            return (key.value() == value && data.hashCode() == key.hashCode() && key.equals(data));
+        }
+        return false;
     }
     
     

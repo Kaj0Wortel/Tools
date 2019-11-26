@@ -143,48 +143,86 @@ public class RBTree<D extends RBKey>
      * @return The node with the given value, or {@code null} if no such node exists.
      */
     protected RBNode<D> get(RBKey key) {
-        if (key == null) throw new NullPointerException();
-        RBNode<D> node = root;
-        while (node != null) {
-            if (key.value() < node.getValue()) node = node.getLeft();
-            else if (key.value() > node.getValue()) node = node.getRight();
-            else return getCollision(key, node);
-        }
-        return null;
-    }
-    
-    /**
-     * Determines the key when there is a collision in the keys.
-     *
-     * @param key The key value.
-     * @param node The current node.
-     *
-     * @return The node with the given key, or {@code null} if it could not be found.
-     */
-    protected RBNode<D> getCollision(RBKey key, RBNode<D> node) {
-        if (node == null || node.getValue() != key.value()) return null;
-        if (key.equals(node.getData())) return node;
-        RBNode<D> left = getCollision(key, node.getLeft());
-        if (left != null) return left;
-        return getCollision(key, node.getRight());
+        RBNode<D> node = getNearest(key);
+        if (node.equals(key)) return node;
+        else return null;
     }
     
     /**
      * @param key The key value.
-     *
-     * @return The node with the given key value, or the last node with at most one leaf
-     * found on the path, or (in case of a collision), the root node of the collision tree.
+     * 
+     * @return The node with the given key, the node the value should be inserted at,
+     *     or {@code null} if {@code node == null}.
      */
     protected RBNode<D> getNearest(RBKey key) {
-        if (key == null) throw new NullPointerException();
-        if (root == null) return null;
         RBNode<D> node = root;
         RBNode<D> prev = null;
         while (node != null) {
             prev = node;
             if (key.value() < node.getValue()) node = node.getLeft();
             else if (key.value() > node.getValue()) node = node.getRight();
+            else if (key.hashCode() < node.hashCode()) node = node.getLeft();
+            else if (key.hashCode() > node.hashCode()) node = node.getRight();
+            else {
+                if (key.equals(node.getData())) return node;
+                return getNearestCollision(key, node);
+            }
+        }
+        return prev;
+    }
+    
+    /**
+     * Either returns the data being searched for, or returns the parent at which
+     * the node could be inserted. <br>
+     * Assume that the value and the hash code of the given node are equal to
+     * those of the key, but the data is not equal.
+     *
+     * @param key The key value.
+     * @param node The current node.
+     * 
+     * @return The node with the given key, the node the value should be inserted at,
+     *     or {@code null} if {@code node == null}.
+     */
+    protected RBNode<D> getNearestCollision(RBKey key, RBNode<D> node) {
+        if (node == null) return null;
+        if (!node.hasChild()) return node;
+        RBNode<D> left = getNearestCollisionSide(key, node.getLeft(), false);
+        RBNode<D> right = getNearestCollisionSide(key, node.getRight(), true);
+        if (left == null) return right; // right != null
+        if (right == null) { // left != null
+            if (left.equals(key)) return left;
             else return node;
+        }
+        
+        // left != null != right
+        if (left.equals(key)) return left;
+        else return right;
+    }
+    
+    /**
+     * Either returns the data being searched for, or returns the parent at which the
+     * node could be inserted. <br>
+     * This function only traverses to the side indicated by {@code left}.
+     * When it encounters a collision, it splits the path via
+     * {@link #getNearestCollision(RBKey, RBNode)}.
+     * 
+     * @param key The key value.
+     * @param node The current node.
+     * @param left Whether to only traverse to the left. Traverses only to the right otherwise.
+     * 
+     * @return The node with the given key, the node the value should be inserted at,
+     *     or {@code null} if {@code node == null}.
+     */
+    protected RBNode<D> getNearestCollisionSide(RBKey key, RBNode<D> node, boolean left) {
+        RBNode<D> prev = node;
+        while (node != null) {
+            if (node.getValue() == key.value() && node.hashCode() == key.hashCode()) {
+                if (key.equals(node.getData())) return node;
+                else return getNearestCollision(key, node);
+            }
+            prev = node;
+            if (left) node = node.getLeft();
+            else node = node.getRight();
         }
         return prev;
     }
@@ -226,11 +264,9 @@ public class RBTree<D extends RBKey>
     
     @Override
     public boolean add(D data) {
-        if (data == null)
-            throw new NullPointerException();
+        if (data == null) throw new NullPointerException();
         RBNode<D> node = bstInsert(data);
-        if (node == null)
-            return false;
+        if (node == null) return false;
         balanceTreeInsert(node);
         size++;
         return true;
@@ -251,22 +287,20 @@ public class RBTree<D extends RBKey>
         }
         
         RBNode<D> near = getNearest(data);
-        if (near.getValue() == data.value()) {
-            if (data.equals(near)) return null; // Value already exists.
-            else { // Collision. Value might already exist.
-                throw new RuntimeException("todo"); // todo;
-            }
-        }
+        if (near.equals(data)) return null;
         
         // There are free leaves.
         RBNode<D> node = new RBNode<>(data);
-        if (node.getValue() < near.getValue() && !near.hasLeft()) {
+        if (node.getValue() < near.getValue() ||
+                (node.getValue() == near.getValue() && node.hashCode() < near.hashCode())) {
+            // near.getLeft() == null
             setLeft(near, node);
-            if (min.getValue() >= node.getValue()) min = node;
+            if (min == near) min = node;
             
         } else {
+            // near.getRight() == null
             setRight(near, node);
-            if (max.getValue() < node.getValue()) max = node;
+            if (max == near) max = node;
         }
         
         return node;
@@ -282,6 +316,7 @@ public class RBTree<D extends RBKey>
         RBNode<D> p = x.getParent();
         RBNode<D> uncle = x.getUncle();
         RBNode<D> gp = x.getGrandParent();
+        
         // x is root.
         if (p == null) {
             x.setColor(RBColor.BLACK);
@@ -297,7 +332,6 @@ public class RBTree<D extends RBKey>
         x.setColor(RBColor.RED);
         if (p.isRed()) {
             if (uncle != null && uncle.isRed()) {
-                x.setColor(RBColor.RED);
                 p.setColor(RBColor.BLACK);
                 uncle.setColor(RBColor.BLACK);
                 gp.setColor(RBColor.RED);
@@ -329,8 +363,7 @@ public class RBTree<D extends RBKey>
         if (obj == null) throw new NullPointerException();
         if (!(obj instanceof RBKey)) return false;
         RBNode<D> node = bstDelete((D) obj);
-        if (node == null)
-            return false;
+        if (node == null) return false;
         balenceTreeDelete(node);
         size++;
         return true;
@@ -355,7 +388,7 @@ public class RBTree<D extends RBKey>
             swap(node, next(node));
             
         } else if (node.hasChild()) {
-            // Node is near-leaf.
+            // The node is near-leaf.
             if (node == min) min = node.getRight();
             else if (node == max) max = node.getLeft();
             
@@ -775,11 +808,14 @@ public class RBTree<D extends RBKey>
     
     
     // TESTING
+    /*
     private static class Key implements RBKey {
         private int i;
+        private int j;
         
-        public Key(int i) {
+        public Key(int i, int j) {
             this.i = i;
+            this.j = j;
         }
         
         @Override
@@ -789,14 +825,19 @@ public class RBTree<D extends RBKey>
         
         @Override
         public String toString() {
-            return Integer.toString(i);
+            return "(" + i + ", " + j + ")";
+        }
+        
+        @Override
+        public int hashCode() {
+            return i + j;
         }
         
         @Override
         public boolean equals(Object obj) {
-            if (!(obj instanceof Key))
-                return false;
-            return ((Key) obj).i == i;
+            if (!(obj instanceof Key)) return false;
+            Key key = (Key) obj;
+            return key.i == i && key.j == j;
         }
         
         
@@ -810,40 +851,40 @@ public class RBTree<D extends RBKey>
     
     public static void replay() {
         RBTree<Key> tree = new RBTree<>();
-        int[] add = new int[]{
-            6, 1, 5, 3, 4, 2, 9, 8, 0, 7
+        Key[] add = new Key[] {
+            new Key(3, 1), new Key(4, 0), new Key(2, 1), new Key(0, 0), new Key(4, 1), new Key(2, 0), new Key(1, 1), new Key(0, 1), new Key(3, 0), new Key(1, 0)
         };
-        int[] rem = new int[] {
-            6, 9, 4, 2, 5, 1, 0
+        Key[] rem = new Key[] {
+            new Key(2, 0), new Key(1, 0), new Key(4, 1), new Key(1, 1), new Key(4, 0)
         };
-        for (int i : add) {
-            System.out.println("added(" + i + "): "
-                    + tree.add(new Key(i)));
+        for (Key k : add) {
+            System.out.println("added" + k + ": " + tree.add(k));
         }
         System.out.println("added!");
 //        System.out.println("==========");
 //        System.out.println(tree.debug());
 //        System.out.println("==========");
 //        MultiTool.sleepThread(10);
-        for (int i : rem) {
-            System.out.println("==========");
-            System.out.println(tree.debug());
-            System.out.println("==========");
+        for (Key k : rem) {
+//            System.out.println("==========");
+//            System.out.println(tree.debug());
+//            System.out.println("==========");
             MultiTool.sleepThread(10);
-            System.out.println("removed(" + i + "): "
-                    + tree.remove(new Key(i)));
+            System.out.println("removed" + k + ": " + tree.remove(k));
         }
         System.out.println("removed!");
+        System.out.println(tree);
+        System.out.println("root: " + tree.getRoot());
+        System.out.println("min : " + tree.getMin());
+        System.out.println("max : " + tree.getMax());
         
-        for (int i : rem) {
-            Key k = new Key(i);
+        for (Key k : rem) {
             if (tree.contains(k)) {
                 System.err.println("ERROR: Unexpected: " + k);
             }
         }
-        for (int i : add) {
-            Key k = new Key(i);
-            if (!tree.contains(k) && !ArrayTools.asList(rem).contains(i)) {
+        for (Key k : add) {
+            if (!tree.contains(k) && !ArrayTools.asList(rem).contains(k)) {
                 System.err.println("ERROR: Expected: " + k);
             }
         }
@@ -853,9 +894,14 @@ public class RBTree<D extends RBKey>
         RBTree<Key> tree = new RBTree<>();
         int addAmt = 50_000;
         int remAmt = 25_000;
+        int colAmt = 2;
         Key[] add = new Key[addAmt];
-        for (int i = 0; i < addAmt; i++) {
-            add[i] = new Key(i);
+        for (int i = 0; i < addAmt/colAmt + 1; i++) {
+            for (int j = 0; j < colAmt; j++) {
+                int index = i*colAmt + j;
+                if (index >= addAmt) break;
+                add[index] = new Key(i, j);
+            }
         }
         System.out.println("added!");
         ArrayTools.shuffle(add);
@@ -866,16 +912,18 @@ public class RBTree<D extends RBKey>
         System.out.println("removed!");
         ArrayTools.shuffle(add);
         ArrayTools.shuffle(rem);
-        //System.out.println("add: " + Arrays.toString(add));
-        //System.out.println("rem: " + Arrays.toString(rem));
-
+        if (addAmt < 50) System.out.println("add: " + Arrays.toString(add).replaceAll("\\(", "new Key\\("));
+        if (remAmt < 25) System.out.println("rem: " + Arrays.toString(rem).replaceAll("\\(", "new Key\\("));
+        if (addAmt < 50) System.out.println("add: " + Arrays.toString(add));
+        if (remAmt < 25) System.out.println("rem: " + Arrays.toString(rem));
+        
         for (Key k : add) {
             tree.add(k);
         }
         for (Key k : rem) {
             tree.remove(k);
         }
-        //System.out.println("tree: " + tree.toString());
+        if (tree.size() < 50) System.out.println("tree: " + tree.toString());
         for (Key k : rem) {
             if (tree.contains(k)) {
                 System.err.println("ERROR: Unexpected: " + k);
@@ -890,7 +938,7 @@ public class RBTree<D extends RBKey>
         System.out.println("checked added!");
         System.out.println("DONE");
     }
-    
+    */
     
 }
 
