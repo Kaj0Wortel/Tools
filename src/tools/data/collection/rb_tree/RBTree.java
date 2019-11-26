@@ -15,15 +15,12 @@ package tools.data.collection.rb_tree;
 
 
 // Java imports
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 // Tools imports
-import tools.MultiTool;
 import tools.Var;
-import tools.data.array.ArrayTools;
 import tools.data.collection.rb_tree.RBSearch.Choice;
 
 
@@ -37,8 +34,21 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
  * <tr><td><b>Delete</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #remove(Object)}</td></tr>
  * <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(RBKey)}, {@link #prev(RBKey)}</td></tr>
  * </table>
+ * Note that it is nessecary that the functions {@link RBKey#value()}, {@link Object#hashCode()},
+ * and {@link Object#equals(Object)} are correctly implemented and that their behaviour doesn't change
+ * for any inserted nodes. <br>
+ * <br>
+ * This balanced binary search tree supports inserting unequal keys with equal value and hash code, but. <br>
+ * Inserting the same element multiple times is not supported. <br>
+ * <br>
+ * This implementation is <b>NOT</b> thread safe. <br>
+ * <br>
+ * For an implementation of a red-black tree with constant get neighbor time, take a look at {@link LinkedRBTree}.
  *
+ * @version 1.0
  * @author Kaj Wortel
+ * 
+ * @see LinkedRBTree
  */
 public class RBTree<D extends RBKey>
         implements Collection<D> {
@@ -56,37 +66,11 @@ public class RBTree<D extends RBKey>
     /** The maximum value of the tree. */
     private RBNode<D> max;
     
-    
-    /* -------------------------------------------------------------------------
-     * Constructors.
-     * -------------------------------------------------------------------------
-     */
-    /**
-     * Constructor.
-     */
-    public RBTree() {
-    }
 
     /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
-    /**
-     * Changes the value of the node.
-     *
-     * @todo Make more efficient implementation.
-     *
-     * @apiNote Runs in {@code O(log(n))} (worst + average)
-     *
-     * @param node The node to change the value of.
-     * @param value The new value of the node.
-     */
-    void changeValue(RBNode<D> node, int value) {
-        remove(node.getData());
-        node.setValue(value);
-        add(node.getData());
-    }
-
     @Override
     public int size() {
         return size;
@@ -99,8 +83,7 @@ public class RBTree<D extends RBKey>
 
     @Override
     public boolean contains(Object obj) {
-        if (!(obj instanceof RBKey))
-            return false;
+        if (!(obj instanceof RBKey)) return false;
         return get((D) obj) != null;
     }
 
@@ -133,12 +116,12 @@ public class RBTree<D extends RBKey>
      *
      * @return {@code node.getData()}, or {@code null} if {@code node == null}.
      */
-    private D gd(RBNode<D> node) {
+    protected final D gd(RBNode<D> node) {
         return (node == null ? null : node.getData());
     }
     
     /**
-     * @param value The target value.
+     * @param key The key to get the node for.
      *
      * @return The node with the given value, or {@code null} if no such node exists.
      */
@@ -282,7 +265,7 @@ public class RBTree<D extends RBKey>
      */
     protected RBNode<D> bstInsert(D data) {
         if (root == null) {
-            (root = min = max = new RBNode<>(data)).setColor(RBColor.BLACK);
+            (root = min = max = createNode(data)).setColor(RBColor.BLACK);
             return root;
         }
         
@@ -290,7 +273,7 @@ public class RBTree<D extends RBKey>
         if (near.equals(data)) return null;
         
         // There are free leaves.
-        RBNode<D> node = new RBNode<>(data);
+        RBNode<D> node = createNode(data);
         if (node.getValue() < near.getValue() ||
                 (node.getValue() == near.getValue() && node.hashCode() < near.hashCode())) {
             // near.getLeft() == null
@@ -806,10 +789,18 @@ public class RBTree<D extends RBKey>
         return sb.toString();
     }
     
+    /**
+     * Creates a new {@link RBNode} from the given data element. Subclasses which
+     * want to change the nodes being created should override this function.
+     */
+    protected RBNode<D> createNode(D data) {
+        return new RBNode<>(data);
+    }
+    
     
     // TESTING
     /*
-    private static class Key implements RBKey {
+    private static class Key extends LinkedRBKey<Key> {
         private int i;
         private int j;
         
@@ -850,12 +841,12 @@ public class RBTree<D extends RBKey>
     }
     
     public static void replay() {
-        RBTree<Key> tree = new RBTree<>();
+        LinkedRBTree tree = new LinkedRBTree();
         Key[] add = new Key[] {
-            new Key(3, 1), new Key(4, 0), new Key(2, 1), new Key(0, 0), new Key(4, 1), new Key(2, 0), new Key(1, 1), new Key(0, 1), new Key(3, 0), new Key(1, 0)
+            
         };
         Key[] rem = new Key[] {
-            new Key(2, 0), new Key(1, 0), new Key(4, 1), new Key(1, 1), new Key(4, 0)
+            
         };
         for (Key k : add) {
             System.out.println("added" + k + ": " + tree.add(k));
@@ -938,7 +929,7 @@ public class RBTree<D extends RBKey>
         System.out.println("checked added!");
         System.out.println("DONE");
     }
-    */
+    /**/
     
 }
 

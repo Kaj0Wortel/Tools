@@ -15,9 +15,12 @@ package tools.data.collection.rb_tree;
 
 
 /**
- * Search function used to find items in a red-black tree. <br>
+ * Search function used to find items in the {@link RBTree} data structure. <br>
  * 
+ * @version 1.0
  * @author Kaj Wortel
+ * 
+ * @see RBTree
  */
 public interface RBSearch<D extends RBKey> {
     

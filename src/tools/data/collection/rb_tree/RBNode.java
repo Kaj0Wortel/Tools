@@ -14,17 +14,18 @@
 package tools.data.collection.rb_tree;
 
 
+// Tools imports
 import tools.Var;
 
 
-
 /**
- * This class stores the information about the node in a {@link RBTree}.
- * The value of the node is initially passed in the constructor. To change
- * this value, use {@link RBTree(RBNode, int)}.
+ * This class stores the information about the node in the {@link RBTree} data structure.
+ * The value of this node is calculated from the given object.
  * 
+ * @version 1.0
  * @author Kaj Wortel
- * @see {@link LinkedRBTree}
+ * 
+ * @see RBTree
  */
 public class RBNode<D extends RBKey> {
      
@@ -34,8 +35,6 @@ public class RBNode<D extends RBKey> {
      */
     /** The color of the node. */
     private RBColor color = RBColor.BLACK;
-    /** The value of the node. */
-    private int value;
     /** The parent of the node. */
     private RBNode<D> parent = null;
     /** The left node of this node in the tree. */
@@ -51,15 +50,11 @@ public class RBNode<D extends RBKey> {
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a new node with the given value to be used as key in the tree. <br>
-     * Also accepts an additional data element.
+     * Creates a new node with the given data.
      * 
-     * @param tree The tree of this node.
-     * @param value The value of this node.
      * @param data The data of this node.
      */
     public RBNode(D data) {
-        this.value = data.value();
         this.data = data;
     }
     
@@ -68,7 +63,7 @@ public class RBNode<D extends RBKey> {
      * Functions.
      * -------------------------------------------------------------------------
      */
-    void setColor(RBColor color) {
+    protected void setColor(RBColor color) {
         this.color = color;
     }
     
@@ -82,28 +77,13 @@ public class RBNode<D extends RBKey> {
      * @return The integer value of the key of the data element.
      */
     public final int getValue() {
-        return value;
-    }
-    
-    /**
-     * Sets the value of this node.
-     * @param value 
-     */
-    void setValue(int value) {
-        this.value = value;
-    }
-    
-    /**
-     * Updates the value of this node.
-     */
-    public final void updateValue() {
-        setValue(data.value());
+        return (data == null ? 0 : data.value());
     }
     
     /**
      * @param parent The new parent of this node.
      */
-    void setParent(RBNode<D> parent) {
+    protected void setParent(RBNode<D> parent) {
         this.parent = parent;
     }
     
@@ -117,7 +97,7 @@ public class RBNode<D extends RBKey> {
     /**
      * @param left The new left child of this node.
      */
-    void setLeft(RBNode<D> left) {
+    protected void setLeft(RBNode<D> left) {
         this.left = left;
     }
     
@@ -131,7 +111,7 @@ public class RBNode<D extends RBKey> {
     /**
      * @param right The new right child of this node.
      */
-    void setRight(RBNode<D> right) {
+    protected void setRight(RBNode<D> right) {
         this.right = right;
     }
     
@@ -185,21 +165,28 @@ public class RBNode<D extends RBKey> {
     }
     
     /**
-     * @return {@code true} if this node has a left child.
+     * @return {@code true} if this node has a left child. {@code false} otherwise.
      */
     public final boolean hasLeft() {
         return left != null;
     }
     
     /**
-     * @return {@code true} if this node has a right child.
+     * @return {@code true} if this node has a right child. {@code false} otherwise.
      */
     public final boolean hasRight() {
         return right != null;
     }
     
     /**
-     * @return If this node has a child.
+     * @return {@code true} if this node has a parent. {@code false} otherwise.
+     */
+    public final boolean hasParent() {
+        return parent != null;
+    }
+    
+    /**
+     * @return If this node has a child. {@code false} otherwise.
      */
     public final boolean hasChild() {
         return hasLeft() || hasRight();
@@ -263,9 +250,9 @@ public class RBNode<D extends RBKey> {
         return "Node[" + Var.LS +
                 "  this  : " + (data == null ? "null" : data.toString()) + Var.LS + 
                 "  color : " + color + Var.LS + 
-                "  parent: " + (parent == null || parent.data == null ? "null" : parent.data.toString()) + Var.LS +
-                "  left  : " + (left == null || left.data == null ? "null" : left.data.toString()) + Var.LS +
-                "  right : " + (right == null || right.data == null ? "null" : right.data.toString()) + Var.LS +
+                "  parent: " + (hasParent() || parent.data == null ? "null" : parent.data.toString()) + Var.LS +
+                "  left  : " + (hasLeft() || left.data == null ? "null" : left.data.toString()) + Var.LS +
+                "  right : " + (hasRight() || right.data == null ? "null" : right.data.toString()) + Var.LS +
                 "]";
     }
     
@@ -279,11 +266,11 @@ public class RBNode<D extends RBKey> {
         if (obj == null) return false;
         if (obj instanceof RBNode) {
             RBNode<D> node = (RBNode<D>) obj;
-            return (node.value == value && node.hashCode() == hashCode() && node.data.equals(data));
+            return (node.getValue() == getValue() && node.hashCode() == hashCode() && node.data.equals(data));
             
         } else if (obj instanceof RBKey) {
             RBKey key = (RBKey) obj;
-            return (key.value() == value && data.hashCode() == key.hashCode() && key.equals(data));
+            return (key.value() == getValue() && data.hashCode() == key.hashCode() && key.equals(data));
         }
         return false;
     }

@@ -15,9 +15,12 @@ package tools.data.collection.rb_tree;
 
 
 /**
- * Interface for classes to be used in red-black trees.
+ * Interface for classes to be used in the {@link RBTree} data structure.
  * 
+ * @version 1.0
  * @author Kaj Wortel
+ * 
+ * @see RBTree
  */
 public interface RBKey {
     
