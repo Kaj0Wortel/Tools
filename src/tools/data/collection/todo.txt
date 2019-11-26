@@ -1,2 +1,3 @@
 Future stuff to add:
 - read-only collections.
+- implement more functions for the LinkedRBTree.
