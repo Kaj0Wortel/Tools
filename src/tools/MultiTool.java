@@ -1409,5 +1409,47 @@ public final class MultiTool {
         return null;
     }
     
+    /** The number of bytes fit in one kilo byte. */
+    public static final long KB = 1_024;
+    /** The number of bytes fit in one mega byte. */
+    public static final long MB = 1_048_576;
+    /** The number of bytes fit in one giga byte. */
+    public static final long GB = 1_073_741_824;
+    
+    /**
+     * Converts the amount of memory to a readable value.
+     * 
+     * @param mem The amount of memory.
+     * 
+     * @return A string representing a readable amount of memory.
+     */
+    private static String memToString(long mem) {
+        if (mem / GB > 3) {
+            return Long.toString(mem / GB) + " GB";
+        } else if (mem / MB > 3) {
+            return Long.toString(mem / MB) + " MB";
+        } else if (mem / KB > 3) {
+            return Long.toString(mem / KB) + " KB";
+        } else {
+            return Long.toString(mem) + " B";
+        }
+    }
+    
+    /**
+     * @return The total amount of memory in use by the JVM, in bytes.
+     */
+    public static long memoryInUse() {
+        Runtime r = Runtime.getRuntime();
+        return r.totalMemory() - r.freeMemory();
+    }
+    
+    /**
+     * @return The total amount of memory that can be used before running out.
+     */
+    public static long maxFreeMemory() {
+        Runtime r = Runtime.getRuntime();
+        return r.maxMemory() - memoryInUse();
+    }
+    
     
 }
