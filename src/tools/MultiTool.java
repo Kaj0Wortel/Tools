@@ -70,6 +70,13 @@ public final class MultiTool {
     /** The multiplication value of the hash for merging hash values of arrays. */
     private static final int HASH_MUL = 37;
     
+    /** The number of bytes fit in one kilo byte. */
+    public static final long KB = 1_024;
+    /** The number of bytes fit in one mega byte. */
+    public static final long MB = 1_048_576;
+    /** The number of bytes fit in one giga byte. */
+    public static final long GB = 1_073_741_824;
+    
     
     /* -------------------------------------------------------------------------
      * Constructors.
@@ -1409,13 +1416,6 @@ public final class MultiTool {
         return null;
     }
     
-    /** The number of bytes fit in one kilo byte. */
-    public static final long KB = 1_024;
-    /** The number of bytes fit in one mega byte. */
-    public static final long MB = 1_048_576;
-    /** The number of bytes fit in one giga byte. */
-    public static final long GB = 1_073_741_824;
-    
     /**
      * Converts the amount of memory to a readable value.
      * 
@@ -1423,7 +1423,7 @@ public final class MultiTool {
      * 
      * @return A string representing a readable amount of memory.
      */
-    private static String memToString(long mem) {
+    public static String memToString(long mem) {
         if (mem / GB > 3) {
             return Long.toString(mem / GB) + " GB";
         } else if (mem / MB > 3) {
