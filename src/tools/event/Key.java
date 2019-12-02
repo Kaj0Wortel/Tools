@@ -330,7 +330,7 @@ public class Key
      * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key) {
-        this(key, false);
+        this(key, DEFAULT_KEY_RELEASE);
     }
     
     /**
@@ -434,9 +434,10 @@ public class Key
      * @return A key having the same key value as {@code key} and the given mask.
      */
     public Key setMask(int mask) {
-        if (this.mask == mask) return this;
-        
-        if (immutable) {
+        if (this.mask == mask) {
+            return this;
+            
+        } else if (immutable) {
             return new Key(key, mask, true);
             
         } else {
@@ -455,9 +456,10 @@ public class Key
      *     but with the new generated mask.
      */
     public Key applyMask(int mask) {
-        if (this.mask == mask) return this;
-        
-        if (immutable) {
+        if (this.mask == mask) {
+            return this;
+            
+        } else if (immutable) {
             return new Key(key, this.mask | mask, onKeyRelease);
             
         } else {
@@ -476,9 +478,10 @@ public class Key
      *     has the given key value.
      */
     public Key newKeyValue(int k) {
-        if (k == key) return this;
-        
-        if (immutable) {
+        if (k == key) {
+            return this;
+            
+        } else if (immutable) {
             return new Key(k, mask, onKeyRelease);
             
         } else {
@@ -496,10 +499,11 @@ public class Key
      * @return A new key having the same properties as {@code this}, but
      *     has the given onKeyRelease value.
      */
-    public Key newOnKeyRelease(boolean okr) {
-        if (onKeyRelease == okr) return this;
-        
-        if (immutable) {
+    public Key setOnKeyRelease(boolean okr) {
+        if (onKeyRelease == okr) {
+            return this;
+            
+        } else if (immutable) {
             return new Key(key, mask, okr);
             
         } else {
@@ -683,7 +687,7 @@ public class Key
     }
     
     /**
-     * @return a string representing all modifiers of this key.
+     * @return A string representing all modifiers of this key.
      */
     public String getModString() {
         StringBuilder sb = new StringBuilder();
@@ -722,7 +726,7 @@ public class Key
     }
     
     /**
-     * @return the {@link #key} value of this key converted to a string representation.
+     * @return The {@link #key} value of this key converted to a string representation.
      */
     public String getKeyString() {
         if (key >= A.key && key <= Z.key) {
