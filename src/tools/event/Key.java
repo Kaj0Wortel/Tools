@@ -27,13 +27,14 @@ import tools.PublicCloneable;
 
 
 /**
- * Class containing shorter naming for keys all under one roof instead
- * of spread out over multiple classes.
+ * Class containing shorter and clearer naming for keys and masks
+ * all under one roof instead of spread out over multiple classes.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  */
-public class Key implements PublicCloneable {
+public class Key
+        implements PublicCloneable {
     
     /* -------------------------------------------------------------------------
      * Constants.
@@ -41,217 +42,217 @@ public class Key implements PublicCloneable {
      */
     // Alphabet
     /** The key for the letter `A`. */
-    public static final Key A = new Key(KeyEvent.VK_A, true); // = 65 = 'A'
+    public static final Key A = key(KeyEvent.VK_A); // = 65 = 'A'
     /** The key for the letter `B`. */
-    public static final Key B = new Key(KeyEvent.VK_B, true); // = 66 = 'B'
+    public static final Key B = key(KeyEvent.VK_B); // = 66 = 'B'
     /** The key for the letter `C`. */
-    public static final Key C = new Key(KeyEvent.VK_C, true); // = 67 = 'C'
+    public static final Key C = key(KeyEvent.VK_C); // = 67 = 'C'
     /** The key for the letter `D`. */
-    public static final Key D = new Key(KeyEvent.VK_D, true); // = 68 = 'D'
+    public static final Key D = key(KeyEvent.VK_D); // = 68 = 'D'
     /** The key for the letter `E`. */
-    public static final Key E = new Key(KeyEvent.VK_E, true); // = 69 = 'E'
+    public static final Key E = key(KeyEvent.VK_E); // = 69 = 'E'
     /** The key for the letter `F`. */
-    public static final Key F = new Key(KeyEvent.VK_F, true); // = 70 = 'F'
+    public static final Key F = key(KeyEvent.VK_F); // = 70 = 'F'
     /** The key for the letter `G`. */
-    public static final Key G = new Key(KeyEvent.VK_G, true); // = 71 = 'G'
+    public static final Key G = key(KeyEvent.VK_G); // = 71 = 'G'
     /** The key for the letter `H`. */
-    public static final Key H = new Key(KeyEvent.VK_H, true); // = 72 = 'H'
+    public static final Key H = key(KeyEvent.VK_H); // = 72 = 'H'
     /** The key for the letter `I`. */
-    public static final Key I = new Key(KeyEvent.VK_I, true); // = 73 = 'I'
+    public static final Key I = key(KeyEvent.VK_I); // = 73 = 'I'
     /** The key for the letter `J`. */
-    public static final Key J = new Key(KeyEvent.VK_J, true); // = 74 = 'J'
+    public static final Key J = key(KeyEvent.VK_J); // = 74 = 'J'
     /** The key for the letter `K`. */
-    public static final Key K = new Key(KeyEvent.VK_K, true); // = 75 = 'K'
+    public static final Key K = key(KeyEvent.VK_K); // = 75 = 'K'
     /** The key for the letter `L`. */
-    public static final Key L = new Key(KeyEvent.VK_L, true); // = 76 = 'L'
+    public static final Key L = key(KeyEvent.VK_L); // = 76 = 'L'
     /** The key for the letter `M`. */
-    public static final Key M = new Key(KeyEvent.VK_M, true); // = 77 = 'M'
+    public static final Key M = key(KeyEvent.VK_M); // = 77 = 'M'
     /** The key for the letter `N`. */
-    public static final Key N = new Key(KeyEvent.VK_N, true); // = 78 = 'N'
+    public static final Key N = key(KeyEvent.VK_N); // = 78 = 'N'
     /** The key for the letter `O`. */
-    public static final Key O = new Key(KeyEvent.VK_O, true); // = 79 = 'O'
+    public static final Key O = key(KeyEvent.VK_O); // = 79 = 'O'
     /** The key for the letter `P`. */
-    public static final Key P = new Key(KeyEvent.VK_P, true); // = 80 = 'P'
+    public static final Key P = key(KeyEvent.VK_P); // = 80 = 'P'
     /** The key for the letter `Q`. */
-    public static final Key Q = new Key(KeyEvent.VK_Q, true); // = 81 = 'Q'
+    public static final Key Q = key(KeyEvent.VK_Q); // = 81 = 'Q'
     /** The key for the letter `R`. */
-    public static final Key R = new Key(KeyEvent.VK_R, true); // = 82 = 'R'
+    public static final Key R = key(KeyEvent.VK_R); // = 82 = 'R'
     /** The key for the letter `S`. */
-    public static final Key S = new Key(KeyEvent.VK_S, true); // = 83 = 'S'
+    public static final Key S = key(KeyEvent.VK_S); // = 83 = 'S'
     /** The key for the letter `T`. */
-    public static final Key T = new Key(KeyEvent.VK_T, true); // = 84 = 'T'
+    public static final Key T = key(KeyEvent.VK_T); // = 84 = 'T'
     /** The key for the letter `U`. */
-    public static final Key U = new Key(KeyEvent.VK_U, true); // = 85 = 'U'
+    public static final Key U = key(KeyEvent.VK_U); // = 85 = 'U'
     /** The key for the letter `V`. */
-    public static final Key V = new Key(KeyEvent.VK_V, true); // = 86 = 'V'
+    public static final Key V = key(KeyEvent.VK_V); // = 86 = 'V'
     /** The key for the letter `W`. */
-    public static final Key W = new Key(KeyEvent.VK_W, true); // = 87 = 'W'
+    public static final Key W = key(KeyEvent.VK_W); // = 87 = 'W'
     /** The key for the letter `X`. */
-    public static final Key X = new Key(KeyEvent.VK_X, true); // = 88 = 'X'
+    public static final Key X = key(KeyEvent.VK_X); // = 88 = 'X'
     /** The key for the letter `Y`. */
-    public static final Key Y = new Key(KeyEvent.VK_Y, true); // = 89 = 'Y'
+    public static final Key Y = key(KeyEvent.VK_Y); // = 89 = 'Y'
     /** The key for the letter `Z`. */
-    public static final Key Z = new Key(KeyEvent.VK_Z, true); // = 90 = 'Z'
+    public static final Key Z = key(KeyEvent.VK_Z); // = 90 = 'Z'
     
     // Numbers
     /** The key for the number `0`. */
-    public static final Key N0 = new Key(KeyEvent.VK_0, true); // = 48 = '0'
+    public static final Key N0 = key(KeyEvent.VK_0); // = 48 = '0'
     /** The key for the number `1`. */
-    public static final Key N1 = new Key(KeyEvent.VK_1, true); // = 49 = '1'
+    public static final Key N1 = key(KeyEvent.VK_1); // = 49 = '1'
     /** The key for the number `2`. */
-    public static final Key N2 = new Key(KeyEvent.VK_2, true); // = 50 = '2'
+    public static final Key N2 = key(KeyEvent.VK_2); // = 50 = '2'
     /** The key for the number `3`. */
-    public static final Key N3 = new Key(KeyEvent.VK_3, true); // = 51 = '3'
+    public static final Key N3 = key(KeyEvent.VK_3); // = 51 = '3'
     /** The key for the number `4`. */
-    public static final Key N4 = new Key(KeyEvent.VK_4, true); // = 52 = '4'
+    public static final Key N4 = key(KeyEvent.VK_4); // = 52 = '4'
     /** The key for the number `5`. */
-    public static final Key N5 = new Key(KeyEvent.VK_5, true); // = 53 = '5'
+    public static final Key N5 = key(KeyEvent.VK_5); // = 53 = '5'
     /** The key for the number `6`. */
-    public static final Key N6 = new Key(KeyEvent.VK_6, true); // = 54 = '6'
+    public static final Key N6 = key(KeyEvent.VK_6); // = 54 = '6'
     /** The key for the number `7`. */
-    public static final Key N7 = new Key(KeyEvent.VK_7, true); // = 55 = '7'
+    public static final Key N7 = key(KeyEvent.VK_7); // = 55 = '7'
     /** The key for the number `8`. */
-    public static final Key N8 = new Key(KeyEvent.VK_8, true); // = 56 = '8'
+    public static final Key N8 = key(KeyEvent.VK_8); // = 56 = '8'
     /** The key for the number `9`. */
-    public static final Key N9 = new Key(KeyEvent.VK_9, true); // = 57 = '9'
+    public static final Key N9 = key(KeyEvent.VK_9); // = 57 = '9'
     
     // Arrow keys
     /** The key for left arrow key. */
-    public static final Key LEFT  = new Key(KeyEvent.VK_LEFT, true);  // = 37 = '%'
+    public static final Key LEFT  = key(KeyEvent.VK_LEFT);  // = 37 = '%'
     /** The key for upper arrow key. */
-    public static final Key UP    = new Key(KeyEvent.VK_UP, true);    // = 38 = '&'
+    public static final Key UP    = key(KeyEvent.VK_UP);    // = 38 = '&'
     /** The key for right arrow key. */
-    public static final Key RIGHT = new Key(KeyEvent.VK_RIGHT, true); // = 39 = '''
+    public static final Key RIGHT = key(KeyEvent.VK_RIGHT); // = 39 = '''
     /** The key for lower arrow key. */
-    public static final Key DOWN  = new Key(KeyEvent.VK_DOWN, true);  // = 40 = '('
+    public static final Key DOWN  = key(KeyEvent.VK_DOWN);  // = 40 = '('
     
     // Function keys
     /** The key for the F1 function key. */
-    public static final Key F1  = new Key(KeyEvent.VK_F1, true);  // = 112
+    public static final Key F1  = key(KeyEvent.VK_F1);  // = 112
     /** The key for the F2 function key. */
-    public static final Key F2  = new Key(KeyEvent.VK_F2, true);  // = 113
+    public static final Key F2  = key(KeyEvent.VK_F2);  // = 113
     /** The key for the F3 function key. */
-    public static final Key F3  = new Key(KeyEvent.VK_F3, true);  // = 114
+    public static final Key F3  = key(KeyEvent.VK_F3);  // = 114
     /** The key for the F4 function key. */
-    public static final Key F4  = new Key(KeyEvent.VK_F4, true);  // = 115
+    public static final Key F4  = key(KeyEvent.VK_F4);  // = 115
     /** The key for the F5 function key. */
-    public static final Key F5  = new Key(KeyEvent.VK_F5, true);  // = 116
+    public static final Key F5  = key(KeyEvent.VK_F5);  // = 116
     /** The key for the F6 function key. */
-    public static final Key F6  = new Key(KeyEvent.VK_F6, true);  // = 117
+    public static final Key F6  = key(KeyEvent.VK_F6);  // = 117
     /** The key for the F7 function key. */
-    public static final Key F7  = new Key(KeyEvent.VK_F7, true);  // = 118
+    public static final Key F7  = key(KeyEvent.VK_F7);  // = 118
     /** The key for the F8 function key. */
-    public static final Key F8  = new Key(KeyEvent.VK_F8, true);  // = 119
+    public static final Key F8  = key(KeyEvent.VK_F8);  // = 119
     /** The key for the F9 function key. */
-    public static final Key F9  = new Key(KeyEvent.VK_F9, true);  // = 120
+    public static final Key F9  = key(KeyEvent.VK_F9);  // = 120
     /** The key for the F10 function key. */
-    public static final Key F10 = new Key(KeyEvent.VK_F10, true); // = 121
+    public static final Key F10 = key(KeyEvent.VK_F10); // = 121
     /** The key for the F11 function key. */
-    public static final Key F11 = new Key(KeyEvent.VK_F11, true); // = 122
+    public static final Key F11 = key(KeyEvent.VK_F11); // = 122
     /** The key for the F12 function key. */
-    public static final Key F12 = new Key(KeyEvent.VK_F12, true); // = 123
+    public static final Key F12 = key(KeyEvent.VK_F12); // = 123
     /** The key for the F13 function key. */
-    public static final Key F13 = new Key(KeyEvent.VK_F13, true); // = 61440
+    public static final Key F13 = key(KeyEvent.VK_F13); // = 61440
     /** The key for the F14 function key. */
-    public static final Key F14 = new Key(KeyEvent.VK_F14, true); // = 61441
+    public static final Key F14 = key(KeyEvent.VK_F14); // = 61441
     /** The key for the F15 function key. */
-    public static final Key F15 = new Key(KeyEvent.VK_F15, true); // = 61442
+    public static final Key F15 = key(KeyEvent.VK_F15); // = 61442
     /** The key for the F16 function key. */
-    public static final Key F16 = new Key(KeyEvent.VK_F16, true); // = 61443
+    public static final Key F16 = key(KeyEvent.VK_F16); // = 61443
     /** The key for the F17 function key. */
-    public static final Key F17 = new Key(KeyEvent.VK_F17, true); // = 61444
+    public static final Key F17 = key(KeyEvent.VK_F17); // = 61444
     /** The key for the F18 function key. */
-    public static final Key F18 = new Key(KeyEvent.VK_F18, true); // = 61445
+    public static final Key F18 = key(KeyEvent.VK_F18); // = 61445
     /** The key for the F19 function key. */
-    public static final Key F19 = new Key(KeyEvent.VK_F19, true); // = 61446
+    public static final Key F19 = key(KeyEvent.VK_F19); // = 61446
     /** The key for the F20 function key. */
-    public static final Key F20 = new Key(KeyEvent.VK_F20, true); // = 61447
+    public static final Key F20 = key(KeyEvent.VK_F20); // = 61447
     /** The key for the F21 function key. */
-    public static final Key F21 = new Key(KeyEvent.VK_F21, true); // = 61448
+    public static final Key F21 = key(KeyEvent.VK_F21); // = 61448
     /** The key for the F22 function key. */
-    public static final Key F22 = new Key(KeyEvent.VK_F22, true); // = 61449
+    public static final Key F22 = key(KeyEvent.VK_F22); // = 61449
     /** The key for the F23 function key. */
-    public static final Key F23 = new Key(KeyEvent.VK_F23, true); // = 61450
+    public static final Key F23 = key(KeyEvent.VK_F23); // = 61450
     /** The key for the F24 function key. */
-    public static final Key F24 = new Key(KeyEvent.VK_F24, true); // = 61451
+    public static final Key F24 = key(KeyEvent.VK_F24); // = 61451
     
     // Other keys
     /** The key for the enter key. */
-    public static final Key ENTER   = new Key(KeyEvent.VK_ENTER, true);   // = 10
+    public static final Key ENTER   = key(KeyEvent.VK_ENTER);   // = 10
     /** The key for the shift key. */
-    public static final Key SHIFT   = new Key(KeyEvent.VK_SHIFT, true);   // = 16
+    public static final Key SHIFT   = key(KeyEvent.VK_SHIFT);   // = 16
     /** The key for the control key. */
-    public static final Key CTRL    = new Key(KeyEvent.VK_CONTROL, true); // = 17
+    public static final Key CTRL    = key(KeyEvent.VK_CONTROL); // = 17
     /** The key for the alt key. */
-    public static final Key ALT     = new Key(KeyEvent.VK_ALT, true);     // = 18
+    public static final Key ALT     = key(KeyEvent.VK_ALT);     // = 18
     /** The key for the escape key. */
-    public static final Key ESC     = new Key(KeyEvent.VK_ESCAPE, true);  // = 27
+    public static final Key ESC     = key(KeyEvent.VK_ESCAPE);  // = 27
     /** The key for the space bar key. */
-    public static final Key SPACE   = new Key(KeyEvent.VK_SPACE, true);   // = 32 = ' '
+    public static final Key SPACE   = key(KeyEvent.VK_SPACE);   // = 32 = ' '
     /** The key for the end key. */
-    public static final Key END     = new Key(KeyEvent.VK_END, true);     // = 35
+    public static final Key END     = key(KeyEvent.VK_END);     // = 35
     /** The key for the home key. */
-    public static final Key HOME    = new Key(KeyEvent.VK_HOME, true);    // = 36
+    public static final Key HOME    = key(KeyEvent.VK_HOME);    // = 36
     /** The key for the comma key. */
-    public static final Key COMMA   = new Key(KeyEvent.VK_COMMA, true);   // = 44
+    public static final Key COMMA   = key(KeyEvent.VK_COMMA);   // = 44
     /** The key for the minus key. */
-    public static final Key MINUS   = new Key(KeyEvent.VK_MINUS, true);   // = 45 = '-'
+    public static final Key MINUS   = key(KeyEvent.VK_MINUS);   // = 45 = '-'
     /** The key for the period key. */
-    public static final Key PERIOD  = new Key(KeyEvent.VK_PERIOD, true);  // = 46
+    public static final Key PERIOD  = key(KeyEvent.VK_PERIOD);  // = 46
     /** The key for the slash key. */
-    public static final Key SLASH   = new Key(KeyEvent.VK_SLASH, true);   // = 47
+    public static final Key SLASH   = key(KeyEvent.VK_SLASH);   // = 47
     /** The key for the equals key. */
-    public static final Key EQUAL   = new Key(KeyEvent.VK_EQUALS, true);  // = 61 = '='
+    public static final Key EQUAL   = key(KeyEvent.VK_EQUALS);  // = 61 = '='
     /** The key for the delete key. */
-    public static final Key DEL     = new Key(KeyEvent.VK_DELETE, true);  // = 127
+    public static final Key DEL     = key(KeyEvent.VK_DELETE);  // = 127
     /** The key for the left angular bracket key, or less than key. */
-    public static final Key LESS    = new Key(KeyEvent.VK_LESS, true);    // = 153
+    public static final Key LESS    = key(KeyEvent.VK_LESS);    // = 153
     /** The key for the insert key. */
-    public static final Key INSERT  = new Key(KeyEvent.VK_INSERT, true);  // = 155
+    public static final Key INSERT  = key(KeyEvent.VK_INSERT);  // = 155
     /** The key for the right angular bracket key, or greater than key. */
-    public static final Key GREATER = new Key(KeyEvent.VK_GREATER, true); // = 160
+    public static final Key GREATER = key(KeyEvent.VK_GREATER); // = 160
     /** The key for the single quote key. */
-    public static final Key QUOTE   = new Key(KeyEvent.VK_QUOTE, true);   // = 222
+    public static final Key QUOTE   = key(KeyEvent.VK_QUOTE);   // = 222
     /** The key for the at key. */
-    public static final Key AT      = new Key(KeyEvent.VK_AT, true);      // = 512
+    public static final Key AT      = key(KeyEvent.VK_AT);      // = 512
     /** The key for the colon key. */
-    public static final Key COLON   = new Key(KeyEvent.VK_COLON, true);   // = 513
+    public static final Key COLON   = key(KeyEvent.VK_COLON);   // = 513
     /** The key for the dollar key. */
-    public static final Key DOLLAR  = new Key(KeyEvent.VK_DOLLAR, true);  // = 515
+    public static final Key DOLLAR  = key(KeyEvent.VK_DOLLAR);  // = 515
     /** The key for the plus key. */
-    public static final Key PLUS    = new Key(KeyEvent.VK_PLUS, true);    // = 521
+    public static final Key PLUS    = key(KeyEvent.VK_PLUS);    // = 521
     /** The key for the windows key. */
-    public static final Key WINDOWS = new Key(KeyEvent.VK_WINDOWS, true); // = 524
+    public static final Key WINDOWS = key(KeyEvent.VK_WINDOWS); // = 524
     /** The key for the backspace key. */
-    public static final Key BACKSPACE   = new Key(KeyEvent.VK_BACK_SPACE, true);  // = 8
+    public static final Key BACKSPACE   = key(KeyEvent.VK_BACK_SPACE);  // = 8
     /** The key for the caps lock key. */
-    public static final Key CAPS_LOCK   = new Key(KeyEvent.VK_CAPS_LOCK, true);   // = 20
+    public static final Key CAPS_LOCK   = key(KeyEvent.VK_CAPS_LOCK);   // = 20
     /** The key for the backslash key. */
-    public static final Key BSLASH      = new Key(KeyEvent.VK_BACK_SLASH, true);  // = 92
+    public static final Key BSLASH      = key(KeyEvent.VK_BACK_SLASH);  // = 92
     /** The key for the print screen  key. */
-    public static final Key PRINT_SCREEN = new Key(KeyEvent.VK_PRINTSCREEN, true); // = 154
+    public static final Key PRINT_SCREEN = key(KeyEvent.VK_PRINTSCREEN); // = 154
     /** The key for the left brace key. */
-    public static final Key LEFT_BRACE  = new Key(KeyEvent.VK_BRACELEFT, true);   // = 161
+    public static final Key LEFT_BRACE  = key(KeyEvent.VK_BRACELEFT);   // = 161
     /** The key for the right brace key. */
-    public static final Key RIGHT_BRACE = new Key(KeyEvent.VK_BRACERIGHT, true);  // = 161
+    public static final Key RIGHT_BRACE = key(KeyEvent.VK_BRACERIGHT);  // = 161
     /** The key for the backwards single quote (back tick) key. */
-    public static final Key BACK_QUOTE  = new Key(KeyEvent.VK_BACK_QUOTE, true);  // = 192
+    public static final Key BACK_QUOTE  = key(KeyEvent.VK_BACK_QUOTE);  // = 192
     /** The key for the circumflex key. */
-    public static final Key CIRCUMFLEX  = new Key(KeyEvent.VK_CIRCUMFLEX, true);  // = 514
+    public static final Key CIRCUMFLEX  = key(KeyEvent.VK_CIRCUMFLEX);  // = 514
     /** The key for the euro key. */
-    public static final Key EURO        = new Key(KeyEvent.VK_EURO_SIGN, true);   // = 516
+    public static final Key EURO        = key(KeyEvent.VK_EURO_SIGN);   // = 516
     /** The key for the hashtag key, or number sign key. */
-    public static final Key NUMBER_SIGN = new Key(KeyEvent.VK_NUMBER_SIGN, true); // = 520
+    public static final Key NUMBER_SIGN = key(KeyEvent.VK_NUMBER_SIGN); // = 520
     /** The key for the underscore key. */
-    public static final Key UNDERSCORE  = new Key(KeyEvent.VK_UNDERSCORE, true);  // = 523
+    public static final Key UNDERSCORE  = key(KeyEvent.VK_UNDERSCORE);  // = 523
     /** The key for the exclamation mark key. */
-    public static final Key EXCLAMATION_MARK  = new Key(KeyEvent.VK_EXCLAMATION_MARK, true);  // = 517
+    public static final Key EXCLAMATION_MARK  = key(KeyEvent.VK_EXCLAMATION_MARK);  // = 517
     /** The key for the left parenthesis key. */
-    public static final Key LEFT_PARENTHESIS  = new Key(KeyEvent.VK_LEFT_PARENTHESIS, true);  // = 519
+    public static final Key LEFT_PARENTHESIS  = key(KeyEvent.VK_LEFT_PARENTHESIS);  // = 519
     /** The key for the right parenthesis key. */
-    public static final Key RIGHT_PARENTHESIS = new Key(KeyEvent.VK_RIGHT_PARENTHESIS, true); // = 522
+    public static final Key RIGHT_PARENTHESIS = key(KeyEvent.VK_RIGHT_PARENTHESIS); // = 522
     /** The key for the inverted exclamation mark key. */
-    public static final Key INVERTED_EXCLAMATION_MARK = new Key(KeyEvent.VK_INVERTED_EXCLAMATION_MARK, true); // = 518
+    public static final Key INVERTED_EXCLAMATION_MARK = key(KeyEvent.VK_INVERTED_EXCLAMATION_MARK); // = 518
     
     // Masks
     /** The mask for the shift key. */
@@ -271,7 +272,7 @@ public class Key implements PublicCloneable {
     /** The default value for key release. */
     public static final boolean DEFAULT_KEY_RELEASE = false;
     /** The default mutable value. */
-    public static final boolean DEFAULT_MUTABLE = false;
+    public static final boolean DEFAULT_IMMUTABLE = false;
     
     
     /* -------------------------------------------------------------------------
@@ -338,7 +339,7 @@ public class Key implements PublicCloneable {
      * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key, int mask) {
-        this(key, mask, DEFAULT_KEY_RELEASE, DEFAULT_MUTABLE);
+        this(key, mask, DEFAULT_KEY_RELEASE, DEFAULT_IMMUTABLE);
     }
     
     /**
@@ -347,7 +348,7 @@ public class Key implements PublicCloneable {
      * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key, boolean onKeyRelease) {
-        this(key, DEFAULT_MASK, onKeyRelease, DEFAULT_MUTABLE);
+        this(key, DEFAULT_MASK, onKeyRelease, DEFAULT_IMMUTABLE);
     }
     
     /**
@@ -356,7 +357,7 @@ public class Key implements PublicCloneable {
      * @see #Key(int, int, boolean, boolean)
      */
     public Key(int key, int mask, boolean onKeyRelease) {
-        this(key, mask, onKeyRelease, DEFAULT_MUTABLE);
+        this(key, mask, onKeyRelease, DEFAULT_IMMUTABLE);
     }
     
     /**
@@ -374,6 +375,16 @@ public class Key implements PublicCloneable {
         this.immutable = immutable;
     }
     
+    /**
+     * Shorthand to create a new immutable key.
+     * 
+     * @param key The value for the key.
+     * 
+     * @return An immutable key with the default settings.
+     */
+    private static Key key(int key) {
+        return new Key(key, DEFAULT_MASK, DEFAULT_KEY_RELEASE, true);
+    }
     
     /* -------------------------------------------------------------------------
      * Functions.

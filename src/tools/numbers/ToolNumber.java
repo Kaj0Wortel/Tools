@@ -13,8 +13,6 @@
 
 package tools.numbers;
 
-import tools.matrix.Mat;
-
 /**
  * A handy number data representation providing
  * the basic operations for numbers.
@@ -409,14 +407,5 @@ public abstract class ToolNumber
         return false;
     }
     
-    public static void main(String[] args) {
-        Mat mat = new Mat(2, 2,
-                          2, 3,
-                          4, 5);
-        PrimitiveNumber<Double> num = new PrimitiveNumber<Double>(2.0);
-        //System.out.println(mat.pow(2));
-        System.out.println(mat.mul(num));
-        System.out.println(mat);
-    }
     
 }
