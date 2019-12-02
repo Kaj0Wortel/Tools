@@ -438,7 +438,7 @@ public class Key
             return this;
             
         } else if (immutable) {
-            return new Key(key, mask, true);
+            return new Key(key, mask, onKeyRelease);
             
         } else {
             this.mask = mask;
