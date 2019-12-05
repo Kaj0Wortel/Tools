@@ -28,7 +28,8 @@ import tools.Var;
  * 
  * @see RBTree
  */
-public class RBNode<D extends Comparable> {
+public class RBNode<D extends Comparable>
+        implements Comparable<RBNode<D>> {
      
     /* -------------------------------------------------------------------------
      * Variables.
@@ -238,13 +239,20 @@ public class RBNode<D extends Comparable> {
     }
     
     @Override
+    public int compareTo(RBNode<D> node) {
+        int eq = data.compareTo(node.data);
+        if (eq != 0) return eq;
+        return data.hashCode() - node.data.hashCode();
+    }
+    
+    @Override
     public String toString() {
         return "Node[" + Var.LS +
                 "  this  : " + (data == null ? "null" : data.toString()) + Var.LS + 
                 "  color : " + color + Var.LS + 
-                "  parent: " + (hasParent() || parent.data == null ? "null" : parent.data.toString()) + Var.LS +
-                "  left  : " + (hasLeft() || left.data == null ? "null" : left.data.toString()) + Var.LS +
-                "  right : " + (hasRight() || right.data == null ? "null" : right.data.toString()) + Var.LS +
+                "  parent: " + (!hasParent() || parent.data == null ? "null" : parent.data.toString()) + Var.LS +
+                "  left  : " + (!hasLeft() || left.data == null ? "null" : left.data.toString()) + Var.LS +
+                "  right : " + (!hasRight() || right.data == null ? "null" : right.data.toString()) + Var.LS +
                 "]";
     }
     

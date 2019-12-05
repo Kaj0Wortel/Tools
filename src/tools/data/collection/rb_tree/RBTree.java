@@ -18,7 +18,9 @@ package tools.data.collection.rb_tree;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 
 // Tools imports
 import tools.MultiTool;
@@ -56,6 +58,9 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
 public class RBTree<D extends Comparable<D>>
         implements Collection<D> {
     
+    /** The result of {@code Math.log(2)} */
+    protected static final double LOG2 = 0.6931471805599453;
+    
     /* -------------------------------------------------------------------------
      * Variables.
      * -------------------------------------------------------------------------
@@ -71,54 +76,115 @@ public class RBTree<D extends Comparable<D>>
     
     
     /* -------------------------------------------------------------------------
+     * Inner-classes.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Class representing a stack item used for initializing the tree.
+     */
+    private class Elem {
+        int minIndex;
+        int maxIndex;
+        int parentIndex;
+        int depth;
+        
+        public Elem(int minIndex, int maxIndex, int parentIndex, int depth) {
+            this.minIndex = minIndex;
+            this.maxIndex = maxIndex;
+            this.parentIndex = parentIndex;
+            this.depth = depth;
+        }
+        
+        
+    }
+    
+    
+    /* -------------------------------------------------------------------------
      * Constructors.
      * -------------------------------------------------------------------------
      */
     /**
-     * Creates a new empty red black tree.
+     * Creates a new empty red-black tree.
      */
     public RBTree() {
     }
     
-    RBTree(Collection<D> col) {
-        if (col.isEmpty()) return;
-        RBNode[] nodes = new RBNode[col.size()];
-        int i = 0;
-        for (D d : col) {
-            nodes[i] = new RBNode<D>(d);
-            if (i == 0) {
-                min = nodes[i];
-            }
-            if (i == col.size()) {
-                max = nodes[i];
-            }
-            i++;
-        }
-        Arrays.sort(nodes);
-        
-        if (nodes.length == 1) {
-            min = max = root = nodes[0];
-            root.setColor(RBColor.BLACK);
-            
-        } else if (nodes.length == 2) {
-            min = nodes[0];
-            max = nodes[1];
-            root = nodes[0];
-            root.setColor(RBColor.BLACK);
-        }
-        
-        min = nodes[0];
-        max = nodes[nodes.length - 1];
-        root = nodes[nodes.length / 2 - 1];
-        
-        // tmp
-        //addAll(col);
+    /**
+     * Creates a new red-black tree from the given collection. <br>
+     * Initializes the tree as balenced as possible. This initialization
+     * is prefered over creating a new tree and then adding all elements
+     * with {@link #add(Comparable)}. <br>
+     * Note that this does not hold for {@link #addAll(Collection)} when
+     * the tree is empty.
+     * 
+     * @apiNote If the collection is almost sorted, then this creation takes
+     *     only {@code O(n)} time. Otherwise {@code O(n log(n))}.
+     * 
+     * @param col The collection to add.
+     */
+    public RBTree(Collection<D> col) {
+        addAll(col);
     }
+    
 
     /* -------------------------------------------------------------------------
      * Functions.
      * -------------------------------------------------------------------------
      */
+    /**
+     * Initializes the entire tree with the given nodes. <br>
+     * <br>
+     * <b>WARNING</b><br>
+     * <ul>
+     *   <li>This function deletes all previous nodes!</li>
+     *   <li>All nodes MUST be sorted!</li>
+     * </ul>
+     * 
+     * @param <N> The type of the nodes to add.
+     * @param nodes The array of nodes.
+     */
+    protected <N extends RBNode<D>> void initTree(N[] nodes) {
+        if (nodes.length == 0) return;
+        if (nodes.length == 1) {
+            (min = max = root = nodes[0]).setColor(RBColor.BLACK);
+            return;
+        }
+        
+        min = nodes[0];
+        max = nodes[nodes.length - 1];
+        
+        int redDepth = (int) Math.floor(Math.log(nodes.length + 1) / LOG2);
+        
+        Stack<Elem> stack = new Stack<>();
+        stack.push(new Elem(0, nodes.length, -1, 0));
+        
+        while (!stack.isEmpty()) {
+            Elem elem = stack.pop();
+            if (elem.minIndex == elem.maxIndex) continue;
+            int nodeIndex = (elem.maxIndex + elem.minIndex/* - Var.RAN.nextInt(2)*/) / 2;
+            RBNode<D> node = nodes[nodeIndex];
+            if (elem.parentIndex == -1) {
+                root = node;
+                
+            } else {
+                if (nodeIndex < elem.parentIndex) {
+                    setLeft(nodes[elem.parentIndex], node);
+                } else {
+                    setRight(nodes[elem.parentIndex], node);
+                }
+            }
+            
+            if (elem.depth == redDepth) {
+                node.setColor(RBColor.RED);
+                
+            } else {
+                node.setColor(RBColor.BLACK);
+                stack.push(new Elem(elem.minIndex, nodeIndex, nodeIndex, elem.depth + 1));
+                stack.push(new Elem(nodeIndex + 1, elem.maxIndex, nodeIndex, elem.depth + 1));
+            }
+        }
+    }
+    
     @Override
     public int size() {
         return size;
@@ -773,13 +839,25 @@ public class RBTree<D extends Comparable<D>>
     }
     
     @Override
-    public boolean addAll(Collection<? extends D> c) {
-        boolean changed = false;
-        for (D data : c) {
-            if (add(data))
-                changed = true;
+    public boolean addAll(Collection<? extends D> col) {
+        if (col.isEmpty()) return false;
+        if (isEmpty()) {
+            int i = 0;
+            RBNode[] nodes = new RBNode[col.size()];
+            for (D d : col) {
+                nodes[i++] = createNode(d);
+            }
+            Arrays.sort(nodes);
+            initTree(nodes);
+            return true;
+            
+        } else {
+            boolean changed = false;
+            for (D data : col) {
+                if (add(data)) changed = true;
+            }
+            return changed;
         }
-        return changed;
     }
     
     @Override
@@ -893,15 +971,15 @@ public class RBTree<D extends Comparable<D>>
     public static void replay() {
         LinkedRBTree tree = new LinkedRBTree();
         Key[] add = new Key[] {
-            
+            new Key(0, 1), new Key(1, 1), new Key(0, 0), new Key(1, 0), new Key(2, 0)
         };
         Key[] rem = new Key[] {
-            
+            new Key(1, 0), new Key(2, 0)
         };
         for (Key k : add) {
             System.out.println("added" + k + ": " + tree.add(k));
         }
-        System.out.println("added!");
+//        System.out.println("added!");
 //        System.out.println("==========");
 //        System.out.println(tree.debug());
 //        System.out.println("==========");
@@ -932,7 +1010,7 @@ public class RBTree<D extends Comparable<D>>
     }
     
     public static void generateRandom() {
-        RBTree<Key> tree = new RBTree<>();
+        //RBTree<Key> tree = new RBTree<>();
         int addAmt = 50_000;
         int remAmt = 25_000;
         int colAmt = 2;
@@ -958,9 +1036,11 @@ public class RBTree<D extends Comparable<D>>
         if (addAmt < 50) System.out.println("add: " + Arrays.toString(add));
         if (remAmt < 25) System.out.println("rem: " + Arrays.toString(rem));
         
-        for (Key k : add) {
-            tree.add(k);
-        }
+        
+        LinkedRBTree<Key> tree = new LinkedRBTree<>(Arrays.asList(add));
+//        for (Key k : add) {
+//            tree.add(k);
+//        }
         for (Key k : rem) {
             tree.remove(k);
         }

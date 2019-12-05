@@ -14,6 +14,11 @@
 package tools.data.collection.rb_tree;
 
 
+import java.util.Arrays;
+import java.util.Collection;
+
+
+
 /**
  * Class implementing a linked red-black tree search tree. It supports the following operations:
  * <table border='1'>
@@ -47,6 +52,27 @@ package tools.data.collection.rb_tree;
 public class LinkedRBTree<D extends LinkedRBKey<D>>
         extends RBTree<D> {
     
+    /* -------------------------------------------------------------------------
+     * Constructor.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new empty linked red-black tree.
+     */
+    public LinkedRBTree() {
+    }
+    
+    /**
+     * Creates a new linked red-black tree from the given collection.
+     * 
+     * @param col The collection to add.
+     * 
+     * @see RBTree#RBTree(Collection)
+     */
+    public LinkedRBTree(Collection<D> col) {
+        addAll(col);
+    }
+    
     
     /* -------------------------------------------------------------------------
      * Functions.
@@ -55,6 +81,33 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     @Override
     public boolean add(D data) {
         return super.add(data);
+    }
+    
+    @Override
+    public boolean addAll(Collection<? extends D> col) {
+        if (col.isEmpty()) return false;
+        if (isEmpty()) {
+            LinkedRBNode[] nodes = new LinkedRBNode[col.size()];
+            {
+                int i = 0;
+                for (D d : col) {
+                    nodes[i++] = createNode(d);
+                }
+            }
+            Arrays.sort(nodes);
+            for (int i = 1; i < nodes.length; i++) {
+                link(nodes[i-1], nodes[i]);
+            }
+            initTree(nodes);
+            return true;
+            
+        } else {
+            boolean changed = false;
+            for (D data : col) {
+                if (add(data)) changed = true;
+            }
+            return changed;
+        }
     }
     
     @Override
