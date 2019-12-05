@@ -22,7 +22,7 @@ package tools.data.collection.rb_tree;
  * 
  * @see RBTree
  */
-public interface RBSearch<D extends RBKey> {
+public interface RBSearch<D extends Comparable<D>> {
     
     /**
      * Enum denoting the options allowed for searching through the tree.

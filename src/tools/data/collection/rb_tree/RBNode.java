@@ -15,6 +15,7 @@ package tools.data.collection.rb_tree;
 
 
 // Tools imports
+import java.util.Objects;
 import tools.Var;
 
 
@@ -27,7 +28,7 @@ import tools.Var;
  * 
  * @see RBTree
  */
-public class RBNode<D extends RBKey> {
+public class RBNode<D extends Comparable> {
      
     /* -------------------------------------------------------------------------
      * Variables.
@@ -69,15 +70,6 @@ public class RBNode<D extends RBKey> {
     
     public final RBColor getColor() {
         return color;
-    }
-    
-    /**
-     * Returns the key of the data element.
-     * 
-     * @return The integer value of the key of the data element.
-     */
-    public final int getValue() {
-        return (data == null ? 0 : data.value());
     }
     
     /**
@@ -266,11 +258,11 @@ public class RBNode<D extends RBKey> {
         if (obj == null) return false;
         if (obj instanceof RBNode) {
             RBNode<D> node = (RBNode<D>) obj;
-            return (node.getValue() == getValue() && node.hashCode() == hashCode() && node.data.equals(data));
+            return Objects.equals(node.data, data);
             
-        } else if (obj instanceof RBKey) {
-            RBKey key = (RBKey) obj;
-            return (key.value() == getValue() && data.hashCode() == key.hashCode() && key.equals(data));
+        } else if (obj instanceof Comparable) {
+            Comparable cmp = (Comparable) obj;
+            return Objects.equals(obj, data);
         }
         return false;
     }

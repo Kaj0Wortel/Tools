@@ -15,12 +15,15 @@ package tools.data.collection.rb_tree;
 
 
 // Java imports
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 // Tools imports
+import tools.MultiTool;
 import tools.Var;
+import tools.data.array.ArrayTools;
 import tools.data.collection.rb_tree.RBSearch.Choice;
 
 
@@ -50,7 +53,7 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
  * 
  * @see LinkedRBTree
  */
-public class RBTree<D extends RBKey>
+public class RBTree<D extends Comparable<D>>
         implements Collection<D> {
     
     /* -------------------------------------------------------------------------
@@ -66,6 +69,51 @@ public class RBTree<D extends RBKey>
     /** The maximum value of the tree. */
     private RBNode<D> max;
     
+    
+    /* -------------------------------------------------------------------------
+     * Constructors.
+     * -------------------------------------------------------------------------
+     */
+    /**
+     * Creates a new empty red black tree.
+     */
+    public RBTree() {
+    }
+    
+    RBTree(Collection<D> col) {
+        if (col.isEmpty()) return;
+        RBNode[] nodes = new RBNode[col.size()];
+        int i = 0;
+        for (D d : col) {
+            nodes[i] = new RBNode<D>(d);
+            if (i == 0) {
+                min = nodes[i];
+            }
+            if (i == col.size()) {
+                max = nodes[i];
+            }
+            i++;
+        }
+        Arrays.sort(nodes);
+        
+        if (nodes.length == 1) {
+            min = max = root = nodes[0];
+            root.setColor(RBColor.BLACK);
+            
+        } else if (nodes.length == 2) {
+            min = nodes[0];
+            max = nodes[1];
+            root = nodes[0];
+            root.setColor(RBColor.BLACK);
+        }
+        
+        min = nodes[0];
+        max = nodes[nodes.length - 1];
+        root = nodes[nodes.length / 2 - 1];
+        
+        // tmp
+        //addAll(col);
+    }
 
     /* -------------------------------------------------------------------------
      * Functions.
@@ -83,7 +131,7 @@ public class RBTree<D extends RBKey>
 
     @Override
     public boolean contains(Object obj) {
-        if (!(obj instanceof RBKey)) return false;
+        if (!(obj instanceof Comparable)) return false;
         return get((D) obj) != null;
     }
 
@@ -125,7 +173,7 @@ public class RBTree<D extends RBKey>
      *
      * @return The node with the given value, or {@code null} if no such node exists.
      */
-    protected RBNode<D> get(RBKey key) {
+    protected RBNode<D> get(D key) {
         RBNode<D> node = getNearest(key);
         if (node.equals(key)) return node;
         else return null;
@@ -137,13 +185,14 @@ public class RBTree<D extends RBKey>
      * @return The node with the given key, the node the value should be inserted at,
      *     or {@code null} if {@code node == null}.
      */
-    protected RBNode<D> getNearest(RBKey key) {
+    protected RBNode<D> getNearest(D key) {
         RBNode<D> node = root;
         RBNode<D> prev = null;
         while (node != null) {
             prev = node;
-            if (key.value() < node.getValue()) node = node.getLeft();
-            else if (key.value() > node.getValue()) node = node.getRight();
+            int cmp = key.compareTo(node.getData());
+            if (cmp < 0) node = node.getLeft();
+            else if (cmp > 0) node = node.getRight();
             else if (key.hashCode() < node.hashCode()) node = node.getLeft();
             else if (key.hashCode() > node.hashCode()) node = node.getRight();
             else {
@@ -166,7 +215,7 @@ public class RBTree<D extends RBKey>
      * @return The node with the given key, the node the value should be inserted at,
      *     or {@code null} if {@code node == null}.
      */
-    protected RBNode<D> getNearestCollision(RBKey key, RBNode<D> node) {
+    protected RBNode<D> getNearestCollision(D key, RBNode<D> node) {
         if (node == null) return null;
         if (!node.hasChild()) return node;
         RBNode<D> left = getNearestCollisionSide(key, node.getLeft(), false);
@@ -196,10 +245,11 @@ public class RBTree<D extends RBKey>
      * @return The node with the given key, the node the value should be inserted at,
      *     or {@code null} if {@code node == null}.
      */
-    protected RBNode<D> getNearestCollisionSide(RBKey key, RBNode<D> node, boolean left) {
+    protected RBNode<D> getNearestCollisionSide(D key, RBNode<D> node, boolean left) {
         RBNode<D> prev = node;
         while (node != null) {
-            if (node.getValue() == key.value() && node.hashCode() == key.hashCode()) {
+            int cmp = key.compareTo(node.getData());
+            if (cmp < 0 && node.hashCode() == key.hashCode()) {
                 if (key.equals(node.getData())) return node;
                 else return getNearestCollision(key, node);
             }
@@ -274,8 +324,8 @@ public class RBTree<D extends RBKey>
         
         // There are free leaves.
         RBNode<D> node = createNode(data);
-        if (node.getValue() < near.getValue() ||
-                (node.getValue() == near.getValue() && node.hashCode() < near.hashCode())) {
+        int cmp = node.getData().compareTo(near.getData());
+        if (cmp < 0 || (cmp == 0 && node.hashCode() < near.hashCode())) {
             // near.getLeft() == null
             setLeft(near, node);
             if (min == near) min = node;
@@ -344,7 +394,7 @@ public class RBTree<D extends RBKey>
     @Override
     public boolean remove(Object obj) {
         if (obj == null) throw new NullPointerException();
-        if (!(obj instanceof RBKey)) return false;
+        if (!(obj instanceof Comparable)) return false; 
         RBNode<D> node = bstDelete((D) obj);
         if (node == null) return false;
         balenceTreeDelete(node);
@@ -799,7 +849,7 @@ public class RBTree<D extends RBKey>
     
     
     // TESTING
-    /*
+    /**/
     private static class Key extends LinkedRBKey<Key> {
         private int i;
         private int j;
@@ -810,8 +860,8 @@ public class RBTree<D extends RBKey>
         }
         
         @Override
-        public int value() {
-            return i;
+        public int compareTo(Key key) {
+            return i - key.i;
         }
         
         @Override

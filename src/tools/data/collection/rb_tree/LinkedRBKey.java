@@ -28,7 +28,7 @@ package tools.data.collection.rb_tree;
  * @see LinkedRBTree
  */
 public abstract class LinkedRBKey<D extends LinkedRBKey<D>>
-        implements RBKey {
+        implements Comparable<D> {
     
      
     /* -------------------------------------------------------------------------
