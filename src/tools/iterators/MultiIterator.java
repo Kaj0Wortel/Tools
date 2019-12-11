@@ -21,7 +21,7 @@ import java.util.Iterator;
 /**
  * Class that iterates over multiple iterators.
  * 
- * @version 01.0
+ * @version 1.0
  * @author Kaj Wortel
  * 
  * @param <V> The type of the iterators.

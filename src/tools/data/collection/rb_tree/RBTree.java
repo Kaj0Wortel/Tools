@@ -183,6 +183,7 @@ public class RBTree<D extends Comparable<D>>
                 stack.push(new Elem(nodeIndex + 1, elem.maxIndex, nodeIndex, elem.depth + 1));
             }
         }
+        size = nodes.length;
     }
     
     @Override
