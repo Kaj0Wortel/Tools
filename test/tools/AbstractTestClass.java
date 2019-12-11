@@ -15,6 +15,7 @@ package tools;
 
 
 // JUnit imports
+import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -166,9 +167,19 @@ public abstract class AbstractTestClass {
      * @param millis The timeout in milliseconds.
      */
     public static void runAndWait(Runnable r, int amt, long millis) {
+        Thread ct = Thread.currentThread();
+        ThreadGroup tg = new ThreadGroup("runners") {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                System.err.println(t.getName()+ ": " + Var.LS +
+                        "  " + Arrays.toString(e.getStackTrace())
+                        .replaceAll(", ", "," + Var.LS + "  "));
+                ct.interrupt();
+            }
+        };
         Thread[] threads = new Thread[amt];
         for (int i = 0; i < amt; i++) {
-            threads[i] = new Thread(r);
+            threads[i] = new Thread(tg, r, "runner " + i);
         }
         for (int i = 0; i < amt; i++) {
             threads[i].start();
@@ -181,7 +192,7 @@ public abstract class AbstractTestClass {
                 threads[i].join(timeout);
                 
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                fail("One of the runs has failed.");
             }
         }
     }

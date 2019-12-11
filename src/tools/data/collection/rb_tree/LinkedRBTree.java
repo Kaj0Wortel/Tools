@@ -42,7 +42,7 @@ import java.util.Collection;
  * <br>
  * For an implmentation of a red-black tree using only an interface as key, take a look at {@link RBTree}.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  * 
  * @see LinkedRBKey
@@ -83,31 +83,11 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
-    public boolean addAll(Collection<? extends D> col) {
-        if (col.isEmpty()) return false;
-        if (isEmpty()) {
-            LinkedRBNode[] nodes = new LinkedRBNode[col.size()];
-            {
-                int i = 0;
-                for (D d : col) {
-                    if (d == null) throw new NullPointerException();
-                    nodes[i++] = createNode(d);
-                }
-            }
-            Arrays.sort(nodes);
-            for (int i = 1; i < nodes.length; i++) {
-                link(nodes[i-1], nodes[i]);
-            }
-            initTree(nodes);
-            return true;
-            
-        } else {
-            boolean changed = false;
-            for (D data : col) {
-                if (add(data)) changed = true;
-            }
-            return changed;
+    protected <N extends RBNode<D>> void initTree(N[] nodes) {
+        for (int i = 1; i < nodes.length; i++) {
+            link((LinkedRBNode<D>) nodes[i - 1], (LinkedRBNode<D>) nodes[i]);
         }
+        super.initTree(nodes);
     }
     
     @Override

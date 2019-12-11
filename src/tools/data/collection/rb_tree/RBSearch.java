@@ -17,7 +17,7 @@ package tools.data.collection.rb_tree;
 /**
  * Search function used to find items in the {@link RBTree} data structure. <br>
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  * 
  * @see RBTree

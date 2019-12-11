@@ -23,7 +23,7 @@ import tools.Var;
  * This class stores the information about the node in the {@link RBTree} data structure.
  * The value of this node is calculated from the given object.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  * 
  * @see RBTree

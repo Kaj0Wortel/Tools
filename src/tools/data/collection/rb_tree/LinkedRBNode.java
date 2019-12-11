@@ -21,7 +21,7 @@ import tools.Var;
 /**
  * This class stores the information about a node in the {@link LinkedRBTree} data structure.
  * 
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  * 
  * @see RBNode

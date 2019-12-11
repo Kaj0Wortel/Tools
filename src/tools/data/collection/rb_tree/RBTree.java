@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Stack;
 
+
 // Tools imports
 import tools.Var;
 import tools.data.collection.rb_tree.RBSearch.Choice;
@@ -52,7 +53,7 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
  * <br>
  * For an implementation of a red-black tree with constant get neighbor time, take a look at {@link LinkedRBTree}.
  *
- * @version 1.0
+ * @version 1.1
  * @author Kaj Wortel
  * 
  * @see LinkedRBTree
@@ -165,6 +166,10 @@ public class RBTree<D extends Comparable<D>>
             if (elem.minIndex == elem.maxIndex) continue;
             int nodeIndex = (elem.maxIndex + elem.minIndex/* - Var.RAN.nextInt(2)*/) / 2;
             RBNode<D> node = nodes[nodeIndex];
+            node.setParent(null);
+            node.setLeft(null);
+            node.setRight(null);
+            
             if (elem.parentIndex == -1) {
                 root = node;
                 
@@ -243,6 +248,7 @@ public class RBTree<D extends Comparable<D>>
      * @return The node with the given value, or {@code null} if no such node exists.
      */
     protected RBNode<D> get(D key) {
+        if (isEmpty()) return null;
         RBNode<D> node = getNearest(key);
         if (node.equals(key)) return node;
         else return null;
@@ -922,8 +928,9 @@ public class RBTree<D extends Comparable<D>>
     @SuppressWarnings("element-type-mismatch")
     public boolean containsAll(Collection<?> c) {
         for (Object obj : c) {
-            if (!contains(c))
+            if (!contains(obj)) {
                 return false;
+            }
         }
         return true;
     }
@@ -932,10 +939,12 @@ public class RBTree<D extends Comparable<D>>
     public boolean addAll(Collection<? extends D> col) {
         if (col.isEmpty()) return false;
         if (isEmpty()) {
-            int i = 0;
             RBNode[] nodes = new RBNode[col.size()];
-            for (D d : col) {
-                nodes[i++] = createNode(d);
+            {
+                int i = 0;
+                for (D d : col) {
+                    nodes[i++] = createNode(d);
+                }
             }
             Arrays.sort(nodes);
             initTree(nodes);
@@ -1066,137 +1075,6 @@ public class RBTree<D extends Comparable<D>>
     
     // TESTING
     /**/
-    private static class Key extends LinkedRBKey<Key> {
-        private int i;
-        private int j;
-        
-        public Key(int i, int j) {
-            this.i = i;
-            this.j = j;
-        }
-        
-        @Override
-        public int compareTo(Key key) {
-            return i - key.i;
-        }
-        
-        @Override
-        public String toString() {
-            return "(" + i + ", " + j + ")";
-        }
-        
-        @Override
-        public int hashCode() {
-            return i + j;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Key)) return false;
-            Key key = (Key) obj;
-            return key.i == i && key.j == j;
-        }
-        
-        
-    }
-    
-    /*
-    public static void main(String[] args) {
-        generateRandom();
-        //replay();
-    }
-    
-    public static void replay() {
-        LinkedRBTree tree = new LinkedRBTree();
-        Key[] add = new Key[] {
-            new Key(0, 1), new Key(1, 0), new Key(0, 0)
-        };
-        Key[] rem = new Key[] {
-            new Key(0, 1)
-        };
-        for (Key k : add) {
-            System.out.println("added" + k + ": " + tree.add(k));
-        }
-        System.out.println("added!");
-//        System.out.println("==========");
-//        System.out.println(tree.debug());
-//        System.out.println("==========");
-//        MultiTool.sleepThread(10);
-        for (Key k : rem) {
-//            System.out.println("==========");
-//            System.out.println(tree.debug());
-//            System.out.println("==========");
-//            MultiTool.sleepThread(10);
-            System.out.println("removed" + k + ": " + tree.remove(k));
-        }
-        System.out.println("removed!");
-        System.out.println(tree);
-        System.out.println("root: " + tree.getRoot());
-        System.out.println("min : " + tree.getMin());
-        System.out.println("max : " + tree.getMax());
-        
-        for (Key k : rem) {
-            if (tree.contains(k)) {
-                System.err.println("ERROR: Unexpected: " + k);
-            }
-        }
-        for (Key k : add) {
-            if (!tree.contains(k) && !ArrayTools.asList(rem).contains(k)) {
-                System.err.println("ERROR: Expected: " + k);
-            }
-        }
-    }
-    
-    public static void generateRandom() {
-        //RBTree<Key> tree = new RBTree<>();
-        int addAmt = 250_000;
-        int remAmt = 10_000;
-        int colAmt = 100;
-        Key[] add = new Key[addAmt];
-        for (int i = 0; i < addAmt/colAmt + 1; i++) {
-            for (int j = 0; j < colAmt; j++) {
-                int index = i*colAmt + j;
-                if (index >= addAmt) break;
-                add[index] = new Key(i, j);
-            }
-        }
-        System.out.println("added!");
-        ArrayTools.shuffle(add);
-        Key[] rem = new Key[remAmt];
-        for (int i = 0; i < remAmt; i++) {
-            rem[i] = add[i];
-        }
-        System.out.println("removed!");
-        ArrayTools.shuffle(add);
-        ArrayTools.shuffle(rem);
-        if (addAmt < 50) System.out.println("add: " + Arrays.toString(add).replaceAll("\\(", "new Key\\("));
-        if (remAmt < 25) System.out.println("rem: " + Arrays.toString(rem).replaceAll("\\(", "new Key\\("));
-        if (addAmt < 50) System.out.println("add: " + Arrays.toString(add));
-        if (remAmt < 25) System.out.println("rem: " + Arrays.toString(rem));
-        
-        
-        LinkedRBTree<Key> tree = new LinkedRBTree<>(Arrays.asList(add));
-//        for (Key k : add) {
-//            tree.add(k);
-//        }
-        for (Key k : rem) {
-            tree.remove(k);
-        }
-        if (tree.size() < 50) System.out.println("tree: " + tree.toString());
-        for (Key k : rem) {
-            if (tree.contains(k)) {
-                System.err.println("ERROR: Unexpected: " + k);
-            }
-        }
-        System.out.println("checked removed!");
-        for (Key k : add) {
-            if (!tree.contains(k) && !ArrayTools.asList(rem).contains(k)) {
-                System.err.println("ERROR: Expected: " + k);
-            }
-        }
-        System.out.println("checked added!");
-        System.out.println("DONE");
-    }
     /**/
     
 }

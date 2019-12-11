@@ -17,6 +17,7 @@ package tools.data.collection.rb_tree;
 /**
  * This enum is used to denote the different types of nodes in the red black tree.
  * 
+ * @version 1.1
  * @author Kaj Wortel
  */
 public enum RBColor {
