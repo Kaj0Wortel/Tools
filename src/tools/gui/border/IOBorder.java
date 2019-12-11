@@ -271,7 +271,6 @@ public class IOBorder
      * of the {@code IOBorder}.
      * 
      * @param c the component to add the mouseListener to.
-     * @param autoRepaint whether each event should trigger a repaint.
      * @return the added mouseListener.
      */
     public MouseListener addDefaultMouseListener(Component c) {

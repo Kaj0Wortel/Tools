@@ -14,9 +14,9 @@
 package tools.data.collection.rb_tree;
 
 
+// Java imports
 import java.util.Arrays;
 import java.util.Collection;
-
 
 
 /**
@@ -32,9 +32,8 @@ import java.util.Collection;
  * <tr><td><b>Neighbor</b></td><td>O(1)</td><td>O(1)</td><td>{@link #next(LinkedRBKey)}, {@link #prev(LinkedRBKey)}, <br>
  *     {@link LinkedRBKey#next()}, {@link LinkedRBKey#prev()}</td></tr>
  * </table>
- * Note that it is nessecary that the functions {@link LinkedRBKey#value()}, {@link Object#hashCode()},
- * and {@link Object#equals(Object)} are correctly implemented and that their behaviour doesn't change
- * for any inserted nodes. <br>
+ * Note that it is nessecary that the functions {@link Object#hashCode()} and {@link Object#equals(Object)}
+ * are correctly implemented and that their behaviour doesn't change for any inserted nodes. <br>
  * <br>
  * This balanced binary search tree supports inserting unequal keys with equal value and hash code, but. <br>
  * Inserting the same element multiple times is not supported. <br>
@@ -46,8 +45,8 @@ import java.util.Collection;
  * @version 1.0
  * @author Kaj Wortel
  * 
+ * @see LinkedRBKey
  * @see RBTree
- * @see LinkedRBTree
  */
 public class LinkedRBTree<D extends LinkedRBKey<D>>
         extends RBTree<D> {

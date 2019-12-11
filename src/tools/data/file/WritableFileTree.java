@@ -36,7 +36,7 @@ public abstract class WritableFileTree
     /**
      * Creates the given directory.
      * 
-     * @param dir The path of the directory to be created.
+     * @param path The path of the directory to be created.
      * 
      * @return {@code true} if the directory was created. False otherwise.
      * 
@@ -50,7 +50,7 @@ public abstract class WritableFileTree
     /**
      * Creates the given directory.
      * 
-     * @param dir The directory to be created.
+     * @param file The directory to be created.
      * 
      * @return {@code true} if the directory was created. False otherwise.
      * 
@@ -62,7 +62,7 @@ public abstract class WritableFileTree
     /**
      * Creates the given directory, including all directories on the given path.
      * 
-     * @param dir The path of the directory to be created.
+     * @param path The path of the directory to be created.
      * 
      * @return {@code true} if the directory was created. False otherwise.
      * 
@@ -76,7 +76,7 @@ public abstract class WritableFileTree
     /**
      * Creates the given directory, including all parent directories.
      * 
-     * @param dir The directory to be created.
+     * @param file The directory to be created.
      * 
      * @return {@code true} if the directory was created. False otherwise.
      * 

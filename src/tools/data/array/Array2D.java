@@ -1020,7 +1020,6 @@ public class Array2D<V>
      * @apiNote
      * This function runs in <i>O</i>({@code width * height + width}).
      * 
-     * @param source The 2D array to copy the values from.
      * @param x The x-coordinate to start copying from.
      * @param y The y-coordinate to start copying from.
      * @param width The width of the area to copy.
@@ -1352,7 +1351,6 @@ public class Array2D<V>
      * 
      * @param dest The destination array.
      * @param x The x-coordinate to start copying values from.
-     * @param y The y-coordinate to start copying values from. Default is {@code 0}.
      * 
      * @return The destination array.
      * 

@@ -18,7 +18,6 @@ package tools.data.collection.rb_tree;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -35,13 +34,12 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
  * <tr><th>Operation</th><th>Average</th><th>Worst case</th><th>Function</th></tr>
  * <tr><td><b>Space</b></td><td>O(n)</td><td>O(n)</td><td></td></tr>
  * <tr><td><b>Search</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #search(RBSearch)}</td></tr>
- * <tr><td><b>Insert</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #add(RBKey)}</td></tr>
+ * <tr><td><b>Insert</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #add(Comparable)}</td></tr>
  * <tr><td><b>Delete</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #remove(Object)}</td></tr>
- * <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(RBKey)}, {@link #prev(RBKey)}</td></tr>
+ * <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(Comparable)}, {@link #prev(Comparable)}</td></tr>
  * </table>
- * Note that it is nessecary that the functions {@link RBKey#value()}, {@link Object#hashCode()},
- * and {@link Object#equals(Object)} are correctly implemented and that their behaviour doesn't change
- * for any inserted nodes. <br>
+ * Note that it is nessecary that the functions {@link Object#hashCode()} and {@link Object#equals(Object)}
+ * are correctly implemented and that their behaviour doesn't change for any inserted nodes. <br>
  * <br>
  * This balanced binary search tree supports inserting unequal keys with equal value and hash code, but. <br>
  * Inserting the same element multiple times is not supported. <br>
@@ -302,7 +300,7 @@ public class RBTree<D extends Comparable<D>>
      * node could be inserted. <br>
      * This function only traverses to the side indicated by {@code left}.
      * When it encounters a collision, it splits the path via
-     * {@link #getNearestCollision(RBKey, RBNode)}.
+     * {@link #getNearestCollision(Comparable, RBNode)}.
      * 
      * @param key The key value.
      * @param node The current node.
