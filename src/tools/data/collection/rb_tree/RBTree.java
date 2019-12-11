@@ -18,6 +18,8 @@ package tools.data.collection.rb_tree;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
@@ -341,6 +343,84 @@ public class RBTree<D extends Comparable<D>>
                 RBNode<D> rtn = n;
                 n = RBTree.this.next(n);
                 return rtn.getData();
+            }
+        };
+    }
+    
+    /**
+     * @param begin Whether the iterator should start at the beginning or the end.
+     * 
+     * @return A list iterator over this tree.
+     */
+    public ListIterator<D> listIterator(final boolean begin) {
+        final boolean b = begin;
+        return new ListIterator() {
+            /** The next node. */
+            private RBNode<D> n = (b ? min : null);
+            /** The previous node. */
+            private RBNode<D> p = (b ? null : max);
+            /** The last returned node. */
+            private RBNode<D> last = null;
+            /** The current index. */
+            private int i = -1;
+            
+            @Override
+            public boolean hasNext() {
+                return n != null;
+            }
+            
+            @Override
+            public Object next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                p = n;
+                n = RBTree.this.next(n);
+                return p.getData();
+            }
+            
+            @Override
+            public boolean hasPrevious() {
+                return p != null;
+            }
+            
+            @Override
+            public Object previous() {
+                if (!hasPrevious()) throw new NoSuchElementException();
+                n = p;
+                p = RBTree.this.prev(n);
+                return n.getData();
+            }
+            
+            @Override
+            public int nextIndex() {
+                return i + 1;
+            }
+            
+            @Override
+            public int previousIndex() {
+                return i;
+            }
+            
+            @Override
+            public void remove() {
+                if (last == null) throw new IllegalStateException("There was no previous element.");
+                RBTree.this.remove(last.getData());
+                if (n != null && n == last) {
+                    n = RBTree.this.next(n);
+                } else if (p != null && p == last) {
+                    p = RBTree.this.prev(p);
+                    i--;
+                }
+                last = null;
+            }
+            
+            @Override
+            public void set(Object obj) {
+                throw new UnsupportedOperationException();
+            }
+            
+            @Override
+            public void add(Object obj) {
+                throw new UnsupportedOperationException();
             }
         };
     }
@@ -879,18 +959,30 @@ public class RBTree<D extends Comparable<D>>
         min = max = root = null;
     }
     
+    /**
+     * @return The minimum element of the tree.
+     */
     public D getMin() {
         return gd(min);
     }
     
+    /**
+     * @return The maximum element of the tree.
+     */
     public D getMax() {
         return gd(max);
     }
     
+    /**
+     * @return The root element of the tree.
+     */
     public D getRoot() {
         return gd(root);
     }
     
+    /**
+     * @return A string used for debugging.
+     */
     protected String debug() {
         StringBuilder sb = new StringBuilder();
         RBNode<D> n = min;
