@@ -144,7 +144,7 @@ public class LinkedRBNode<D extends LinkedRBKey<D>>
         return "Node[" + Var.LS +
                 "  this  : " + (getData() == null ? "null" : getData().toString()) + Var.LS + 
                 "  color : " + getColor() + Var.LS + 
-                "  parent: " + (!hasParent() || getParent().getData() != null
+                "  parent: " + (!hasParent() || getParent().getData() == null
                 ? "null" : getParent().getData().toString()) + Var.LS +
                 "  left  : " + (!hasLeft() || getLeft().getData() == null
                 ? "null" : getLeft().getData().toString()) + Var.LS +

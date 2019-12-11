@@ -90,6 +90,7 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
             {
                 int i = 0;
                 for (D d : col) {
+                    if (d == null) throw new NullPointerException();
                     nodes[i++] = createNode(d);
                 }
             }
@@ -146,7 +147,7 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     protected LinkedRBNode<D> bstInsert(D data) {
         LinkedRBNode<D> node = (LinkedRBNode<D>) super.bstInsert(data);
         if (node == null) return null;
-        node.getData().setNode(null);
+        node.getData().setNode(node);
         LinkedRBNode<D> p = (LinkedRBNode<D>) node.getParent();
         if (p == null) return node;
         // node != root
@@ -156,8 +157,8 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
-    protected LinkedRBNode<D> bstDelete(D data) {
-        LinkedRBNode<D> node = (LinkedRBNode<D>) super.bstDelete(data);
+    protected LinkedRBNode<D> bstDelete(RBNode<D> n) {
+        LinkedRBNode<D> node = (LinkedRBNode<D>) super.bstDelete(n);
         if (node != null) link(node.getPrev(), node.getNext());
         return node;
     }

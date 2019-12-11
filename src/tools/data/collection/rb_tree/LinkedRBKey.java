@@ -49,8 +49,11 @@ public abstract class LinkedRBKey<D extends LinkedRBKey<D>>
      * @param node The node to link.
      */
     void setNode(LinkedRBNode<D> node) {
-        if (this.node != null) throw new IllegalStateException("Key cannot be added to multiple trees!");
-        this.node = node;
+        if (this.node == node) return;
+        else if (node == null || this.node == null) this.node = node;
+        else {
+            throw new IllegalStateException("Key cannot be added to multiple trees!");
+        }
     }
     
     /**

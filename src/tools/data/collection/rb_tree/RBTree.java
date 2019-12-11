@@ -15,18 +15,19 @@ package tools.data.collection.rb_tree;
 
 
 // Java imports
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.Stack;
 
 // Tools imports
-import tools.MultiTool;
 import tools.Var;
-import tools.data.array.ArrayTools;
 import tools.data.collection.rb_tree.RBSearch.Choice;
 
 
@@ -38,7 +39,8 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
  * <tr><td><b>Search</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #search(RBSearch)}</td></tr>
  * <tr><td><b>Insert</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #add(Comparable)}</td></tr>
  * <tr><td><b>Delete</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #remove(Object)}</td></tr>
- * <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(Comparable)}, {@link #prev(Comparable)}</td></tr>
+ * <tr><td><b>Neighbor</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #next(Comparable)},
+ *     {@link #prev(Comparable)}</td></tr>
  * </table>
  * Note that it is nessecary that the functions {@link Object#hashCode()} and {@link Object#equals(Object)}
  * are correctly implemented and that their behaviour doesn't change for any inserted nodes. <br>
@@ -466,7 +468,6 @@ public class RBTree<D extends Comparable<D>>
         
         RBNode<D> near = getNearest(data);
         if (near.equals(data)) return null;
-        
         // There are free leaves.
         RBNode<D> node = createNode(data);
         int cmp = node.getData().compareTo(near.getData());
@@ -539,11 +540,23 @@ public class RBTree<D extends Comparable<D>>
     @Override
     public boolean remove(Object obj) {
         if (obj == null) throw new NullPointerException();
-        if (!(obj instanceof Comparable)) return false; 
-        RBNode<D> node = bstDelete((D) obj);
+        if (!(obj instanceof Comparable)) return false;
+        return remove(get((D) obj));
+    }
+    
+    /**
+     * Removes the given node. This function assumes that the node
+     * occurs in the tree.
+     * 
+     * @param node The node to be removed.
+     * 
+     * @return {@code true} if the node was removed. {@code false} otherwise.
+     */
+    protected boolean remove(RBNode<D> node) {
+        bstDelete(node);
         if (node == null) return false;
         balenceTreeDelete(node);
-        size++;
+        size--;
         return true;
     }
     
@@ -552,14 +565,12 @@ public class RBTree<D extends Comparable<D>>
      * The node returned by the function must have at most one child. <br>
      * The values {@code min}, {@code max} and {@code root} should also be updated here.
      *
-     * @param data The data to delete. Is guaranteed non-null.
+     * @param node The node to be deleted delete.
      *
      * @return The removed node.
      */
-    protected RBNode<D> bstDelete(D data) {
-        RBNode<D> node = get(data);
+    protected RBNode<D> bstDelete(RBNode<D> node) {
         if (node == null) return null;
-        
         if (node.hasLeft() && node.hasRight()) {
             // The node is an inner node -> convert to (near-)leaf.
             // Note that this implies that {@code node} cannot be min or max.
@@ -951,13 +962,47 @@ public class RBTree<D extends Comparable<D>>
     }
     
     @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
+    public boolean retainAll(Collection<?> col) {
+        if (col == null) throw new NullPointerException();
+        if (isEmpty()) return false;
+        
+        Set<Comparable<D>> data = (col instanceof Set
+                ? (Set<Comparable<D>>) col
+                : new HashSet<Comparable<D>>((Collection<D>) col));
+        List<RBNode<D>> keep = new ArrayList<>();
+        List<RBNode<D>> remove = new ArrayList<>();
+        {
+        RBNode<D> node = min;
+            do {
+                if (data.contains(node.getData())) keep.add(node);
+                else remove.add(node);
+                
+            } while ((node = next(node)) != null);
+        }
+        if (keep.size() == size()) return false;
+        // Note that both keep and remove are sorted.
+        // Creating a tree from a sorted list with k items takes O(k) time,
+        // while deleting k items from a tree of n items takes O(0.5*(k+1)(2n-k)*log(n)) time.
+        // Simply take the fastest one.
+        int n = size();
+        int k = keep.size();
+        if (k > 0.5*(k+1)*(2*n-k)*Math.log(n) / LOG2) {
+            // Deleting k items is faster.
+            for (RBNode<D> node : remove) {
+                remove(node);
+            }
+        } else {
+            // Creating a new tree is faster.
+            clear();
+            initTree(keep.toArray(new RBNode[keep.size()]));
+        }
+        return true;
     }
     
     @Override
     public void clear() {
         min = max = root = null;
+        size = 0;
     }
     
     /**
@@ -1017,6 +1062,8 @@ public class RBTree<D extends Comparable<D>>
     }
     
     
+    
+    
     // TESTING
     /**/
     private static class Key extends LinkedRBKey<Key> {
@@ -1053,7 +1100,7 @@ public class RBTree<D extends Comparable<D>>
         
     }
     
-    
+    /*
     public static void main(String[] args) {
         generateRandom();
         //replay();
@@ -1062,15 +1109,15 @@ public class RBTree<D extends Comparable<D>>
     public static void replay() {
         LinkedRBTree tree = new LinkedRBTree();
         Key[] add = new Key[] {
-            new Key(0, 1), new Key(1, 1), new Key(0, 0), new Key(1, 0), new Key(2, 0)
+            new Key(0, 1), new Key(1, 0), new Key(0, 0)
         };
         Key[] rem = new Key[] {
-            new Key(1, 0), new Key(2, 0)
+            new Key(0, 1)
         };
         for (Key k : add) {
             System.out.println("added" + k + ": " + tree.add(k));
         }
-//        System.out.println("added!");
+        System.out.println("added!");
 //        System.out.println("==========");
 //        System.out.println(tree.debug());
 //        System.out.println("==========");
@@ -1079,7 +1126,7 @@ public class RBTree<D extends Comparable<D>>
 //            System.out.println("==========");
 //            System.out.println(tree.debug());
 //            System.out.println("==========");
-            MultiTool.sleepThread(10);
+//            MultiTool.sleepThread(10);
             System.out.println("removed" + k + ": " + tree.remove(k));
         }
         System.out.println("removed!");
@@ -1102,9 +1149,9 @@ public class RBTree<D extends Comparable<D>>
     
     public static void generateRandom() {
         //RBTree<Key> tree = new RBTree<>();
-        int addAmt = 50_000;
-        int remAmt = 25_000;
-        int colAmt = 2;
+        int addAmt = 250_000;
+        int remAmt = 10_000;
+        int colAmt = 100;
         Key[] add = new Key[addAmt];
         for (int i = 0; i < addAmt/colAmt + 1; i++) {
             for (int j = 0; j < colAmt; j++) {

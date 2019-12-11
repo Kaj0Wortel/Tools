@@ -65,10 +65,16 @@ public class RBNode<D extends Comparable>
      * Functions.
      * -------------------------------------------------------------------------
      */
+    /**
+     * @param color The new color of the node.
+     */
     protected void setColor(RBColor color) {
         this.color = color;
     }
     
+    /**
+     * @return The color of the node.
+     */
     public final RBColor getColor() {
         return color;
     }
