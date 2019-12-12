@@ -15,7 +15,6 @@ package tools.data.collection.rb_tree;
 
 
 // Java imports
-import java.util.Arrays;
 import java.util.Collection;
 
 
@@ -29,8 +28,8 @@ import java.util.Collection;
  *     {@link LinkedRBKey#prev()}</td></tr>
  * <tr><td><b>Insert</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #add(LinkedRBKey)}</td></tr>
  * <tr><td><b>Delete</b></td><td>O(log n)</td><td>O(log n)</td><td>{@link #remove(Object)}</td></tr>
- * <tr><td><b>Neighbor</b></td><td>O(1)</td><td>O(1)</td><td>{@link #next(LinkedRBKey)}, {@link #prev(LinkedRBKey)}, <br>
- *     {@link LinkedRBKey#next()}, {@link LinkedRBKey#prev()}</td></tr>
+ * <tr><td><b>Neighbor</b></td><td>O(1)</td><td>O(1)</td><td>{@link #next(LinkedRBKey)},
+ *     {@link #prev(LinkedRBKey)}, <br> {@link LinkedRBKey#next()}, {@link LinkedRBKey#prev()}</td></tr>
  * </table>
  * Note that it is nessecary that the functions {@link Object#hashCode()} and {@link Object#equals(Object)}
  * are correctly implemented and that their behaviour doesn't change for any inserted nodes. <br>

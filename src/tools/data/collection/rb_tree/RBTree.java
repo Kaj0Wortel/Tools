@@ -371,7 +371,7 @@ public class RBTree<D extends Comparable<D>>
             /** The last returned node. */
             private RBNode<D> last = null;
             /** The current index. */
-            private int i = -1;
+            private int i = (b ? -1 : size());
             
             @Override
             public boolean hasNext() {
@@ -395,7 +395,7 @@ public class RBTree<D extends Comparable<D>>
             public Object previous() {
                 if (!hasPrevious()) throw new NoSuchElementException();
                 n = p;
-                p = RBTree.this.prev(n);
+                p = RBTree.this.prev(p);
                 return n.getData();
             }
             
