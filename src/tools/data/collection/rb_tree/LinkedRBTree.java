@@ -138,7 +138,11 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     @Override
     protected LinkedRBNode<D> bstDelete(RBNode<D> n) {
         LinkedRBNode<D> node = (LinkedRBNode<D>) super.bstDelete(n);
-        if (node != null) link(node.getPrev(), node.getNext());
+        if (node == null) return null;
+        
+        link(node.getPrev(), node.getNext());
+        node.setNext(null);
+        node.setPrev(null);
         return node;
     }
     

@@ -371,7 +371,7 @@ public class RBTree<D extends Comparable<D>>
             /** The last returned node. */
             private RBNode<D> last = null;
             /** The current index. */
-            private int i = (b ? -1 : size());
+            private int i = (b ? 0 : size());
             
             @Override
             public boolean hasNext() {
@@ -401,12 +401,12 @@ public class RBTree<D extends Comparable<D>>
             
             @Override
             public int nextIndex() {
-                return i + 1;
+                return i;
             }
             
             @Override
             public int previousIndex() {
-                return i;
+                return i - 1;
             }
             
             @Override
@@ -562,6 +562,9 @@ public class RBTree<D extends Comparable<D>>
         bstDelete(node);
         if (node == null) return false;
         balenceTreeDelete(node);
+        node.setLeft(null);
+        node.setRight(null);
+        node.setParent(null);
         size--;
         return true;
     }
@@ -572,7 +575,7 @@ public class RBTree<D extends Comparable<D>>
      * The values {@code min}, {@code max} and {@code root} should also be updated here.
      *
      * @param node The node to be deleted delete.
-     *
+     * 
      * @return The removed node.
      */
     protected RBNode<D> bstDelete(RBNode<D> node) {
@@ -626,17 +629,6 @@ public class RBTree<D extends Comparable<D>>
         
         // If x is red and had no children, then done.
         if (x.isRed()) return;
-        
-//        if (x.getData().equals(new Key(4))) {
-//            System.out.println("++++++++");
-//            System.out.println("x: " + x);
-//            System.out.println("s: " + s);
-//            System.out.println("p: " + p);
-//            System.out.println("root: " + root);
-//            System.out.println("++++++++");
-//            System.out.println(debug());
-//            MultiTool.sleepThread(10);
-//        }
         
         while (x != root) {
             if (s.isRed()) {
@@ -1070,12 +1062,6 @@ public class RBTree<D extends Comparable<D>>
         return new RBNode<>(data);
     }
     
-    
-    
-    
-    // TESTING
-    /**/
-    /**/
     
 }
 
