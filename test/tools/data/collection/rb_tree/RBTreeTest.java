@@ -42,18 +42,6 @@ public class RBTreeTest
         extends AbstractTestClass {
     
     /* -------------------------------------------------------------------------
-     * Constants.
-     * -------------------------------------------------------------------------
-     */
-     
-     
-    /* -------------------------------------------------------------------------
-     * Variables.
-     * -------------------------------------------------------------------------
-     */
-    
-    
-    /* -------------------------------------------------------------------------
      * Inner classes.
      * -------------------------------------------------------------------------
      */
@@ -99,6 +87,39 @@ public class RBTreeTest
      * Functions.
      * -------------------------------------------------------------------------
      */
+    @Test
+    public void get0() {
+        RBTree<Integer> tree = new RBTree<Integer>();
+        tree.add(10);
+        assertEquals("Error while getting single element!", 10, (int) tree.get(0));
+    }
+    
+    @Test
+    public void get1() {
+        RBTree<Integer> tree = new RBTree<Integer>();
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(0));
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(1));
+        tree.add(10);
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(1));
+    }
+    
+    @Test
+    public void get2() {
+        RBTree<Integer> tree = new RBTree<Integer>();
+        int amt = 1000_000;
+        for (int i = 0; i < amt; i++) {
+            tree.add(i);
+        }
+        for (int i = 0; i < amt; i++) {
+            int rtn = tree.get(i);
+            assertEquals("Wrong returned value!", i, rtn);
+        }
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
+        expEx(IndexOutOfBoundsException.class, () -> tree.get(tree.size()));
+    }
+    
     @Test
     public void add0() {
         RBTree<Integer> tree = new RBTree<>();

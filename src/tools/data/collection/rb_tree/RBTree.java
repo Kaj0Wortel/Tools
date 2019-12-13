@@ -30,7 +30,6 @@ import java.util.Stack;
 // Tools imports
 import tools.Var;
 import tools.data.collection.rb_tree.RBSearch.Choice;
-import tools.log.Logger;
 
 
 /**
@@ -460,6 +459,20 @@ public class RBTree<D extends Comparable<D>>
     }
     
     /**
+     * Updates the size of the subtree of the parents of the given node.
+     * 
+     * @param node The starting node.
+     */
+    protected void updateSizeParents(RBNode<D> node, int diff) {
+        if (node == null) return;
+        node.setSize(1);
+        while (node.hasParent()) {
+            node = node.getParent();
+            node.setSize(node.size() + diff);
+        }
+    }
+    
+    /**
      * Does a binary search tree insert. <br>
      * The values {@code min}, {@code max} and {@code root} should also be updated here.
      *
@@ -489,6 +502,7 @@ public class RBTree<D extends Comparable<D>>
             if (max == near) max = node;
         }
         
+        updateSizeParents(node, 1);
         return node;
     }
     
@@ -601,6 +615,7 @@ public class RBTree<D extends Comparable<D>>
             if (node == min) min = node.getParent();
             else if (node == max) max = node.getParent();
         }
+        updateSizeParents(node, -1);
         return node;
     }
     
@@ -732,6 +747,13 @@ public class RBTree<D extends Comparable<D>>
         if (n1 == max) max = n2;
         else if (n2 == max) max = n1;
         
+        // Swap the size of the subtree.
+        {
+            int tmpSize = n1.size();
+            n1.setSize(n2.size());
+            n2.setSize(tmpSize);
+        }
+        
         // If n1 and n2 are family, then swap such that n1 is parent.
         if (n1.getParent() == n2) {
             RBNode<D> tmp = n1;
@@ -814,6 +836,8 @@ public class RBTree<D extends Comparable<D>>
         else setRight(p.getParent(), x);
         setRight(p, x.getLeft());
         setLeft(x, p);
+        updateSize(p);
+        updateSize(x);
         if (p == root) root = x;
     }
     
@@ -828,7 +852,36 @@ public class RBTree<D extends Comparable<D>>
         else setRight(p.getParent(), x);
         setLeft(p, x.getRight());
         setRight(x, p);
+        updateSize(p);
+        updateSize(x);
         if (p == root) root = x;
+    }
+    
+    /**
+     * Updates the size of the given node.
+     * 
+     * @param p The node to update the size for.
+     */
+    protected final void updateSize(RBNode<D> p) {
+        if (p != null) {
+            p.setSize(sizeOfChild(p, true) + sizeOfChild(p, false) + 1);
+        }
+    }
+    
+    /**
+     * Determines the size of the left or right child.
+     * 
+     * @param p The parent of the child.
+     * @param left Whether to select the left or right child.
+     * 
+     * @return Returns the size of the child. If the parent or the child don't exist,
+     *     then {@code 0} is returned.
+     */
+    protected final int sizeOfChild(RBNode<D> p, boolean left) {
+        if (p == null) return 0;
+        RBNode<D> node = (left ? p.getLeft() : p.getRight());
+        if (node == null) return 0;
+        else return node.size();
     }
     
     /**
@@ -1030,6 +1083,32 @@ public class RBTree<D extends Comparable<D>>
      */
     public D getRoot() {
         return gd(root);
+    }
+    
+    public D get(int i) {
+        if (i < 0 || i >= size()) throw new IndexOutOfBoundsException(i);
+        int sum = 0;
+        RBNode<D> node = root;
+        while (node != null) {
+            if (node.hasLeft()) {
+                int index = sum + sizeOfChild(node, true);
+                if (index == i) return node.getData();
+                else if (i < index) node = node.getLeft();
+                else {
+                    node = node.getRight();
+                    sum = index + 1;
+                }
+                
+            } else {
+                int index = sum;
+                if (index == i) return node.getData();
+                else {
+                    node = node.getRight();
+                    sum = index + 1;
+                }
+            }
+        }
+        throw new IllegalStateException();
     }
     
     /**

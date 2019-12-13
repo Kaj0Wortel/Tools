@@ -43,6 +43,8 @@ public class RBNode<D extends Comparable>
     private RBNode<D> left = null;
     /** The right node of this node in the tree. */
     private RBNode<D> right = null;
+    /** The size of the subtree. */
+    private int size = 1;
     /** The data element of this node. */
     private D data;
     
@@ -119,6 +121,20 @@ public class RBNode<D extends Comparable>
      */
     public final RBNode<D> getRight() {
         return right;
+    }
+    
+    /**
+     * @return The size of the subtree rooted at this node.
+     */
+    public int size() {
+        return size;
+    }
+    
+    /**
+     * @param size The new size of the subtree routed at this node.
+     */
+    public void setSize(int size) {
+        this.size = size;
     }
     
     /**
@@ -259,6 +275,7 @@ public class RBNode<D extends Comparable>
                 "  parent: " + (!hasParent() || parent.data == null ? "null" : parent.data.toString()) + Var.LS +
                 "  left  : " + (!hasLeft() || left.data == null ? "null" : left.data.toString()) + Var.LS +
                 "  right : " + (!hasRight() || right.data == null ? "null" : right.data.toString()) + Var.LS +
+                "  size  : " + size + Var.LS +
                 "]";
     }
     
