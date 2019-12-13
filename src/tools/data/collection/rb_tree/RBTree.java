@@ -580,12 +580,6 @@ public class RBTree<D extends Comparable<D>>
      * @return The removed node.
      */
     protected RBNode<D> bstDelete(RBNode<D> node) {
-        if (max.toString().contains("ID: 98")) {
-            Logger.write("MAX: " + max, Logger.Type.ERROR);
-        }
-        if (node.toString().contains("ID: 98")) {
-            Logger.write("NODE: " + node, Logger.Type.ERROR);
-        }
         if (node == null) return null;
         if (node.hasLeft() && node.hasRight()) {
             // The node is an inner node -> convert to (near-)leaf.
@@ -605,10 +599,7 @@ public class RBTree<D extends Comparable<D>>
             // The node is a leaf.
             if (node == root) min = max = root = null;
             if (node == min) min = node.getParent();
-            else if (node == max) {
-                Logger.write(new Object[] {"HERE", node, "HERE"}, Logger.Type.WARNING);
-                max = node.getParent();
-            }
+            else if (node == max) max = node.getParent();
         }
         return node;
     }
