@@ -1014,8 +1014,7 @@ public class RBTree<D extends Comparable<D>>
     public boolean removeAll(Collection<?> c) {
         boolean changed = false;
         for (Object obj : c) {
-            if (remove(c))
-                changed = true;
+            if (remove(c)) changed = true;
         }
         return changed;
     }

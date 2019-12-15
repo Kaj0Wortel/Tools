@@ -82,6 +82,16 @@ public class LinkedRBTree<D extends LinkedRBKey<D>>
     }
     
     @Override
+    protected boolean remove(RBNode<D> node) {
+        if (super.remove(node)) {
+            D data = gd(node);
+            if (data != null) data.setNode(null);
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
     protected <N extends RBNode<D>> void initTree(N[] nodes) {
         for (int i = 1; i < nodes.length; i++) {
             link((LinkedRBNode<D>) nodes[i - 1], (LinkedRBNode<D>) nodes[i]);
