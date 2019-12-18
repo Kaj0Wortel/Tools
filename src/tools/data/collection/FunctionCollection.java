@@ -165,5 +165,22 @@ public class FunctionCollection<S, T>
         src.clear();
     }
     
+    @Override
+    public String toString() {
+        return src.toString();
+    }
+    
+    @Override
+    public int hashCode() {
+        return src.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Collection)) return false;
+        Collection<T> col = (Collection<T>) obj;
+        return src.equals(new FunctionCollection(src, stFunction, tsFunction));
+    }
+    
     
 }
