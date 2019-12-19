@@ -147,6 +147,7 @@ public class RBTree<D extends Comparable<D>>
      * @param nodes The array of nodes.
      */
     protected <N extends RBNode<D>> void initTree(N[] nodes) {
+        size = nodes.length;
         if (nodes.length == 0) return;
         if (nodes.length == 1) {
             (min = max = root = nodes[0]).setColor(RBColor.BLACK);
@@ -190,7 +191,6 @@ public class RBTree<D extends Comparable<D>>
                 stack.push(new Elem(nodeIndex + 1, elem.maxIndex, nodeIndex, elem.depth + 1));
             }
         }
-        size = nodes.length;
     }
     
     @Override
