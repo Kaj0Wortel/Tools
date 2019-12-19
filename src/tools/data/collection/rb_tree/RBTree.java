@@ -165,7 +165,7 @@ public class RBTree<D extends Comparable<D>>
         while (!stack.isEmpty()) {
             Elem elem = stack.pop();
             if (elem.minIndex == elem.maxIndex) continue;
-            int nodeIndex = (elem.maxIndex + elem.minIndex/* - Var.RAN.nextInt(2)*/) / 2;
+            int nodeIndex = (elem.maxIndex + elem.minIndex - Var.RAN.nextInt(2)) / 2;
             RBNode<D> node = nodes[nodeIndex];
             node.setParent(null);
             node.setLeft(null);
@@ -191,6 +191,24 @@ public class RBTree<D extends Comparable<D>>
                 stack.push(new Elem(nodeIndex + 1, elem.maxIndex, nodeIndex, elem.depth + 1));
             }
         }
+        
+        // Set the sizes of the nodes.
+        Stack<RBNode<D>> itStack = new Stack<RBNode<D>>();
+        List<RBNode<D>> updateList = new ArrayList<RBNode<D>>(size() / 2 + 2);
+        itStack.push(root);
+        while (!itStack.isEmpty()) {
+            RBNode<D> node = itStack.pop();
+            if (node.hasChild()) {
+                updateList.add(node);
+                if (node.hasRight()) itStack.push(node.getRight());
+                if (node.hasLeft()) itStack.push(node.getLeft());
+                
+            } else {
+                node.setSize(1);
+            }
+        }
+        
+        updateList.forEach((node) -> updateSize(node));
     }
     
     @Override
@@ -1084,6 +1102,11 @@ public class RBTree<D extends Comparable<D>>
         return gd(root);
     }
     
+    /**
+     * @param i The index of the element to return.
+     * 
+     * @return The element at the given index.
+     */
     public D get(int i) {
         if (i < 0 || i >= size()) throw new IndexOutOfBoundsException(i);
         int sum = 0;
