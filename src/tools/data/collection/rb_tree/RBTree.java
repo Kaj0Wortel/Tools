@@ -194,7 +194,7 @@ public class RBTree<D extends Comparable<D>>
         
         // Set the sizes of the nodes.
         Stack<RBNode<D>> itStack = new Stack<RBNode<D>>();
-        List<RBNode<D>> updateList = new ArrayList<RBNode<D>>(size() / 2 + 2);
+        List<RBNode<D>> updateList = new ArrayList<RBNode<D>>(size());
         itStack.push(root);
         while (!itStack.isEmpty()) {
             RBNode<D> node = itStack.pop();
@@ -208,7 +208,9 @@ public class RBTree<D extends Comparable<D>>
             }
         }
         
-        updateList.forEach((node) -> updateSize(node));
+        for (int i = updateList.size() - 1; i >= 0; i--) {
+            updateSize(updateList.get(i));
+        }
     }
     
     @Override
@@ -1166,6 +1168,13 @@ public class RBTree<D extends Comparable<D>>
      */
     protected RBNode<D> createNode(D data) {
         return new RBNode<>(data);
+    }
+    
+    public static void main(String[] args) {
+        RBTree<Integer> tree = new RBTree<>(List.of(
+                1, 2, 3, 4, 5, 6, 7
+        ));
+        System.out.println(tree.debug());
     }
     
     

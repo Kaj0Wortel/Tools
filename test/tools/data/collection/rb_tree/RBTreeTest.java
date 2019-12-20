@@ -108,7 +108,7 @@ public class RBTreeTest
     @Test
     public void get2() {
         RBTree<Integer> tree = new RBTree<Integer>();
-        int amt = 1000_000;
+        int amt = 1_000_000;
         for (int i = 0; i < amt; i++) {
             tree.add(i);
         }
@@ -118,6 +118,16 @@ public class RBTreeTest
         }
         expEx(IndexOutOfBoundsException.class, () -> tree.get(-1));
         expEx(IndexOutOfBoundsException.class, () -> tree.get(tree.size()));
+    }
+    
+    @Test
+    public void get3() {
+        int amt = 1_000_000;
+        RBTree<Integer> tree = new RBTree<Integer>(ArrayTools.asList(genIntArr(amt)));
+        for (int i = 0; i < amt; i++) {
+            int rtn = tree.get(i);
+            assertEquals("Wrong returned value!", i, rtn);
+        }
     }
     
     @Test
