@@ -45,6 +45,7 @@ public class DefaultGUIImageSheet
     /** The local image location of the disabled underlay image. */
     private static final String BUTTON_DIS = DIR + "content_button_TYPE_001_u_dis.png";
     
+    
     /* -------------------------------------------------------------------------
      * Constructors.
      * -------------------------------------------------------------------------

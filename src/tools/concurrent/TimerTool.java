@@ -89,11 +89,11 @@ public class TimerTool {
     private Long pauseTime;
     
     /** Whether the execution is still being performed. */
-    public boolean running = false;
+    private boolean running = false;
     
     /** Keeps track of how many cycles must pass before the
      *  additative increase is replaced multiplicative increase. */
-    public int waitMul = 0;
+    private int waitMul = 0;
     
     
     /* -------------------------------------------------------------------------

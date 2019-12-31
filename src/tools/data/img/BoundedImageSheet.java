@@ -17,6 +17,7 @@ package tools.data.img;
 // Java imports
 import java.awt.Graphics2D;
 import java.awt.Image;
+import tools.log.Logger;
 
 
 /**
@@ -353,12 +354,12 @@ public abstract class BoundedImageSheet
      * @throws IndexOutOfBoundsException If at least one of the indices is out of bounds.
      */
     protected final void checkBounds(int x, int y) {
-        if (x < 0 && getWidth() <= x) {
+        if (x < 0 || getWidth() <= x) {
             throw new IndexOutOfBoundsException(
                     "Index was out of bounds! Expected: 0 <= x(" + x
                             + ") < width(" + getWidth() + ").");
         }
-        if (y < 0 && getHeight() <= y) {
+        if (y < 0 || getHeight() <= y) {
             throw new IndexOutOfBoundsException(
                     "Index was out of bounds! Expected: 0 <= y(" + y
                             + ") < height(" + getHeight() + ").");

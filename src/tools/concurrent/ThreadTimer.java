@@ -121,7 +121,7 @@ public class ThreadTimer {
     
     /**  Keeps track of how many cycles must pass before the
      *  additative increase is replaced by multiplicative increase. */
-    public int waitMul = 0;
+    private int waitMul = 0;
     
     /** Denotes the thread priority for this timer. */
     private int priority = Thread.NORM_PRIORITY;
@@ -240,7 +240,7 @@ public class ThreadTimer {
             throw new IllegalArgumentException(
                     "Expected interval < 0, but found: " + interval);
         }
-        if (delay <= 0) {
+        if (delay < 0) {
             throw new IllegalArgumentException(
                     "Expected delay < 0, but found: " + delay);
         }
@@ -660,7 +660,8 @@ public class ThreadTimer {
         try {
             // Prevent multiple threads from running in case of fast
             // start/stop triggers.
-            while (prevThreadId < tId - 1) {
+            //while (prevThreadId < tId - 1) {
+            while (threadId < tId - 1) {
                 // Terminate current thread if it should be stopped.
                 if (tId != threadId) return;
                 
@@ -704,8 +705,8 @@ public class ThreadTimer {
             
         do {
             // tmp TODO
-            System.out.println("Thread id: " + threadId);
-            System.out.println("my thread: " + tId);
+            //System.out.println("Thread id: " + threadId);
+            //System.out.println("my thread: " + tId);
             
             // If the thread was interrupted, clear the interrupt status
             // and log an error.
@@ -753,8 +754,8 @@ public class ThreadTimer {
             lock.lock();
             try {
                 // tmp TODO
-                System.out.println("interval: " + interval + ", exe: " + exeTime);
-                System.out.println(interval - exeTime);
+                //System.out.println("interval: " + interval + ", exe: " + exeTime);
+                //System.out.println(interval - exeTime);
                 waitTime((interval - exeTime) * 1000_000L, tId);
 
                 // Update start time stamp.
@@ -775,21 +776,18 @@ public class ThreadTimer {
      * @return A fresh update thread with the given id.
      */
     private Thread createUpdateThread(int tId) {
-        return new Thread("Timer-thread-" + timeId) {
-            @Override
-            public void run() {
-                threadFunction(tId);
+        return new Thread(() -> {
+            threadFunction(tId);
+            
+            lock.lock();
+            try {
+                prevThreadId++;
+                threadIdCondition.signalAll();
                 
-                lock.lock();
-                try {
-                    prevThreadId++;
-                    threadIdCondition.signalAll();
-                    
-                } finally {
-                    lock.unlock();
-                }
+            } finally {
+                lock.unlock();
             }
-        };
+        }, "Timer-thread-" + timeId);
     }
     
     

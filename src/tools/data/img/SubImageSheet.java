@@ -17,8 +17,7 @@ package tools.data.img;
 // Java imports
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
-import tools.MultiTool;
+import tools.log.Logger;
 
 
 /**
@@ -82,6 +81,8 @@ public class SubImageSheet
      */
     public SubImageSheet(ImageSheet sheet, int transX, int transY, int sheetWidth, int sheetHeight) {
         if ((this.sheet = sheet) == null) throw new NullPointerException();
+        this.sheetWidth = sheetWidth;
+        this.sheetHeight = sheetHeight;
         setSize(sheetWidth, sheetHeight);
         setTranslate(transX, transY);
     }
@@ -117,9 +118,9 @@ public class SubImageSheet
     
     @Override
     public Image get(int x, int y) {
-        int newX = x - transX;
-        int newY = y - transY;
-        checkBounds(newX, newY);
+        checkBounds(x, y);
+        int newX = x + transX;
+        int newY = y + transY;
         if (!sheet.canAccess(newX, newY)) return null;
         return sheet.get(newX, newY);
     }
@@ -127,9 +128,9 @@ public class SubImageSheet
     @Override
     public Image get(int x, int y, int width, int height, int scaleHints) {
         checkWidthHeight(width, height);
-        int newX = x - transX;
-        int newY = y - transY;
-        checkBounds(newX, newY);
+        checkBounds(x, y);
+        int newX = x + transX;
+        int newY = y + transY;
         if (!sheet.canAccess(newX, newY)) return null;
         return sheet.get(newX, newY, width, height, scaleHints);
     }
@@ -142,9 +143,9 @@ public class SubImageSheet
     @Override
     public boolean draw(Graphics2D g2d, int x, int y, int posX, int posY)
             throws IndexOutOfBoundsException {
-        int newX = x - transX;
-        int newY = y - transY;
-        checkBounds(newX, newY);
+        checkBounds(x, y);
+        int newX = x + transX;
+        int newY = y + transY;
         if (!sheet.canAccess(newX, newY)) return false;
         sheet.draw(g2d, newX, newY, posX, posY);
         return true;
@@ -155,9 +156,9 @@ public class SubImageSheet
             int width, int height, int scaleHints)
             throws IndexOutOfBoundsException {
         checkWidthHeight(width, height);
-        int newX = x - transX;
-        int newY = y - transY;
-        checkBounds(newX, newY);
+        checkBounds(x, y);
+        int newX = x + transX;
+        int newY = y + transY;
         if (!sheet.canAccess(newX, newY)) return false;
         sheet.draw(g2d, newX, newY, posX, posY, width, height, scaleHints);
         return true;
@@ -323,7 +324,7 @@ public class SubImageSheet
      *     Image img0 = sheet.get(0, 0);
      *     sheet.translate(1, 2);
      *     Image img1 = sheet.get(1, 2);
-     *     sheet.translateY(3, 4);
+     *     sheet.translate(3, 4);
      *     Image img2 = sheet.get(4, 6);
      * </pre>
      * 

@@ -522,7 +522,7 @@ public final class ImageManager {
                     Delay delay = QUEUE.poll(1, TimeUnit.DAYS);
                     if (delay == null) continue;
                     ImageSheetLoader.removeImage(delay.getToken().getIdName());
-
+                    
                 } catch (InterruptedException e) {
                     Logger.write(e);
                 }
