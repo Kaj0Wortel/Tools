@@ -523,6 +523,22 @@ public class Key
     }
     
     /**
+     * Checks if any of the given keys match this key.
+     * 
+     * @param keys The keys to check. Can be {@code null}.
+     * 
+     * @return {@code true} if any of the given keys match. {@code false} otherwise.
+     */
+    public boolean equalsAny(Key... keys) {
+        if (keys == null) return false;
+        for (Key k : keys) {
+            if (k == null) continue;
+            if (k.equals(this)) return true;
+        }
+        return false;
+    }
+    
+    /**
      * {@inheritDoc}
      * 
      * Checks if two keys are identical, i.e. the {@link #key}, {@link #mask},
