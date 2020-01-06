@@ -36,6 +36,8 @@ public interface Var {
     public static final String FS = System.getProperty("file.separator");
     /** Regex for detecting a line separator of any OS. */
     public static final String LS_REGEX = "\n\r|\r\n|\n|\r";
+    /** Regex for detecting a file separator of any OS. */
+    public static final String FILE_REGEX = "[\\\\/" + Var.FS.replaceAll("\\\\", "\\\\") + "];";
     
     /** The global project working directory. */
     @Deprecated

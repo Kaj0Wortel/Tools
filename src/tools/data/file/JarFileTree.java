@@ -29,7 +29,6 @@ import java.util.jar.JarFile;
 
 // Tools imports
 import tools.Var;
-import tools.data.array.ArrayTools;
 import tools.iterators.GeneratorIterator;
 
 
@@ -150,11 +149,11 @@ public class JarFileTree
      */
     private JarEntry getEntry(String path)
             throws IOException {
-        String localPath = toLocalPath(path);
+        String localPath = toLocalPath(path).replaceAll(Var.FILE_REGEX, "/");
         if ("".equals(localPath)) return null;
         JarEntry entry = jarFile.getJarEntry(localPath);
         if (entry == null) {
-            throw new FileNotFoundException("'" + path + "', '" + toLocalPath(path) + "'.");
+            throw new FileNotFoundException("'" + path + "', '" + localPath + "'.");
         }
         return entry;
     }
