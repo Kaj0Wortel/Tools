@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 
@@ -59,7 +60,7 @@ import tools.data.collection.rb_tree.RBSearch.Choice;
  * @see LinkedRBTree
  */
 public class RBTree<D extends Comparable<D>>
-        implements Collection<D> {
+        implements Collection<D>, Queue<D> {
     
     /** The result of {@code Math.log(2)} */
     protected static final double LOG2 = 0.6931471805599453;
@@ -1136,6 +1137,58 @@ public class RBTree<D extends Comparable<D>>
     }
     
     /**
+     * Creates a new {@link RBNode} from the given data element. Subclasses which
+     * want to change the nodes being created should override this function.
+     */
+    protected RBNode<D> createNode(D data) {
+        return new RBNode<>(data);
+    }
+    
+    
+    /* ----------------------------------------------------------------------
+     * Queue functions.
+     * ----------------------------------------------------------------------
+     */
+    @Override
+    public boolean offer(D e) {
+        return add(e);
+    }
+    
+    @Override
+    public D poll() {
+        if (isEmpty()) return null;
+        D data = getMin();
+        remove(min);
+        return data;
+    }
+    
+    @Override
+    public D peek() {
+        return getMin();
+    }
+    
+    @Override
+    public D remove()
+            throws NoSuchElementException {
+        if (isEmpty()) throw new NoSuchElementException();
+        D data = getMin();
+        remove(min);
+        return data;
+    }
+    
+    @Override
+    public D element()
+            throws NoSuchElementException {
+        if (isEmpty()) throw new NoSuchElementException();
+        return getMin();
+    }
+    
+    
+    /* ----------------------------------------------------------------------
+     * Tool and debug functions.
+     * ----------------------------------------------------------------------
+     */
+    /**
      * @return A string used for debugging.
      */
     protected String debug() {
@@ -1162,20 +1215,12 @@ public class RBTree<D extends Comparable<D>>
         return sb.toString();
     }
     
-    /**
-     * Creates a new {@link RBNode} from the given data element. Subclasses which
-     * want to change the nodes being created should override this function.
-     */
-    protected RBNode<D> createNode(D data) {
-        return new RBNode<>(data);
-    }
-    
-    public static void main(String[] args) {
-        RBTree<Integer> tree = new RBTree<>(List.of(
-                1, 2, 3, 4, 5, 6, 7
-        ));
-        System.out.println(tree.debug());
-    }
+//    public static void main(String[] args) {
+//        RBTree<Integer> tree = new RBTree<>(List.of(
+//                1, 2, 3, 4, 5, 6, 7
+//        ));
+//        System.out.println(tree.debug());
+//    }
     
     
 }
